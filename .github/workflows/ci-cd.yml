@@ -11,53 +11,52 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Set up Python for Backend
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-    
-    - name: Install dependencies (Backend)
-      run: |
-        cd backend
-        pip install -r requirements.txt
-        
-    - name: Run backend tests
-      run: |
-        cd backend
-        pytest  # O el comando para ejecutar tus pruebas
-    
-    - name: Set up Node.js for Frontend
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    
-    - name: Install dependencies (Frontend)
-      run: |
-        cd frontend
-        npm install
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Run frontend tests (opcional)
-      run: |
-        cd frontend
-        npm test
-    
-    - name: Build Backend Docker Image
-      run: |
-        cd backend
-        docker build -t my-fastapi-backend .
+      - name: Set up Python for Backend
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
 
-    - name: Build Frontend Docker Image
-      run: |
-        cd frontend
-        docker build -t my-react-frontend .
+      - name: Install dependencies (Backend)
+        run: |
+          cd backend
+          pip install -r requirements.txt
 
-    - name: Push Docker Images to Render (o Docker Hub)
-      run: |
-        docker push <Render_registry_url>/my-fastapi-backend
-        docker push <Render_registry_url>/my-react-frontend
+      - name: Run backend tests
+        run: |
+          cd backend
+          pytest  # O el comando para ejecutar tus pruebas
 
+      - name: Set up Node.js for Frontend
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install dependencies (Frontend)
+        run: |
+          cd FrontEnd/chatify
+          npm install
+
+      - name: Run frontend tests (opcional)
+        run: |
+          cd FrontEnd/chatify
+          npm test
+
+      - name: Build Backend Docker Image
+        run: |
+          cd backend
+          docker build -t my-fastapi-backend .
+
+      - name: Build Frontend Docker Image
+        run: |
+          cd FrontEnd/chatify
+          docker build -t my-react-frontend .
+
+      - name: Push Docker Images to Render (o Docker Hub)
+        run: |
+          docker push <Render_registry_url>/my-fastapi-backend
+          docker push <Render_registry_url>/my-react-frontend
