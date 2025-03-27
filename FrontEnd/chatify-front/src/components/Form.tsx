@@ -76,7 +76,7 @@ const Form: React.FC<FormProps> = ({
           variant="contained"
           sx={{
             backgroundColor: "#4CAF50", // Color verde personalizado
-            "&:hover": { backgroundColor: "#388E3C" }, // Color al hacer hover
+            "&:hover": { backgroundColor: "#0F6B30" }, // Color al hacer hover
           }}
           fullWidth
         >
