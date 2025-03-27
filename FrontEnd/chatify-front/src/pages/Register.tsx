@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import Form from "../components/Form";
 
 const Register: React.FC = () => {
@@ -16,7 +16,18 @@ const Register: React.FC = () => {
   };
 
   return (
-    <Form title="Registrarse" fields={registerFields} onSubmit={handleRegister} buttonText="Crear Cuenta" />
+    <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center", // Centrado horizontal
+      alignItems: "center",     // Centrado vertical
+      width: "100vw",           // Ancho de la ventana
+      height: "100vh",          // Alto de la ventana
+      backgroundColor: "background.default", // Opcional: color de fondo
+    }}
+    >
+      <Form title="Registrarse" fields={registerFields} onSubmit={handleRegister} buttonText="Crear Cuenta" logoUrl="../src/assets/react.svg" />
+    </Box>
   );
 };
 

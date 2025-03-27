@@ -1,26 +1,30 @@
 import { useState } from "react";
-import { Box, TextField, Button, Typography, Container } from "@mui/material";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import Logo from "./Logo";
 
-// Definimos la estructura de cada campo
 interface Field {
   name: string;
   label: string;
   type: string;
 }
 
-// Definimos las props que el formulario recibirá
 interface FormProps {
   title: string;
   fields: Field[];
   onSubmit: (formData: Record<string, string>) => void;
   buttonText: string;
+  logoUrl?: string; // Prop opcional para la URL del logo
 }
 
-const Form: React.FC<FormProps> = ({ title, fields, onSubmit, buttonText }) => {
-  // Estado dinámico basado en los campos
+const Form: React.FC<FormProps> = ({
+  title,
+  fields,
+  onSubmit,
+  buttonText,
+  logoUrl,
+}) => {
   const [formData, setFormData] = useState<Record<string, string>>({});
 
-  // Maneja cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -28,54 +32,58 @@ const Form: React.FC<FormProps> = ({ title, fields, onSubmit, buttonText }) => {
     });
   };
 
-  // Maneja el envío del formulario
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
   return (
-    <Container maxWidth="sm"
-        sx={{
+    <Box
+      sx={{
+        width: "400px",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
-        height: "100vh", // Centra verticalmente
-        }}
+        gap: 2,
+        p: 4,
+        boxShadow: 3,
+        borderRadius: 2,
+        bgcolor: "background.paper",
+      }}
     >
-        <Box
-        sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            p: 4,
-            boxShadow: 3,
-            borderRadius: 2,
-            bgcolor: "background.paper",
-        }}
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        {logoUrl && <Logo logoUrl={logoUrl} />}
+        <Typography variant="h5" sx={{ color: "green" }}>
+          {title}
+        </Typography>
+      </Box>
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+        {fields.map((field) => (
+          <TextField
+            key={field.name}
+            fullWidth
+            label={field.label}
+            type={field.type}
+            name={field.name}
+            value={formData[field.name] || ""}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+        ))}
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{
+            backgroundColor: "#4CAF50", // Color verde personalizado
+            "&:hover": { backgroundColor: "#388E3C" }, // Color al hacer hover
+          }}
+          fullWidth
         >
-        <Typography variant="h5">{title}</Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
-            {fields.map((field) => (
-            <TextField
-                key={field.name}
-                fullWidth
-                label={field.label}
-                type={field.type}
-                name={field.name}
-                value={formData[field.name] || ""}
-                onChange={handleChange}
-                margin="normal"
-                required
-            />
-            ))}
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            {buttonText}
-            </Button>
-        </Box>
-        </Box>
-    </Container>
+          {buttonText}
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
