@@ -48,16 +48,25 @@ const Form: React.FC<FormProps> = ({
         p: 4,
         boxShadow: 3,
         borderRadius: 2,
-        bgcolor: "background.paper",
+        bgcolor: "#1f1f1f",
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         {logoUrl && <Logo logoUrl={logoUrl} />}
-        <Typography variant="h5" sx={{ color: "green" }}>
+        <Typography variant="h5" sx={{ color: "#ffffff" }}>
           {title}
         </Typography>
       </Box>
-      <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         {fields.map((field) => (
           <TextField
             key={field.name}
@@ -69,14 +78,48 @@ const Form: React.FC<FormProps> = ({
             onChange={handleChange}
             margin="normal"
             required
+            sx={{
+              // Cambia el color del texto del input
+              "& .MuiInputBase-input": {
+                color: "#ffffff",
+              },
+              // Cambia el color del label
+              "& .MuiInputLabel-root": {
+                color: "#7c7c7c",
+              },
+              // Cambia el color del label al estar enfocado
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#ffffff",
+              },
+              // Cambia el color del borde por defecto y en hover/foco (para variant="outlined")
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#7c7c7c", // color por defecto del borde
+                },
+                "&:hover fieldset": {
+                  borderColor: "#ffffff", // color del borde al hacer hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ffffff", // color del borde al estar enfocado
+                },
+              },
+            }}
           />
         ))}
         <Button
           type="submit"
           variant="contained"
           sx={{
-            backgroundColor: "#4CAF50", // Color verde personalizado
-            "&:hover": { backgroundColor: "#0F6B30" }, // Color al hacer hover
+            mt: "2rem",
+            width: "50%",
+            justifySelf: "center",
+            backgroundColor: "#3be477", // Color verde personalizado
+            color: "#000000",
+            fontWeight: "bold",
+            fontSize: "1rem",
+            borderRadius: "var(--encore-button-corner-radius, 9999px);",
+            textTransform: "none",
+            "&:hover": { backgroundColor: "#1abc54" }, // Color al hacer hover
           }}
           fullWidth
         >
