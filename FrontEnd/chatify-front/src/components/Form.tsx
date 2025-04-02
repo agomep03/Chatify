@@ -24,6 +24,7 @@ const Form: React.FC<FormProps> = ({
   logoUrl,
 }) => {
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -34,6 +35,15 @@ const Form: React.FC<FormProps> = ({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Verifica si algún campo requerido está vacío
+    const hasEmptyRequiredField = fields.some(
+      (field) => !formData[field.name]?.trim()
+    );
+    if (hasEmptyRequiredField) {
+      // Puedes agregar alguna lógica adicional, como mostrar un mensaje de error
+      return;
+    }
     onSubmit(formData);
   };
 
@@ -67,45 +77,51 @@ const Form: React.FC<FormProps> = ({
           alignItems: "center",
         }}
       >
-        {fields.map((field) => (
-          <TextField
-            key={field.name}
-            fullWidth
-            label={field.label}
-            type={field.type}
-            name={field.name}
-            value={formData[field.name] || ""}
-            onChange={handleChange}
-            margin="normal"
-            required
-            sx={{
-              // Cambia el color del texto del input
-              "& .MuiInputBase-input": {
-                color: "#ffffff",
-              },
-              // Cambia el color del label
-              "& .MuiInputLabel-root": {
-                color: "#7c7c7c",
-              },
-              // Cambia el color del label al estar enfocado
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#ffffff",
-              },
-              // Cambia el color del borde por defecto y en hover/foco (para variant="outlined")
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#7c7c7c", // color por defecto del borde
+        {fields.map((field) => {
+          // Determina si debe mostrar el estilo de error
+          const isError = submitAttempted && !formData[field.name]?.trim();
+
+          return (
+            <TextField
+              error={isError}
+              key={field.name}
+              fullWidth
+              label={field.label}
+              type={field.type}
+              name={field.name}
+              value={formData[field.name] || ""}
+              onChange={handleChange}
+              margin="normal"
+              required
+              sx={{
+                // Cambia el color del texto del input
+                "& .MuiInputBase-input": {
+                  color: "#ffffff",
                 },
-                "&:hover fieldset": {
-                  borderColor: "#ffffff", // color del borde al hacer hover
+                // Cambia el color del label
+                "& .MuiInputLabel-root": {
+                  color: "#7c7c7c",
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffffff", // color del borde al estar enfocado
+                // Cambia el color del label al estar enfocado
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#ffffff",
                 },
-              },
-            }}
-          />
-        ))}
+                // Cambia el color del borde por defecto y en hover/foco (para variant="outlined")
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: isError ? "red" : "#7c7c7c", // color por defecto del borde
+                  },
+                  "&:hover fieldset": {
+                    borderColor: isError ? "red" : "#ffffff", // color del borde al hacer hover
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: isError ? "red" : "#ffffff", // color del borde al estar enfocado
+                  },
+                },
+              }}
+            />
+          );
+        })}
         <Button
           type="submit"
           variant="contained"
