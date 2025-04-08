@@ -29,7 +29,7 @@ const Login: React.FC = () => {
         fields={loginFields}
         onSubmit={handleLogin}
         buttonText="Log In"
-        logoUrl="../src/assets/react.svg"
+        logoUrl="../src/assets/Logo.png"
       />
     </Box>
   );

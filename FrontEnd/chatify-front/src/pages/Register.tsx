@@ -35,7 +35,7 @@ const Register: React.FC = () => {
         fields={registerFields}
         onSubmit={handleRegister}
         buttonText="Sign In"
-        logoUrl="../src/assets/react.svg"
+        logoUrl="../src/assets/Logo.png"
       />
     </Box>
   );
