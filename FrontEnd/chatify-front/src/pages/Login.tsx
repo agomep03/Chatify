@@ -25,6 +25,7 @@ const Login: React.FC = () => {
         backgroundColor: "#191919", // Opcional: color de fondo
       }}
     >
+<<<<<<< HEAD
       <Box sx={{ width: "100%", maxWidth: 400 }}>
         <Form
           title="Iniciar Sesión"
@@ -48,6 +49,15 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
       </Box>
+=======
+      <Form
+        title="Iniciar Sesión"
+        fields={loginFields}
+        onSubmit={handleLogin}
+        buttonText="Log In"
+        logoUrl="../src/assets/Logo.png"
+      />
+>>>>>>> d04619d (Poner logo de chatify en login y register)
     </Box>
   );
 };
