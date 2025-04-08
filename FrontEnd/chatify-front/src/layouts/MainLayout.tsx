@@ -9,7 +9,7 @@ interface LayoutProps {
 
 const MainLayout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#7c7c7c' }}>
       <TopBar />
       <Box sx={{ flex: 1, mt: 8, p: 2 }}>
         {children || <Outlet />}
