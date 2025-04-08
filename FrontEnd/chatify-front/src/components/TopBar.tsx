@@ -14,11 +14,6 @@ const TopBar: React.FC = () => {
         <Typography variant="h6" component="div">
           Chatify
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton color="inherit">
-            <AccountCircleIcon />
-          </IconButton>
-        </Box>
       </Toolbar>
     </AppBar>
   );
