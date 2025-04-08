@@ -24,7 +24,6 @@ const Form: React.FC<FormProps> = ({
   logoUrl,
 }) => {
   const [formData, setFormData] = useState<Record<string, string>>({});
-  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -36,14 +35,8 @@ const Form: React.FC<FormProps> = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Verifica si algún campo requerido está vacío
-    const hasEmptyRequiredField = fields.some(
-      (field) => !formData[field.name]?.trim()
-    );
-    if (hasEmptyRequiredField) {
-      // Puedes agregar alguna lógica adicional, como mostrar un mensaje de error
-      return;
-    }
+    // TODO: Manejar formulario
+
     onSubmit(formData);
   };
 
@@ -78,12 +71,8 @@ const Form: React.FC<FormProps> = ({
         }}
       >
         {fields.map((field) => {
-          // Determina si debe mostrar el estilo de error
-          const isError = submitAttempted && !formData[field.name]?.trim();
-
           return (
             <TextField
-              error={isError}
               key={field.name}
               fullWidth
               label={field.label}
@@ -109,13 +98,13 @@ const Form: React.FC<FormProps> = ({
                 // Cambia el color del borde por defecto y en hover/foco (para variant="outlined")
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
-                    borderColor: isError ? "red" : "#7c7c7c", // color por defecto del borde
+                    borderColor: "#7c7c7c", // color por defecto del borde
                   },
                   "&:hover fieldset": {
-                    borderColor: isError ? "red" : "#ffffff", // color del borde al hacer hover
+                    borderColor: "#ffffff", // color del borde al hacer hover
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: isError ? "red" : "#ffffff", // color del borde al estar enfocado
+                    borderColor: "#ffffff", // color del borde al estar enfocado
                   },
                 },
               }}
