@@ -1,8 +1,17 @@
 version: "3.9"
+
 services:
-  app:
+  backend:
     build: .
+    container_name: chatify-backend
     ports:
       - "8000:8000"
     env_file:
       - .env
+    depends_on:
+      - wait_for_db
+
+  wait_for_db:
+    image: busybox
+    command: sh -c "sleep 10"
+
