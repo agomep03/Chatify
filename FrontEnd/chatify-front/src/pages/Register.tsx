@@ -1,5 +1,6 @@
 import { Box, Container } from "@mui/material";
 import Form from "../components/Form";
+import config from "../config";
 
 const Register: React.FC = () => {
   // Campos para el registro
@@ -14,9 +15,42 @@ const Register: React.FC = () => {
     },
   ];
 
-  // Función que maneja el registro
-  const handleRegister = (formData: Record<string, string>) => {
-    console.log("Registrando usuario con:", formData);
+  const handleRegister = async (formData: Record<string, string>) => {
+    if (formData.password !== formData.confirmPassword) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
+
+    const payload = {
+      username: formData.name,
+      email: formData.email,
+      password: formData.password,
+    };
+
+    try {
+      const response = await fetch(`${config.apiBaseUrl}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.detail || "Registro fallido"}`);
+        return;
+      }
+
+      const data = await response.json();
+      alert("Usuario registrado exitosamente");
+      console.log(data);
+
+      // TODO: Redirigir al login u otra vista
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("No se pudo conectar con el servidor.");
+    }
   };
 
   return (
