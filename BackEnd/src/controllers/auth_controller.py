@@ -5,6 +5,7 @@ from src.models.user_model import User
 from src.utils.auth import hash_password, verify_password, create_access_token
 from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError
+from src.controllers.user_controller import verify_spotify_account
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,6 +39,19 @@ def validate_email_address(email: str):
     except EmailNotValidError as e:
         logger.error(f"Invalid email: {email}. Error: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid email: {e}")
+
+def auth_flow(spotify_token: str):
+    """
+    Controlador principal que gestiona la autenticación y verifica la cuenta Spotify.
+
+    Args:
+        spotify_token (str): Token de acceso de Spotify.
+
+    Returns:
+        dict: Resultado de la verificación.
+    """
+    if verify_spotify_account(spotify_token):
+        return {"message": "Cuenta de Spotify verificada"}
 
 def register_user(username: str, email: str, password: str, db: Session):
     """
