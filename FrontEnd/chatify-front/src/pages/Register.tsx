@@ -1,8 +1,11 @@
 import { Box, Container } from "@mui/material";
 import Form from "../components/Form";
+import { useNavigate } from "react-router-dom";
 import config from "../config";
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
+
   // Campos para el registro
   const registerFields = [
     { name: "name", label: "Nombre Completo", type: "text" },
@@ -38,9 +41,19 @@ const Register: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(`Error: ${errorData.detail || "Registro fallido"}`);
+
+        // Intenta extraer mensaje desde errorData.detail[0].msg
+        const errorMsg =
+          Array.isArray(errorData.detail) && errorData.detail.length > 0
+            ? errorData.detail[0].msg
+            : "Registro fallido";
+
+        alert(`Error: ${errorMsg}`);
         return;
       }
+
+      // Redirige al usuario a /login
+      navigate("/login");
 
       const data = await response.json();
       alert("Usuario registrado exitosamente");
