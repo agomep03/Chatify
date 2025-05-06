@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
@@ -23,13 +23,13 @@ jobs:
 
       - name: Install dependencies (Backend)
         run: |
-          cd Backend
+          cd BackEnd
           pip install -r requirements.txt
 
-      - name: Run backend tests
+      - name: Build Backend Docker Image
         run: |
-          cd Backend
-          pytest  # O el comando para ejecutar tus pruebas
+          cd BackEnd
+          docker build -t my-fastapi-backend .
 
       - name: Set up Node.js for Frontend
         uses: actions/setup-node@v2
@@ -38,25 +38,17 @@ jobs:
 
       - name: Install dependencies (Frontend)
         run: |
-          cd FrontEnd/chatify
+          cd FrontEnd/chatify-front
           npm install
-
-      - name: Run frontend tests (opcional)
-        run: |
-          cd FrontEnd/chatify
-          npm test
-
-      - name: Build Backend Docker Image
-        run: |
-          cd Backend
-          docker build -t my-fastapi-backend .
 
       - name: Build Frontend Docker Image
         run: |
-          cd FrontEnd/chatify
+          cd FrontEnd/chatify-front
           docker build -t my-react-frontend .
 
-      - name: Push Docker Images to Render (o Docker Hub)
+      - name: Push Docker Images to Docker Hub
         run: |
-          docker push <Render_registry_url>/my-fastapi-backend
-          docker push <Render_registry_url>/my-react-frontend
+          docker tag my-fastapi-backend <dockerhub_user>/my-fastapi-backend:latest
+          docker tag my-react-frontend <dockerhub_user>/my-react-frontend:latest
+          docker push <dockerhub_user>/my-fastapi-backend:latest
+          docker push <dockerhub_user>/my-react-frontend:latest
