@@ -21,7 +21,7 @@ async def consult_IA(question: str):
         response.raise_for_status()
 
         data = response.json()
-        return {"answer": data['choices'][0]['text']}
+        return {"answer": data['choices'][0]['message']['content']}
 
     except requests.exceptions.RequestException as e:
         raise Exception(f"Error al conectar con la IA: {e}")
