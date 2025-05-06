@@ -1,7 +1,7 @@
 import logging
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
-from src.models.user_model import User
+from src.models.auth_model import User
 from src.utils.auth import hash_password, verify_password, create_access_token
 from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError

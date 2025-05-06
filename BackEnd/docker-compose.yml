@@ -10,8 +10,12 @@ services:
       - .env
     depends_on:
       - wait_for_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   wait_for_db:
     image: busybox
     command: sh -c "sleep 10"
+
+
 
