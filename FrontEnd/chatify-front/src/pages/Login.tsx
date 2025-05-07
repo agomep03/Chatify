@@ -1,13 +1,13 @@
 import { Box, Container, Link, Typography } from "@mui/material";
 import Form from "../components/Form";
-import { NavigateFunction, Link as RouterLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import config from "../config";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -16,14 +16,15 @@ const Login: React.FC = () => {
     }
   }, [navigate]);
 
-  // Campos para el login
+  // Campos del formulario
   const loginFields = [
     { name: "email", label: "Correo Electrónico", type: "email" },
     { name: "password", label: "Contraseña", type: "password" },
   ];
 
-  // Función que maneja el login
+  // Manejar el envío del formulario
   const handleLogin = async (formData: Record<string, string>) => {
+    setLoading(true);
     const payload = {
       email: formData.email,
       password: formData.password,
@@ -44,7 +45,6 @@ const Login: React.FC = () => {
         return;
       }
 
-      // Intenta primero como texto
       const contentType = response.headers.get("content-type");
       let token: string | undefined;
 
@@ -65,6 +65,8 @@ const Login: React.FC = () => {
     } catch (error) {
       console.error("Error de red:", error);
       alert("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,11 +74,11 @@ const Login: React.FC = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center", // Centrado horizontal
-        alignItems: "center", // Centrado vertical
-        width: "100vw", // Ancho de la ventana
-        height: "100vh", // Alto de la ventana
-        backgroundColor: "#191919", // Opcional: color de fondo
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#191919",
       }}
     >
       <Container maxWidth="xs">
@@ -86,6 +88,7 @@ const Login: React.FC = () => {
           onSubmit={handleLogin}
           buttonText="Log In"
           logoUrl="../src/assets/Logo.png"
+          loading={loading}
         />
         <Box mt={2} textAlign="center">
           <Typography variant="body2" color="white">

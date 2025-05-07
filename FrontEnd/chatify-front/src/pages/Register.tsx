@@ -1,12 +1,13 @@
 import { Box, Container } from "@mui/material";
 import Form from "../components/Form";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import config from "../config";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  // Campos para el registro
   const registerFields = [
     { name: "name", label: "Nombre Completo", type: "text" },
     { name: "email", label: "Correo Electrónico", type: "email" },
@@ -30,6 +31,7 @@ const Register: React.FC = () => {
       password: formData.password,
     };
 
+    setLoading(true);
     try {
       const response = await fetch(`${config.apiBaseUrl}/auth/register`, {
         method: "POST",
@@ -42,7 +44,6 @@ const Register: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
 
-        // Intenta extraer mensaje desde errorData.detail[0].msg
         const errorMsg =
           Array.isArray(errorData.detail) && errorData.detail.length > 0
             ? errorData.detail[0].msg
@@ -52,17 +53,15 @@ const Register: React.FC = () => {
         return;
       }
 
-      // Redirige al usuario a /login
-      navigate("/login");
-
       const data = await response.json();
       alert("Usuario registrado exitosamente");
       console.log(data);
-
-      // TODO: Redirigir al login u otra vista
+      navigate("/login");
     } catch (error) {
       console.error("Error de red:", error);
       alert("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,20 +69,23 @@ const Register: React.FC = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center", // Centrado horizontal
-        alignItems: "center", // Centrado vertical
-        width: "100vw", // Ancho de la ventana
-        height: "100vh", // Alto de la ventana
-        backgroundColor: "#191919", // Opcional: color de fondo
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#191919",
       }}
     >
-      <Form
-        title="Registrarse"
-        fields={registerFields}
-        onSubmit={handleRegister}
-        buttonText="Sign In"
-        logoUrl="../src/assets/Logo.png"
-      />
+      <Container maxWidth="xs">
+        <Form
+          title="Registrarse"
+          fields={registerFields}
+          onSubmit={handleRegister}
+          buttonText="Sign In"
+          logoUrl="../src/assets/Logo.png"
+          loading={loading}
+        />
+      </Container>
     </Box>
   );
 };
