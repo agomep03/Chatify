@@ -1,8 +1,13 @@
 import { Box, Container } from "@mui/material";
 import Form from "../components/Form";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import config from "../config";
 
 const Register: React.FC = () => {
-  // Campos para el registro
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const registerFields = [
     { name: "name", label: "Nombre Completo", type: "text" },
     { name: "email", label: "Correo Electrónico", type: "email" },
@@ -14,29 +19,73 @@ const Register: React.FC = () => {
     },
   ];
 
-  // Función que maneja el registro
-  const handleRegister = (formData: Record<string, string>) => {
-    console.log("Registrando usuario con:", formData);
+  const handleRegister = async (formData: Record<string, string>) => {
+    if (formData.password !== formData.confirmPassword) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
+
+    const payload = {
+      username: formData.name,
+      email: formData.email,
+      password: formData.password,
+    };
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${config.apiBaseUrl}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        const errorMsg =
+          Array.isArray(errorData.detail) && errorData.detail.length > 0
+            ? errorData.detail[0].msg
+            : "Registro fallido";
+
+        alert(`Error: ${errorMsg}`);
+        return;
+      }
+
+      const data = await response.json();
+      alert("Usuario registrado exitosamente");
+      console.log(data);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center", // Centrado horizontal
-        alignItems: "center", // Centrado vertical
-        width: "100vw", // Ancho de la ventana
-        height: "100vh", // Alto de la ventana
-        backgroundColor: "#191919", // Opcional: color de fondo
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#191919",
       }}
     >
-      <Form
-        title="Registrarse"
-        fields={registerFields}
-        onSubmit={handleRegister}
-        buttonText="Sign In"
-        logoUrl="../src/assets/react.svg"
-      />
+      <Container maxWidth="xs">
+        <Form
+          title="Registrarse"
+          fields={registerFields}
+          onSubmit={handleRegister}
+          buttonText="Sign In"
+          logoUrl="../src/assets/Logo.png"
+          loading={loading}
+        />
+      </Container>
     </Box>
   );
 };
