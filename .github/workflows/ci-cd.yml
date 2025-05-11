@@ -45,10 +45,3 @@ jobs:
         run: |
           cd FrontEnd/chatify-front
           docker build -t my-react-frontend .
-
-      - name: Push Docker Images to Docker Hub
-        run: |
-          docker tag my-fastapi-backend <dockerhub_user>/my-fastapi-backend:latest
-          docker tag my-react-frontend <dockerhub_user>/my-react-frontend:latest
-          docker push <dockerhub_user>/my-fastapi-backend:latest
-          docker push <dockerhub_user>/my-react-frontend:latest
