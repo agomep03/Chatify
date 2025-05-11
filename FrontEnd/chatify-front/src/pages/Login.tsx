@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (isAuthenticated()) {
-      navigate("/chat");
+      navigate("/home");
     }
   }, [navigate]);
 
@@ -61,7 +61,7 @@ const Login: React.FC = () => {
       }
 
       localStorage.setItem("token", token);
-      navigate("/chat");
+      navigate("/home");
     } catch (error) {
       console.error("Error de red:", error);
       alert("No se pudo conectar con el servidor.");
