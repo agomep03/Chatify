@@ -81,15 +81,14 @@ const Login: React.FC = () => {
         backgroundColor: "#191919",
       }}
     >
-      <Container maxWidth="xs">
-        <Form
-          title="Iniciar Sesión"
-          fields={loginFields}
-          onSubmit={handleLogin}
-          buttonText="Log In"
-          logoUrl="../src/assets/Logo.png"
-          loading={loading}
-        />
+      <Form
+        title="Iniciar Sesión"
+        fields={loginFields}
+        onSubmit={handleLogin}
+        buttonText="Log In"
+        logoUrl="../src/assets/Logo.png"
+        loading={loading}
+      >
         <Box mt={2} textAlign="center">
           <Typography variant="body2" color="white">
             ¿No tienes una cuenta?{" "}
@@ -103,7 +102,7 @@ const Login: React.FC = () => {
             </Link>
           </Typography>
         </Box>
-      </Container>
+      </Form>
     </Box>
   );
 };
