@@ -9,12 +9,33 @@ import {
 } from "@mui/material";
 import Logo from "./Logo";
 
+/**
+ * Componente de formulario reutilizable.
+ */
+
+/**
+ * Interfaz para definir la estructura de los campos del formulario.
+ * @property {string} name - Nombre del campo.
+ * @property {string} label - Etiqueta del campo.
+ * @property {string} type - Tipo de campo (text, email, password, etc.).
+ */
 interface Field {
   name: string;
   label: string;
   type: string;
 }
 
+/**
+ * Propiedades del componente Form.
+ * @property {string} title - Título del formulario.
+ * @property {Field[]} fields - Campos del formulario.
+ * @property {(formData: Record<string, string>) => void} onSubmit - Función a ejecutar al enviar el formulario.
+ * @property {string} buttonText - Texto del botón de envío.
+ * @property {string} [logoUrl] - URL del logo (opcional).
+ * @property {boolean} [loading] - Estado de carga (opcional).
+ * @property {Record<string, string>} [initialValues] - Valores iniciales del formulario (opcional).
+ * @property {React.ReactNode} [children] - Elementos hijos opcionales.
+ */
 interface FormProps {
   title: string;
   fields: Field[];
@@ -26,6 +47,11 @@ interface FormProps {
   children?: React.ReactNode;
 }
 
+/**
+ * Componente de formulario reutilizable.
+ * @param {FormProps} props - Propiedades del componente.
+ * @returns {JSX.Element}
+ */
 const Form: React.FC<FormProps> = ({
   title,
   fields,
@@ -36,9 +62,14 @@ const Form: React.FC<FormProps> = ({
   initialValues = {},
   children,
 }) => {
+  // Estado para manejar los datos del formulario
   const [formData, setFormData] =
     useState<Record<string, string>>(initialValues);
 
+  /**
+   * Manejador de cambios en los campos del formulario.
+   * @param e - Evento de cambio.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -46,12 +77,17 @@ const Form: React.FC<FormProps> = ({
     });
   };
 
+  /**
+   * Manejador de envío del formulario.
+   * @param e - Evento de envío.
+   */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
   return (
+    // Contenedor principal del formulario
     <Container maxWidth="xs">
       <Box
         sx={{
@@ -87,14 +123,14 @@ const Form: React.FC<FormProps> = ({
             <CircularProgress sx={{ color: "#ffffff" }} />
           </Box>
         )}
-
+        {/* Logo y título */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           {logoUrl && <Logo logoUrl={logoUrl} />}
           <Typography variant="h5" sx={{ color: "#ffffff" }}>
             {title}
           </Typography>
         </Box>
-
+        {/* Campos del formulario */}
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -150,6 +186,7 @@ const Form: React.FC<FormProps> = ({
             {buttonText}
           </Button>
         </Box>
+        {/* Elementos hijos opcionales */}
         {children && (
           <Box mt={2} textAlign="center" width="100%">
             {children}

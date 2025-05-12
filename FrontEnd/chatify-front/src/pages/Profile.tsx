@@ -2,11 +2,17 @@ import { Box, Container, CircularProgress, Typography } from "@mui/material";
 import Form from "../components/Form";
 import { useEffect, useState } from "react";
 
+/**
+ * Página de perfil de usuario.
+ * @returns {JSX.Element} Componente de perfil.
+ * @description Este componente permite a los usuarios editar su perfil.
+ */
 const Profile: React.FC = () => {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Campos del formulario
   const profileFields = [
     { name: "name", label: "Nombre Completo", type: "text" },
     { name: "email", label: "Correo Electrónico", type: "email" },
@@ -14,11 +20,13 @@ const Profile: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simula llamada al endpoint para obtener datos del usuario
+    /**
+     * Función para obtener los datos del perfil del usuario.
+     */
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        // Aquí irá el fetch real
+        // TODO: Aquí irá el fetch real
         // const response = await fetch(`${config.apiBaseUrl}/user/profile`);
         // const data = await response.json();
 
@@ -33,6 +41,7 @@ const Profile: React.FC = () => {
       } catch (error) {
         console.error("Error al obtener datos del perfil:", error);
       } finally {
+        // Cambiar el estado de carga
         setLoading(false);
       }
     };
@@ -40,6 +49,10 @@ const Profile: React.FC = () => {
     fetchUserData();
   }, []);
 
+  /**
+   * Maneja la actualización del perfil del usuario.
+   * @param data - Datos del formulario.
+   */
   const handleProfileUpdate = async (data: Record<string, string>) => {
     setSubmitting(true);
     try {
