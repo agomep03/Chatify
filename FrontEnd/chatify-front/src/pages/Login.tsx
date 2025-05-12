@@ -1,4 +1,4 @@
-import { Box, Container, Link, Typography } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import Form from "../components/Form";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
