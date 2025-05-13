@@ -7,6 +7,8 @@ from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError
 from src.controllers.user_controller import verify_spotify_account
 from src.controllers.user_controller import get_spotify_auth_url
+from fastapi.responses import RedirectResponse
+
 
 
 logging.basicConfig(level=logging.INFO)
