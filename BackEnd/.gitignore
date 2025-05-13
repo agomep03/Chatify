@@ -1,7 +1,38 @@
-.env
+# Editor directories and files
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.ntvs*
+*.njsproj
+*.sln
+*.suo
+*.sw?
+
+# Logs
+*.log
+lerna-debug.log*
+logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node modules and build artifacts
+dist
+dist-ssr
+node_modules
+*.local
+
+# Python-related files
 __pycache__
 *.pyc
 *.pyo
-.git
-*.dockerignore
 
+# Git-related files
+.git
+
+# Other
+.github
+*.dockerignore
+.env
