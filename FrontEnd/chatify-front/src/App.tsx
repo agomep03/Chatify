@@ -6,7 +6,9 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ChatPage from "./pages/ChatPage";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import PrivateRoute from "./components/PrivateRoute";
 
 const App: React.FC = () => {
   return (
@@ -16,7 +18,12 @@ const App: React.FC = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/chat" element={<ChatPage />} />
+
+        {/* Rutas protegidas */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
     </Router>
   );

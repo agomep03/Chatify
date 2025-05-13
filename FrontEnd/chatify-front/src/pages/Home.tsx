@@ -1,6 +1,6 @@
 import MainLayout from '../layouts/MainLayout';
 
-const ChatPage: React.FC = () => {
+const Home: React.FC = () => {
   return (
     <MainLayout>
       <p>En desarrollo...</p>
@@ -8,4 +8,4 @@ const ChatPage: React.FC = () => {
   );
 };
 
-export default ChatPage;
+export default Home;
