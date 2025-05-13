@@ -2,6 +2,7 @@ import logging
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from src.models.auth_model import User
+from src.controllers.user_controller import get_spotify_login_url
 from src.utils.auth import hash_password, verify_password, create_access_token
 from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError
@@ -70,8 +71,16 @@ def register_user(username: str, email: str, password: str, db: Session):
     db.commit()
     db.refresh(new_user)
 
+    token = create_access_token({"sub": new_user.email})
+    redirect_url = get_spotify_login_url(email=new_user.email)
+
     logger.info(f"User {username} registered successfully with email {email}.")
-    return {"message": "User registered successfully"}
+    print(redirect_url)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "redirect_url": redirect_url
+    }
 
 # Función para iniciar sesión
 def login_user(email: str, password: str, db: Session):
@@ -99,4 +108,13 @@ def login_user(email: str, password: str, db: Session):
     token = create_access_token({"sub": user.email})
 
     logger.info(f"User {user.username} logged in successfully.")
-    return {"access_token": token, "token_type": "bearer"}
+
+    redirect_url = get_spotify_login_url(email=user.email)
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "redirect_url": redirect_url
+    }
+
+    from src.services.spotify_service import get_spotify_login_url
+
