@@ -115,6 +115,3 @@ def login_user(email: str, password: str, db: Session):
         "token_type": "bearer",
         "redirect_url": redirect_url
     }
-
-    from src.services.spotify_service import get_spotify_login_url
-
