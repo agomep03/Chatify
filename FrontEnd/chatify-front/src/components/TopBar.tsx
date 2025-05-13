@@ -1,7 +1,7 @@
-import { AppBar, Toolbar, Typography, Avatar, Box } from '@mui/material';
-import Logo from '../assets/Logo.png'; 
+import { AppBar, Toolbar, Typography, Box } from '@mui/material';
 import UserMenu from './UserMenu.tsx'
 import { useNavigate } from 'react-router-dom';
+import Logo from './Logo.tsx'
 
 const TopBar: React.FC = () => {
   const navigate = useNavigate();
@@ -18,11 +18,7 @@ const TopBar: React.FC = () => {
             sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
             onClick={handleNavegateChat}
           >
-          <Avatar 
-            src={Logo}
-            alt="Chatify Logo"
-            sx={{ mr: 2}}
-          />
+          <Logo logoUrl='/src/assets/Logo.png'/>
           <Typography variant="h6" component="div">
             Chatify
           </Typography>

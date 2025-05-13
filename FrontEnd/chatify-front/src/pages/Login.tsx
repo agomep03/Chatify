@@ -4,10 +4,12 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
 import { useEffect, useState } from "react";
 import config from "../config";
+import {useAlert} from "../components/Alert";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { customAlert } = useAlert();
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -41,7 +43,7 @@ const Login: React.FC = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        alert(`Error: ${errorText || "Inicio de sesión fallido"}`);
+        customAlert("error",`Error: ${errorText || "Inicio de sesión fallido"}`);
         return;
       }
 
@@ -56,7 +58,7 @@ const Login: React.FC = () => {
       }
 
       if (!token) {
-        alert("No se recibió un token válido.");
+        customAlert("error","No se recibió un token válido.");
         return;
       }
 
@@ -64,7 +66,7 @@ const Login: React.FC = () => {
       navigate("/home");
     } catch (error) {
       console.error("Error de red:", error);
-      alert("No se pudo conectar con el servidor.");
+      customAlert("error","No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
     }
