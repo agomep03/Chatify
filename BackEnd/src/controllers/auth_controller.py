@@ -6,6 +6,8 @@ from src.utils.auth import hash_password, verify_password, create_access_token
 from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError
 from src.controllers.user_controller import verify_spotify_account
+from src.controllers.user_controller import get_spotify_auth_url
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,19 +42,6 @@ def validate_email_address(email: str):
         logger.error(f"Invalid email: {email}. Error: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid email: {e}")
 
-def auth_flow(spotify_token: str):
-    """
-    Controlador principal que gestiona la autenticación y verifica la cuenta Spotify.
-
-    Args:
-        spotify_token (str): Token de acceso de Spotify.
-
-    Returns:
-        dict: Resultado de la verificación.
-    """
-    if verify_spotify_account(spotify_token):
-        return {"message": "Cuenta de Spotify verificada"}
-
 def register_user(username: str, email: str, password: str, db: Session):
     """
     Registra un nuevo usuario en la base de datos, primero validando el correo y asegurándose
@@ -79,13 +68,15 @@ def register_user(username: str, email: str, password: str, db: Session):
     hashed = hash_password(password)
 
     new_user = User(username=username, email=email, hashed_password=hashed)
+
+    url = get_spotify_auth_url()
     
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
     logger.info(f"User {username} registered successfully with email {email}.")
-    return {"message": "User registered successfully"}
+    return RedirectResponse(url=get_spotify_auth_url(), status_code=302)
 
 # Función para iniciar sesión
 def login_user(email: str, password: str, db: Session):
@@ -113,4 +104,5 @@ def login_user(email: str, password: str, db: Session):
     token = create_access_token({"sub": user.email})
 
     logger.info(f"User {user.username} logged in successfully.")
-    return {"access_token": token, "token_type": "bearer"}
+    return RedirectResponse(url=get_spotify_auth_url(), status_code=302)
+
