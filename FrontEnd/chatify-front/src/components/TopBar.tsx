@@ -16,13 +16,14 @@ const TopBar: React.FC = () => {
 
         <Box 
             sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
-            onClick={handleNavegateChat}
+            onClick={handleNavegateChat} //Al dar al logo o al nombre de de la aplicación se volverá a 'home'
           >
           <Logo logoUrl='/src/assets/Logo.png'/>
           <Typography variant="h6" component="div">
             Chatify
           </Typography>
         </Box>
+
         <Box sx={{ flexGrow: 1 }} />
         <UserMenu />
       </Toolbar>

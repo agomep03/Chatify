@@ -1,12 +1,14 @@
 import { Dialog, DialogContent, Box, Button } from '@mui/material';
 import { ReactNode, useState } from 'react';
 
+// Configuración de los botones
 type ButtonConfig = {
   label: string;
   action: () => void;
   color?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
 };
 
+// Propiedades del diálogo de confirmación
 type ConfirmDialogProps = {
   open: boolean;
   onClose: () => void;
@@ -16,6 +18,7 @@ type ConfirmDialogProps = {
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
+// Componente para mostrar el diálogo de confirmación
 const ConfirmDialog = (props: ConfirmDialogProps) => {
   const {
     open,
@@ -30,7 +33,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
     { label: 'Cancelar', action: onClose, color: 'secondary' },
     { label: 'Aceptar', action: onConfirm, color: 'primary' }
   ];
-
+  //Usa 1 o 2 botones si el usuarios los especifica, sino usa los por defecto
   const resolvedButtons = buttons?.length ? buttons.slice(0, 2) : defaultButtons;
 
   return (
@@ -91,6 +94,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
   );
 };
 
+// Función para activar el diálogo de confirmación
 let triggerConfirm: (options: {
   content: ReactNode;
   onConfirm: () => void;
@@ -100,8 +104,10 @@ let triggerConfirm: (options: {
   button2Color?: ButtonConfig['color'];
 }) => void = () => {};
 
+// Función para acceder a poner dialogos
 export const useConfirm = () => triggerConfirm;
 
+// Provedor de dialogos
 export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState<ReactNode>(null);
@@ -129,10 +135,10 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
         ];
     
     setButtons(newButtons);
-    setOpen(true);
+    setOpen(true); //Abrir dialogo
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => setOpen(false); //Cerrar dialogo
 
   return (
     <>
