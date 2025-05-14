@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, List, ListItem, ListItemText, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import { marked } from 'marked';
 import config from "../config";
 
 type Message = {
@@ -84,9 +83,15 @@ const Chat: React.FC = () => {
   };
 
   const renderTextToHtml = (text: string) => {
-    const htmlText = marked(text);
-    const cleanedHtml = htmlText.replace(/<\/?p>/g, ''); 
-    return { __html: cleanedHtml };
+    let htmlText = text.replace(/\n/g, '<br>');
+    htmlText = htmlText.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+    htmlText = htmlText.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+    htmlText = htmlText.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+    htmlText = htmlText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    htmlText = htmlText.replace(/^\s*[-\*]\s+(.*)$/gm, '<ul><li>$1</li></ul>');
+    htmlText = htmlText.replace(/<\/?p>/g, '');
+    return { __html: htmlText };
   };
   
   return (
@@ -115,8 +120,7 @@ const Chat: React.FC = () => {
           >
             <ListItemText
               primary={<span dangerouslySetInnerHTML={renderTextToHtml(msg.text)} />} // Usamos dangerouslySetInnerHTML
-              align={msg.sender === 'user' ? 'right' : 'left'}
-              sx={{ whiteSpace: 'pre-wrap' }} 
+              sx={{ whiteSpace: 'pre-wrap', textAlign:msg.sender === 'user' ? 'right' : 'left' }} 
             />
           </Box>
         </ListItem>
@@ -131,7 +135,7 @@ const Chat: React.FC = () => {
             borderRadius: '15px 15px 15px 0px',
           }}
         >
-          <ListItemText primary={`Pensando${dots}`} align="left" />
+          <ListItemText primary={`Pensando${dots}`} sx={{textAlign:"left"}} />
         </Box>
       </ListItem>
     )}
