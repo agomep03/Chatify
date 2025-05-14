@@ -14,6 +14,8 @@ type Message = {
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [dots, setDots] = useState('');
 
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -26,6 +28,19 @@ const Chat: React.FC = () => {
     }
   }, [messages]); 
 
+  useEffect(() => {
+    if (!isLoading) {
+      setDots('...');
+      return;
+    }
+  
+    const interval = setInterval(() => {
+      setDots(prev => (prev.length < 3 ? prev + '.' : ''));
+    }, 500);
+  
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   const handleSend = () => {
     if (!input.trim()) return;
   
@@ -37,6 +52,8 @@ const Chat: React.FC = () => {
   
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
+    setIsLoading(true);
+    
   
     fetch(`${config.apiBaseUrl}/chat/ask-music-question/?question=${encodeURIComponent(input)}`, {
       method: 'POST',
@@ -57,12 +74,15 @@ const Chat: React.FC = () => {
           sender: 'bot',
         };
         setMessages(prev => [...prev, errorMessage]);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
   
 
   return (
-    <Box display="flex" flexDirection="column" height="85vh" width="85vw" overflow="hidden" p={2}>
+    <Box display="flex" flexDirection="column" height="90vh" width="85vw" overflow="hidden" p={2}>
       <Box
         ref={listRef}
         flexGrow={1}
@@ -93,6 +113,20 @@ const Chat: React.FC = () => {
           </Box>
         </ListItem>
       ))}
+      {isLoading && (
+      <ListItem sx={{ justifyContent: 'flex-start' }}>
+        <Box
+          sx={{
+            padding: '8px 12px',
+            backgroundColor: '#303030',
+            color: '#fff',
+            borderRadius: '15px 15px 15px 0px',
+          }}
+        >
+          <ListItemText primary={`Pensando${dots}`} align="left" />
+        </Box>
+      </ListItem>
+    )}
         </List>
       </Box>
       <Box display="flex" overflow="hidden">
