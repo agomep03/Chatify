@@ -1,7 +1,7 @@
 # Dockerfile para React (Frontend)
 
 # Usar una imagen base de Node.js
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 # Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
