@@ -5,15 +5,37 @@ import {
   Button,
   Typography,
   CircularProgress,
+  Container,
 } from "@mui/material";
 import Logo from "./Logo";
 
+/**
+ * Componente de formulario reutilizable.
+ */
+
+/**
+ * Interfaz para definir la estructura de los campos del formulario.
+ * @property {string} name - Nombre del campo.
+ * @property {string} label - Etiqueta del campo.
+ * @property {string} type - Tipo de campo (text, email, password, etc.).
+ */
 interface Field {
   name: string;
   label: string;
   type: string;
 }
 
+/**
+ * Propiedades del componente Form.
+ * @property {string} title - Título del formulario.
+ * @property {Field[]} fields - Campos del formulario.
+ * @property {(formData: Record<string, string>) => void} onSubmit - Función a ejecutar al enviar el formulario.
+ * @property {string} buttonText - Texto del botón de envío.
+ * @property {string} [logoUrl] - URL del logo (opcional).
+ * @property {boolean} [loading] - Estado de carga (opcional).
+ * @property {Record<string, string>} [initialValues] - Valores iniciales del formulario (opcional).
+ * @property {React.ReactNode} [children] - Elementos hijos opcionales.
+ */
 interface FormProps {
   title: string;
   fields: Field[];
@@ -21,8 +43,15 @@ interface FormProps {
   buttonText: string;
   logoUrl?: string;
   loading?: boolean; // Nueva prop
+  initialValues?: Record<string, string>;
+  children?: React.ReactNode;
 }
 
+/**
+ * Componente de formulario reutilizable.
+ * @param {FormProps} props - Propiedades del componente.
+ * @returns {JSX.Element}
+ */
 const Form: React.FC<FormProps> = ({
   title,
   fields,
@@ -30,9 +59,17 @@ const Form: React.FC<FormProps> = ({
   buttonText,
   logoUrl,
   loading = false,
+  initialValues = {},
+  children,
 }) => {
-  const [formData, setFormData] = useState<Record<string, string>>({});
+  // Estado para manejar los datos del formulario
+  const [formData, setFormData] =
+    useState<Record<string, string>>(initialValues);
 
+  /**
+   * Manejador de cambios en los campos del formulario.
+   * @param e - Evento de cambio.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -40,110 +77,123 @@ const Form: React.FC<FormProps> = ({
     });
   };
 
+  /**
+   * Manejador de envío del formulario.
+   * @param e - Evento de envío.
+   */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
   return (
-    <Box
-      sx={{
-        width: "400px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-        p: 4,
-        boxShadow: 3,
-        borderRadius: 2,
-        bgcolor: "#1f1f1f",
-        position: "relative",
-      }}
-    >
-      {/* Overlay de carga */}
-      {loading && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            bgcolor: "#1f1f1f",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 2,
-            zIndex: 10,
-          }}
-        >
-          <CircularProgress sx={{ color: "#ffffff" }} />
-        </Box>
-      )}
-
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-        {logoUrl && <Logo logoUrl={logoUrl} />}
-        <Typography variant="h5" sx={{ color: "#ffffff" }}>
-          {title}
-        </Typography>
-      </Box>
-
+    // Contenedor principal del formulario
+    <Container maxWidth="xs">
       <Box
-        component="form"
-        onSubmit={handleSubmit}
         sx={{
-          width: "100%",
+          width: "400px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          gap: 2,
+          p: 4,
+          boxShadow: 3,
+          borderRadius: 2,
+          bgcolor: "#1f1f1f",
+          position: "relative",
         }}
       >
-        {fields.map((field) => (
-          <TextField
-            key={field.name}
-            fullWidth
-            label={field.label}
-            type={field.type}
-            name={field.name}
-            value={formData[field.name] || ""}
-            onChange={handleChange}
-            margin="normal"
-            required
+        {/* Overlay de carga */}
+        {loading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              bgcolor: "#1f1f1f",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 2,
+              zIndex: 10,
+            }}
+          >
+            <CircularProgress sx={{ color: "#ffffff" }} />
+          </Box>
+        )}
+        {/* Logo y título */}
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          {logoUrl && <Logo logoUrl={logoUrl} />}
+          <Typography variant="h5" sx={{ color: "#ffffff" }}>
+            {title}
+          </Typography>
+        </Box>
+        {/* Campos del formulario */}
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {fields.map((field) => (
+            <TextField
+              key={field.name}
+              fullWidth
+              label={field.label}
+              type={field.type}
+              name={field.name}
+              value={formData[field.name] || ""}
+              onChange={handleChange}
+              margin="normal"
+              required
+              disabled={loading}
+              sx={{
+                "& .MuiInputBase-input": { color: "#ffffff" },
+                "& .MuiInputLabel-root": { color: "#7c7c7c" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "#7c7c7c" },
+                  "&:hover fieldset": { borderColor: "#ffffff" },
+                  "&.Mui-focused fieldset": { borderColor: "#ffffff" },
+                },
+              }}
+            />
+          ))}
+          <Button
+            type="submit"
+            variant="contained"
             disabled={loading}
             sx={{
-              "& .MuiInputBase-input": { color: "#ffffff" },
-              "& .MuiInputLabel-root": { color: "#7c7c7c" },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: "#7c7c7c" },
-                "&:hover fieldset": { borderColor: "#ffffff" },
-                "&.Mui-focused fieldset": { borderColor: "#ffffff" },
-              },
+              mt: "2rem",
+              width: "50%",
+              justifySelf: "center",
+              backgroundColor: "#3be477",
+              color: "#000000",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              borderRadius: "var(--encore-button-corner-radius, 9999px);",
+              textTransform: "none",
+              "&:hover": { backgroundColor: "#1abc54" },
             }}
-          />
-        ))}
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={loading}
-          sx={{
-            mt: "2rem",
-            width: "50%",
-            justifySelf: "center",
-            backgroundColor: "#3be477",
-            color: "#000000",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            borderRadius: "var(--encore-button-corner-radius, 9999px);",
-            textTransform: "none",
-            "&:hover": { backgroundColor: "#1abc54" },
-          }}
-          fullWidth
-        >
-          {buttonText}
-        </Button>
+            fullWidth
+          >
+            {buttonText}
+          </Button>
+        </Box>
+        {/* Elementos hijos opcionales */}
+        {children && (
+          <Box mt={2} textAlign="center" width="100%">
+            {children}
+          </Box>
+        )}
       </Box>
-    </Box>
+    </Container>
   );
 };
 
