@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 80
 
 # Comando  por defecto para ejecutar
-CMD ["npm", "start"]
+CMD ["serve", "-s", "dist", "-l", "80"]
