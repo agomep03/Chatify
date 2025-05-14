@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, List, ListItem, ListItemText, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import { marked } from 'marked';
 import config from "../config";
 
 type Message = {
@@ -60,9 +61,11 @@ const Chat: React.FC = () => {
     })
       .then(res => res.json())
       .then(data => {
+        console.log(data);
+        console.log(data.answer);
         const botMessage: Message = {
           id: Date.now() + 1,
-          text: data.response || 'Sin respuesta',
+          text: data.answer || 'Sin respuesta',
           sender: 'bot',
         };
         setMessages(prev => [...prev, botMessage]);
@@ -79,8 +82,13 @@ const Chat: React.FC = () => {
         setIsLoading(false);
       });
   };
-  
 
+  const renderTextToHtml = (text: string) => {
+    const htmlText = marked(text);
+    const cleanedHtml = htmlText.replace(/<\/?p>/g, ''); 
+    return { __html: cleanedHtml };
+  };
+  
   return (
     <Box display="flex" flexDirection="column" height="90vh" width="85vw" overflow="hidden" p={2}>
       <Box
@@ -106,7 +114,7 @@ const Chat: React.FC = () => {
             }}
           >
             <ListItemText
-              primary={msg.text}
+              primary={<span dangerouslySetInnerHTML={renderTextToHtml(msg.text)} />} // Usamos dangerouslySetInnerHTML
               align={msg.sender === 'user' ? 'right' : 'left'}
               sx={{ whiteSpace: 'pre-wrap' }} 
             />
