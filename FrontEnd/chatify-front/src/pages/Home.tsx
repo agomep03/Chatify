@@ -1,11 +1,7 @@
-import MainLayout from '../layouts/MainLayout';
+import MainLayout from "../layouts/MainLayout";
 
 const Home: React.FC = () => {
-  return (
-    <MainLayout>
-      <p>En desarrollo...</p>
-    </MainLayout>
-  );
+  return <MainLayout />;
 };
 
 export default Home;
