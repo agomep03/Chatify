@@ -3,10 +3,12 @@ import Form from "../components/Form";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import config from "../config";
+import {useAlert} from "../components/Alert";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { customAlert } = useAlert();
 
   const registerFields = [
     { name: "name", label: "Nombre Completo", type: "text" },
@@ -21,7 +23,7 @@ const Register: React.FC = () => {
 
   const handleRegister = async (formData: Record<string, string>) => {
     if (formData.password !== formData.confirmPassword) {
-      alert("Las contraseñas no coinciden.");
+      customAlert("error","Las contraseñas no coinciden.");
       return;
     }
 
@@ -49,17 +51,17 @@ const Register: React.FC = () => {
             ? errorData.detail[0].msg
             : "Registro fallido";
 
-        alert(`Error: ${errorMsg}`);
+            customAlert("error",`Error: ${errorMsg}`);
         return;
       }
 
       const data = await response.json();
-      alert("Usuario registrado exitosamente");
+      customAlert("info","Usuario registrado exitosamente");
       console.log(data);
       navigate("/login");
     } catch (error) {
       console.error("Error de red:", error);
-      alert("No se pudo conectar con el servidor.");
+      customAlert("error","No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
     }

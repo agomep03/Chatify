@@ -1,15 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import {useAlert} from "../components/Alert";
 
 const PrivateRoute: React.FC = () => {
   const authenticated = isAuthenticated();
-  const hasAlerted = useRef(false);
+  const { customAlert } = useAlert();
 
   useEffect(() => {
-    if (!authenticated && !hasAlerted.current) {
-      alert("No estás autenticado");
-      hasAlerted.current = true;
+    if (!authenticated) {
+      customAlert("error","No estás autenticado");
     }
   }, [authenticated]);
 
