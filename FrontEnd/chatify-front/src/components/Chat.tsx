@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, List, ListItem, ListItemText, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import config from "../config";
 
 type Message = {
   id: number;
@@ -27,22 +28,38 @@ const Chat: React.FC = () => {
 
   const handleSend = () => {
     if (!input.trim()) return;
-
+  
     const userMessage: Message = {
       id: Date.now(),
       text: input,
       sender: 'user',
     };
-
-    const botMessage: Message = {
-      id: Date.now() + 1,
-      text: 'en desarrollo',
-      sender: 'bot',
-    };
-
-    setMessages((prev) => [...prev, userMessage, botMessage]);
+  
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
+  
+    fetch(`${config.apiBaseUrl}/chat/ask-music-question/?question=${encodeURIComponent(input)}`, {
+      method: 'POST',
+    })
+      .then(res => res.json())
+      .then(data => {
+        const botMessage: Message = {
+          id: Date.now() + 1,
+          text: data.response || 'Sin respuesta',
+          sender: 'bot',
+        };
+        setMessages(prev => [...prev, botMessage]);
+      })
+      .catch(() => {
+        const errorMessage: Message = {
+          id: Date.now() + 1,
+          text: 'Error al obtener respuesta.',
+          sender: 'bot',
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      });
   };
+  
 
   return (
     <Box display="flex" flexDirection="column" height="85vh" width="85vw" overflow="hidden" p={2}>
