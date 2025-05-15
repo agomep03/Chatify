@@ -15,7 +15,10 @@ RUN npm install
 
 # Copiar el código fuente al contenedor
 COPY . .
-COPY .env .env
+
+# Crear archivo .env desde las vars del entorno de Render
+RUN echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env && \
+    echo "VITE_API_PROD_URLS=$VITE_API_PROD_URLS" >> .env
 
 # Construir la aplicación (Vite genera los archivos en 'dist/')
 RUN npm run build  
