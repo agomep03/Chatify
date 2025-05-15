@@ -8,12 +8,10 @@ from src.models.message_model import Message
 logger = logging.getLogger(__name__)
 agent = Agent()
 
-async def consult_IA(question: str, history: list = []):
-    try:
-        return {"answer": await agent.chat(question, history)}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
+
+def get_conversation_by_id(chat_id: int, db: Session):
+    return db.query(Conversation).filter(Conversation.id == chat_id).first()
 
 async def start_conversation(user_id: str, db: Session):
     logger.info(f"Start conversation for user with id {user_id}")

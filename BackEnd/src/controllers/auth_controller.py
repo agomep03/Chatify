@@ -1,14 +1,26 @@
 import logging
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Security
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from src.models.auth_model import User
 from src.controllers.user_controller import get_spotify_login_url
 from src.utils.auth import hash_password, verify_password, create_access_token
 from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError
+from jose import JWTError, jwt
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")  
 
 def get_db():
     db = SessionLocal()
@@ -16,6 +28,28 @@ def get_db():
         yield db  
     finally:
         db.close() 
+
+def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Unauthorized",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    user = db.query(User).filter(User.email == email).first()
+    if user is None:
+        raise credentials_exception
+
+    return user
+
+
 
 def validate_email_address(email: str):
     logger.info(f"Validating email: {email}")
