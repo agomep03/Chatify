@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import config from "../config";
 import {useAlert} from "../components/Alert";
+import logo from '../assets/Logo.png';
 
 /**
  * Pagina de registro.
@@ -105,7 +106,7 @@ const Register: React.FC = () => {
         fields={registerFields}
         onSubmit={handleRegister}
         buttonText="Sign In"
-        logoUrl="../src/assets/Logo.png"
+        logoUrl={logo}
         loading={loading}
       />
     </Box>

@@ -1,6 +1,7 @@
 import { Box, Container, CircularProgress, Typography } from "@mui/material";
 import Form from "../components/Form";
 import { useEffect, useState } from "react";
+import logo from '../assets/Logo.png';
 
 /**
  * Página de perfil de usuario.
@@ -93,7 +94,7 @@ const Profile: React.FC = () => {
               fields={profileFields}
               onSubmit={handleProfileUpdate}
               buttonText="Guardar Cambios"
-              logoUrl="../src/assets/Logo.png"
+              logoUrl={logo}
               loading={submitting}
               initialValues={formData}
             >

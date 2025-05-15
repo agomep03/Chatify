@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Toolbar } from "@mui/material";
 import TopBar from "../components/TopBar";
 import NavMenu from "../components/NavMenu";
+import Chat from "../components/Chat";
 
 interface Chat {
   id: string;
@@ -54,7 +55,7 @@ const MainLayout = () => {
 
     const chat = chats.find((chat) => chat.title === selectedTab);
     if (chat) {
-      return <div>{`Mostrando contenido del chat: ${chat.title}`}</div>;
+      return <Chat/>;
     }
 
     return <div>Tab no encontrada</div>;
