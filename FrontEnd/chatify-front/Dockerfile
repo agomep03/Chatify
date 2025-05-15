@@ -15,6 +15,7 @@ RUN npm install
 
 # Copiar el código fuente al contenedor
 COPY . .
+COPY .env .env
 
 # Construir la aplicación (Vite genera los archivos en 'dist/')
 RUN npm run build  
