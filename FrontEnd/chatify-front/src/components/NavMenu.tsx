@@ -9,8 +9,13 @@ import {
 
 import CloseIcon from "@mui/icons-material/Close";
 
+interface Tab {
+  id: string;
+  title: string;
+}
+
 interface NavMenuProps {
-  tabs: string[];
+  tabs: Tab[];
   selectedTab: string;
   onTabChange: (tab: string) => void;
   closableTabs?: boolean[]; // Nuevo: indica qué tabs se pueden cerrar
@@ -40,14 +45,14 @@ const NavMenu: React.FC<NavMenuProps> = ({
       >
         {tabs.map((tab, index) => (
           <ListItem
-            key={tab}
+            key={tab.id}
             disablePadding
             secondaryAction={
               closableTabs[index] && onTabClose ? (
                 <IconButton
                   edge="end"
                   aria-label="close"
-                  onClick={() => onTabClose(tab)}
+                  onClick={() => onTabClose(tab.id)}
                   sx={{ color: "white" }}
                 >
                   <CloseIcon fontSize="small" />
@@ -56,22 +61,22 @@ const NavMenu: React.FC<NavMenuProps> = ({
             }
           >
             <ListItemButton
-              selected={selectedTab === tab}
-              onClick={() => onTabChange(tab)}
+              selected={selectedTab === tab.id}
+              onClick={() => onTabChange(tab.id)}
               sx={{
                 borderRadius: 2, // Bordes redondeados
                 backgroundColor:
-                  selectedTab === tab ? "#1abc54" : "transparent", // Fondo cuando está seleccionado
+                  selectedTab === tab.id ? "#1abc54" : "transparent", // Fondo cuando está seleccionado
                 "&:hover": {
                   backgroundColor: "#1abc54", // Color de fondo al pasar el ratón
                 },
               }}
             >
               <ListItemText
-                primary={tab}
+                primary={tab.title}
                 sx={{
-                  color: selectedTab === tab ? "#1abc54" : "#ffffff", // Color del texto cuando está seleccionado
-                  fontWeight: selectedTab === tab ? "bold" : "normal", // Fuente más gruesa para el tab seleccionado
+                  color: selectedTab === tab.id ? "#1abc54" : "#ffffff", // Color del texto cuando está seleccionado
+                  fontWeight: selectedTab === tab.id ? "bold" : "normal", // Fuente más gruesa para el tab seleccionado
                 }}
               />
             </ListItemButton>

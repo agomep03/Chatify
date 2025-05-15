@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Toolbar } from "@mui/material";
 import TopBar from "../components/TopBar";
 import NavMenu from "../components/NavMenu";
 import Chat from "../components/Chat";
+import config from "../config";
+import {useAlert} from "../components/Alert";
 
 interface Chat {
   id: string;
@@ -11,49 +13,119 @@ interface Chat {
 
 const MainLayout = () => {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>("Playlists");
+  const [selectedTab, setSelectedTab] = useState<string>("playlists");
+  const { customAlert } = useAlert();
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      const simulatedChats: Chat[] = [
-        { id: "1", title: "Chat de marketing" },
-        { id: "2", title: "Análisis mensual" },
-        { id: "3", title: "Brainstorming IA" },
-      ];
-      setChats(simulatedChats);
-    };
+  const filterchats = useMemo(() => 
+    chats
+      .filter((chat) => chat && chat.id)
+      .map((chat) => ({
+        id: chat.id.toString(),
+        title: chat.title,
+      })), [chats]);
+  
 
-    fetchChats();
-  }, []);
+  const allTabs = [
+    { id: "playlists", title: "Playlists" },
+    { id: "add", title: "Añadir conversación" },
+    ...filterchats
+  ];
 
-  const allTabs = ["Playlists", ...chats.map((chat) => chat.title)];
-  const closableTabs = [false, ...chats.map(() => true)];
+  
+  const closableTabs = [false, false, ...filterchats.map(() => true)];
 
-  const handleTabClose = (tabTitle: string) => {
-    // Eliminar del estado local
-    setChats((prev) => prev.filter((chat) => chat.title !== tabTitle));
-
-    // Cambiar selección si se eliminó la tab activa
-    if (selectedTab === tabTitle) {
-      setSelectedTab("Playlists");
-    }
-
-    // Aquí irá tu llamada al endpoint de borrado:
-    // await api.delete(`/chats/${chatId}`)
-    // Para eso necesitarías buscar el `id` del chat por el `title`
-    const chat = chats.find((c) => c.title === tabTitle);
-    if (chat) {
-      console.log(`Eliminar chat con ID: ${chat.id}`);
-      // await deleteChat(chat.id);
+  //Para eliminar un chat
+  const deleteChat = async (chatId: string) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${config.apiBaseUrl}/chat/${chatId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) throw new Error("No se pudo eliminar el chat");
+  };
+  const handleTabClose = async (tadId: string) => {
+    const chat = filterchats.find((c) => c.id === tadId);
+    if (!chat) return;
+  
+    try {
+      await deleteChat(chat.id);
+      await fetchChats();
+      if (selectedTab === chat.id) {
+        setSelectedTab("playlists");
+      }
+    } catch (error) {
+      console.error(error);
+      customAlert("error", "Error al eliminar conversación");
     }
   };
+  
+
+  // Para empezar una nueva conversación
+  const handleStartChat = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${config.apiBaseUrl}/chat/start`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const newChat = await res.json();
+      if (!res.ok || !newChat.chat_id) {
+        throw new Error("Respuesta inválida del servidor");
+      }
+      await fetchChats();
+      setSelectedTab(newChat.chat_id.toString());
+    } catch (error) {
+      console.error(error);
+      customAlert("error", "Error al iniciar conversación");
+    }
+  };
+  
+  // Actualizar los chats
+  const fetchChats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${config.apiBaseUrl}/chat/user`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data: Chat[] = await res.json();
+      setChats(data);
+    } catch (error) {
+      customAlert("error", "Error al obtener chats");
+    }
+  };
+  
+  useEffect(() => {
+    const loadChats = async () => {
+      await fetchChats();
+    };
+    loadChats();
+  }, []); 
+
+  useEffect(() => {
+    if (selectedTab === "add") {
+      handleStartChat();
+    }
+  }, [selectedTab]);
+  
+  
 
   const renderTabContent = () => {
-    if (selectedTab === "Playlists") {
+    if (selectedTab === "playlists") {
       return <div>Contenido de las playlists guardadas</div>;
     }
+    
+    if(selectedTab == "add"){
+      return <div>Iniciando conversación...</div>;
+    }
 
-    const chat = chats.find((chat) => chat.title === selectedTab);
+    const chat = filterchats.find((chat) => chat.id.toString() === selectedTab); //da error aqui
     if (chat) {
       return <Chat/>;
     }
