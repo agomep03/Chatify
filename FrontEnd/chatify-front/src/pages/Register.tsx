@@ -3,8 +3,8 @@ import Form from "../components/Form";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import config from "../config";
-import {useAlert} from "../components/Alert";
-import logo from '../assets/Logo.png';
+import { useAlert } from "../components/Alert";
+import logo from "../assets/Logo.png";
 
 /**
  * Pagina de registro.
@@ -36,21 +36,18 @@ const Register: React.FC = () => {
   const handleRegister = async (formData: Record<string, string>) => {
     // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
-      customAlert("error","Las contraseñas no coinciden.");
+      customAlert("error", "Las contraseñas no coinciden.");
       return;
     }
 
-    // Crear el payload para la API
     const payload = {
       username: formData.name,
       email: formData.email,
       password: formData.password,
     };
 
-    // Cambiar a estado de carga
     setLoading(true);
 
-    // Hacer petición de registro a la API
     try {
       const response = await fetch(`${config.apiBaseUrl}/auth/register`, {
         method: "POST",
@@ -60,31 +57,36 @@ const Register: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      // Manejar la respuesta
       if (!response.ok) {
-        // Obtener los datos de error
         const errorData = await response.json();
-
-        // Manejar errores específicos
         const errorMsg =
           Array.isArray(errorData.detail) && errorData.detail.length > 0
             ? errorData.detail[0].msg
             : "Registro fallido";
 
-            customAlert("error",`Error: ${errorMsg}`);
+        customAlert("error", `Error: ${errorMsg}`);
         return;
       }
-      // Si la respuesta es exitosa, redirigir al usuario a la página de inicio de sesión
-      // FIXME. La respuesta debería ser un JSON, ahora devuelve un string.
+
       const data = await response.json();
-      customAlert("info","Usuario registrado exitosamente");
-      console.log(data);
-      navigate("/login");
+      customAlert("info", "Usuario registrado exitosamente");
+
+      // Redirigir al usuario a la URL de Spotify para vinculación
+      window.location.href = data.redirect_url;
+
+      // Esperar a que el usuario complete la vinculación
+      const checkLinking = setInterval(async () => {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          clearInterval(checkLinking);
+          customAlert("success", "Vinculación con Spotify completada.");
+          navigate("/home");
+        }
+      }, 2000);
     } catch (error) {
       console.error("Error de red:", error);
-      customAlert("error","No se pudo conectar con el servidor.");
+      customAlert("error", "No se pudo conectar con el servidor.");
     } finally {
-      // Cambiar de nuevo a estado normal
       setLoading(false);
     }
   };
