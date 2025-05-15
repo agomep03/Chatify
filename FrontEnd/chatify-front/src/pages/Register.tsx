@@ -78,7 +78,6 @@ const Register: React.FC = () => {
       // FIXME. La respuesta debería ser un JSON, ahora devuelve un string.
       const data = await response.json();
       customAlert("info","Usuario registrado exitosamente");
-      console.log(data);
       navigate("/login");
     } catch (error) {
       console.error("Error de red:", error);

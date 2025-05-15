@@ -60,8 +60,6 @@ const Chat: React.FC = () => {
     })
       .then(res => res.json())
       .then(data => {
-        console.log(data);
-        console.log(data.answer);
         const botMessage: Message = {
           id: Date.now() + 1,
           text: data.answer || 'Sin respuesta',
