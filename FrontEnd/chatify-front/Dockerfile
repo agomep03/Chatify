@@ -29,8 +29,13 @@ FROM nginx:alpine
 # Eliminar los archivos por defecto
 RUN rm -rf /usr/share/nginx/html/*
 
+# Copiar configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
+
 # Copiar los archivos construidos desde la fase anterior
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Exponer el puerto en el que se ejecutará la aplicación
 EXPOSE 80
+
