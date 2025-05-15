@@ -60,6 +60,17 @@ const MainLayout = () => {
       customAlert("error", "Error al eliminar conversación");
     }
   };
+
+  // Para renombrar conversacion
+  const handleTabRename = async (chatId: string, newTitle: string) => {
+    try {
+      await updateChatTitle(chatId, newTitle);
+      await fetchChats();
+    } catch (error) {
+      console.error(error);
+      customAlert("error", "Error al renombrar conversación");
+    }
+  };
   
 
   // Para empezar una nueva conversación
@@ -83,6 +94,21 @@ const MainLayout = () => {
       customAlert("error", "Error al iniciar conversación");
     }
   };
+
+  // Actualizar el titulo del chat
+  const updateChatTitle = async (chatId: string, newTitle: string) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${config.apiBaseUrl}/chat/${chatId}/title`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title: newTitle }),
+    });
+    if (!res.ok) throw new Error("Error al actualizar título");
+  };
+  
   
   // Actualizar los chats
   const fetchChats = async () => {
@@ -125,9 +151,9 @@ const MainLayout = () => {
       return <div>Iniciando conversación...</div>;
     }
 
-    const chat = filterchats.find((chat) => chat.id.toString() === selectedTab); //da error aqui
+    const chat = filterchats.find((chat) => chat.id.toString() === selectedTab);
     if (chat) {
-      return <Chat/>;
+      return <Chat chatId={chat.id} />;
     }
 
     return <div>Tab no encontrada</div>;
@@ -136,7 +162,7 @@ const MainLayout = () => {
   return (
     <Box
       sx={{
-        position: "fixed",
+        position: "relative",
         top: 0,
         left: 0,
         width: "100vw",
@@ -146,18 +172,20 @@ const MainLayout = () => {
       }}
     >
       <TopBar />
-      <Toolbar />
-      <Box sx={{ display: "flex", flex: 1, width: "100%" }}>
-        <Box sx={{ width: 240 }}>
-          <NavMenu
+      <Box sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}>
+        <Box sx={{ width: 280, flexShrink: 0, backgroundColor:'#1f1f1f', height:"100%"}}>
+        <NavMenu
             tabs={allTabs}
             closableTabs={closableTabs}
             selectedTab={selectedTab}
             onTabChange={setSelectedTab}
             onTabClose={handleTabClose}
+            onTabRename={handleTabRename}
           />
         </Box>
-        <Box sx={{ flexGrow: 1, p: 2 }}>{renderTabContent()}</Box>
+        <Box sx={{ flexGrow: 1, p: 2, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {renderTabContent()}
+        </Box>
       </Box>
     </Box>
   );
