@@ -5,6 +5,7 @@ import { isAuthenticated } from "../utils/auth";
 import { useEffect, useState } from "react";
 import config from "../config";
 import {useAlert} from "../components/Alert";
+import logo from '../assets/Logo.png';
 
 /**
  * Pagina de inicio de sesión.
@@ -111,7 +112,7 @@ const Login: React.FC = () => {
         fields={loginFields}
         onSubmit={handleLogin}
         buttonText="Log In"
-        logoUrl="../src/assets/Logo.png"
+        logoUrl={logo}
         loading={loading}
       >
         {/* Link para ir al registro */}
