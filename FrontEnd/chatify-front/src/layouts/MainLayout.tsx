@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import TopBar from "../components/TopBar";
 import NavMenu from "../components/NavMenu";
@@ -47,13 +47,9 @@ const MainLayout = () => {
 
   // Para renombrar conversacion
   const handleTabRename = async (chatId: string, newTitle: string) => {
-    console.log("handle");//no se imprime nunca
     try {
-      console.log("a");
       setChats(prev => prev.map(c => c.id === chatId ? {...c, title: newTitle} : c));
-      console.log("B");
       await fetchUpdateChatTitle(chatId, newTitle);
-      console.log("c");
     } catch (error) {
       console.error(error);
       customAlert("error", "Error al renombrar conversación");
@@ -79,14 +75,12 @@ const MainLayout = () => {
   
   // Actualizar los chats
   const fetchChats = async () => {
-    console.log("empezar actualizacion chats");
     try {
       const data = await fetchObtainAllChats();
       setChats(data);
     } catch (error) {
       customAlert("error", "Error al obtener chats");
     }
-    console.log("fin actualizacion chats");
   };
   
   useEffect(() => {
