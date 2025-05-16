@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Box, Toolbar } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import TopBar from "../components/TopBar";
 import NavMenu from "../components/NavMenu";
 import Chat from "../components/Chat";
+import {useAlert} from "../components/Alert";
+import { fetchDeleteChat, fetchStartChat, fetchUpdateChatTitle, fetchObtainAllChats } from "../api/chatService";
 
 interface Chat {
   id: string;
@@ -11,51 +13,103 @@ interface Chat {
 
 const MainLayout = () => {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>("Playlists");
+  const [selectedTab, setSelectedTab] = useState<string>("playlists");
+  const { customAlert } = useAlert();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const allTabs = [
+    { id: "playlists", title: "Playlists" },
+    { id: "add", title: "Añadir conversación" },
+    ...chats
+  ];
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      const simulatedChats: Chat[] = [
-        { id: "1", title: "Chat de marketing" },
-        { id: "2", title: "Análisis mensual" },
-        { id: "3", title: "Brainstorming IA" },
-      ];
-      setChats(simulatedChats);
-    };
+  
+  const closableTabs = [false, false, ...chats.map(() => true)];
 
-    fetchChats();
-  }, []);
+  //Para eliminar un chat
+  const handleTabClose = async (tadId: string) => {
+    const chat = chats.find((c) => c.id === tadId);
+    if (!chat) return;
+    setChats(prev => prev.filter(c => c.id !== chat.id)); //Actualizo localmente
 
-  const allTabs = ["Playlists", ...chats.map((chat) => chat.title)];
-  const closableTabs = [false, ...chats.map(() => true)];
-
-  const handleTabClose = (tabTitle: string) => {
-    // Eliminar del estado local
-    setChats((prev) => prev.filter((chat) => chat.title !== tabTitle));
-
-    // Cambiar selección si se eliminó la tab activa
-    if (selectedTab === tabTitle) {
-      setSelectedTab("Playlists");
+    try {
+      await fetchDeleteChat(chat.id);
+      if (selectedTab === chat.id) {
+        setSelectedTab("playlists");
+      }
+    } catch (error) {
+      console.error(error);
+      customAlert("error", "Error al eliminar conversación");
     }
-
-    // Aquí irá tu llamada al endpoint de borrado:
-    // await api.delete(`/chats/${chatId}`)
-    // Para eso necesitarías buscar el `id` del chat por el `title`
-    const chat = chats.find((c) => c.title === tabTitle);
-    if (chat) {
-      console.log(`Eliminar chat con ID: ${chat.id}`);
-      // await deleteChat(chat.id);
-    }
+    await fetchChats();
   };
 
+
+  // Para renombrar conversacion
+  const handleTabRename = async (chatId: string, newTitle: string) => {
+    try {
+      setChats(prev => prev.map(c => c.id === chatId ? {...c, title: newTitle} : c));
+      await fetchUpdateChatTitle(chatId, newTitle);
+    } catch (error) {
+      console.error(error);
+      customAlert("error", "Error al renombrar conversación");
+    }
+    await fetchChats();
+  };
+  
+
+  // Para empezar una nueva conversación
+  const handleStartChat = async () => {
+    try {
+      setIsLoading(true);
+      const chatId = await fetchStartChat();
+      await fetchChats();
+      setSelectedTab(chatId);
+    } catch (error) {
+      console.error(error);
+      customAlert("error", "Error al iniciar conversación");
+    }
+    setIsLoading(false);
+  };
+  
+  
+  // Actualizar los chats
+  const fetchChats = async () => {
+    try {
+      const data = await fetchObtainAllChats();
+      setChats(data);
+    } catch (error) {
+      customAlert("error", "Error al obtener chats");
+    }
+  };
+  
+  useEffect(() => {
+    const loadChats = async () => {
+      await fetchChats();
+    };
+    loadChats();
+  }, []); 
+
+  useEffect(() => {
+    if (selectedTab === "add") {
+      handleStartChat();
+    }
+  }, [selectedTab]);
+  
+  
+
   const renderTabContent = () => {
-    if (selectedTab === "Playlists") {
+    if (selectedTab === "playlists") {
       return <div>Contenido de las playlists guardadas</div>;
     }
-
-    const chat = chats.find((chat) => chat.title === selectedTab);
+    
+    if(selectedTab == "add"){
+      return <div></div>;
+    }
+    
+    const chat = chats.find((chat) => chat.id === selectedTab);
     if (chat) {
-      return <Chat/>;
+      return <Chat chatId={chat.id} />;
     }
 
     return <div>Tab no encontrada</div>;
@@ -64,7 +118,7 @@ const MainLayout = () => {
   return (
     <Box
       sx={{
-        position: "fixed",
+        position: "relative",
         top: 0,
         left: 0,
         width: "100vw",
@@ -74,18 +128,32 @@ const MainLayout = () => {
       }}
     >
       <TopBar />
-      <Toolbar />
-      <Box sx={{ display: "flex", flex: 1, width: "100%" }}>
-        <Box sx={{ width: 240 }}>
-          <NavMenu
+      <Box sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}>
+        <Box sx={{ width: 280, flexShrink: 0, backgroundColor:'#1f1f1f', height:"100%"}}>
+        <NavMenu
             tabs={allTabs}
             closableTabs={closableTabs}
             selectedTab={selectedTab}
             onTabChange={setSelectedTab}
             onTabClose={handleTabClose}
+            onTabRename={handleTabRename}
           />
         </Box>
-        <Box sx={{ flexGrow: 1, p: 2 }}>{renderTabContent()}</Box>
+        <Box sx={{ flexGrow: 1, p: 2, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {isLoading?
+                <Box
+                  height="100vh"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  width="100%"
+                >
+                  <CircularProgress size={60} sx={{color:"#3be477"}}/>
+                </Box>
+              :
+                renderTabContent()
+          }
+        </Box>
       </Box>
     </Box>
   );

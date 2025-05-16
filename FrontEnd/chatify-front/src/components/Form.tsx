@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import {
   Box,
   TextField,
@@ -35,6 +35,8 @@ interface Field {
  * @property {boolean} [loading] - Estado de carga (opcional).
  * @property {Record<string, string>} [initialValues] - Valores iniciales del formulario (opcional).
  * @property {React.ReactNode} [children] - Elementos hijos opcionales.
+ * @property {boolean} [noBackground] - Si se muestra sin fondo.
+ * @property {boolean} [showButton] - Controla la visibilidad del botón.
  */
 interface FormProps {
   title: string;
@@ -45,6 +47,9 @@ interface FormProps {
   loading?: boolean; // Nueva prop
   initialValues?: Record<string, string>;
   children?: React.ReactNode;
+  noBackground?: boolean;
+  showButton?: boolean;
+
 }
 
 /**
@@ -52,7 +57,7 @@ interface FormProps {
  * @param {FormProps} props - Propiedades del componente.
  * @returns {JSX.Element}
  */
-const Form: React.FC<FormProps> = ({
+const Form = forwardRef<HTMLFormElement, FormProps>(({
   title,
   fields,
   onSubmit,
@@ -61,7 +66,9 @@ const Form: React.FC<FormProps> = ({
   loading = false,
   initialValues = {},
   children,
-}) => {
+  noBackground = false,
+  showButton = true,
+}, ref) => {
   // Estado para manejar los datos del formulario
   const [formData, setFormData] =
     useState<Record<string, string>>(initialValues);
@@ -88,7 +95,12 @@ const Form: React.FC<FormProps> = ({
 
   return (
     // Contenedor principal del formulario
-    <Container maxWidth="xs">
+    <Container 
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}>
       <Box
         sx={{
           width: "400px",
@@ -97,9 +109,9 @@ const Form: React.FC<FormProps> = ({
           alignItems: "center",
           gap: 2,
           p: 4,
-          boxShadow: 3,
+          boxShadow: noBackground ? 0 : 3,
           borderRadius: 2,
-          bgcolor: "#1f1f1f",
+          bgcolor: noBackground ? "transparent" : "#1f1f1f",
           position: "relative",
         }}
       >
@@ -133,6 +145,7 @@ const Form: React.FC<FormProps> = ({
         {/* Campos del formulario */}
         <Box
           component="form"
+          ref={ref} 
           onSubmit={handleSubmit}
           sx={{
             width: "100%",
@@ -165,26 +178,28 @@ const Form: React.FC<FormProps> = ({
               }}
             />
           ))}
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            sx={{
-              mt: "2rem",
-              width: "50%",
-              justifySelf: "center",
-              backgroundColor: "#3be477",
-              color: "#000000",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              borderRadius: "var(--encore-button-corner-radius, 9999px);",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#1abc54" },
-            }}
-            fullWidth
-          >
-            {buttonText}
-          </Button>
+          {showButton&& (
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{
+                mt: "2rem",
+                width: "50%",
+                justifySelf: "center",
+                backgroundColor: "#3be477",
+                color: "#000000",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                borderRadius: "var(--encore-button-corner-radius, 9999px);",
+                textTransform: "none",
+                "&:hover": { backgroundColor: "#1abc54" },
+              }}
+              fullWidth
+            >
+              {buttonText}
+            </Button>
+          )}
         </Box>
         {/* Elementos hijos opcionales */}
         {children && (
@@ -195,6 +210,6 @@ const Form: React.FC<FormProps> = ({
       </Box>
     </Container>
   );
-};
+});
 
 export default Form;

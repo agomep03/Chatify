@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, List, ListItem, ListItemText, TextField, IconButton } from '@mui/material';
+import { Box, List, ListItem, ListItemText, TextField, IconButton, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import config from "../config";
+import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 
 type Message = {
   id: number;
@@ -10,14 +10,25 @@ type Message = {
 };
 
 
+type ChatProps = {
+  chatId: string; 
+};
 
-const Chat: React.FC = () => {
+const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingDot, setIsLoadingDot] = useState(false);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [dots, setDots] = useState('');
 
   const listRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (!chatId) return;
+    fetchChatHistory(chatId, setMessages, setIsLoadingChat);
+  }, [chatId]);
+  
+  
 
   useEffect(() => {
     if (listRef.current) {
@@ -29,7 +40,7 @@ const Chat: React.FC = () => {
   }, [messages]); 
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoadingDot) {
       setDots('...');
       return;
     }
@@ -39,61 +50,53 @@ const Chat: React.FC = () => {
     }, 500);
   
     return () => clearInterval(interval);
-  }, [isLoading]);
+  }, [isLoadingDot]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-  
-    const userMessage: Message = {
-      id: Date.now(),
-      text: input,
-      sender: 'user',
-    };
-  
-    setMessages((prev) => [...prev, userMessage]);
+    fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot);
     setInput('');
-    setIsLoading(true);
-    
-  
-    fetch(`${config.apiBaseUrl}/chat/ask-music-question/?question=${encodeURIComponent(input)}`, {
-      method: 'POST',
-    })
-      .then(res => res.json())
-      .then(data => {
-        const botMessage: Message = {
-          id: Date.now() + 1,
-          text: data.answer || 'Sin respuesta',
-          sender: 'bot',
-        };
-        setMessages(prev => [...prev, botMessage]);
-      })
-      .catch(() => {
-        const errorMessage: Message = {
-          id: Date.now() + 1,
-          text: 'Error al obtener respuesta.',
-          sender: 'bot',
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
   };
 
   const renderTextToHtml = (text: string) => {
-    let htmlText = text.replace(/\n/g, '<br>');
-    htmlText = htmlText.replace(/^# (.*)$/gm, '<h1>$1</h1>');
-    htmlText = htmlText.replace(/^## (.*)$/gm, '<h2>$1</h2>');
-    htmlText = htmlText.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+    let htmlText = text.replace(/\n^### (.*)$\n+/gm, '<h3>$1</h3>');
+    htmlText = htmlText.replace(/^### (.*)$\n+/gm, '<h3>$1</h3>');
+    htmlText = htmlText.replace(/\n^## (.*)$\n+/gm, '<h2>$1</h2>');
+    htmlText = htmlText.replace(/^## (.*)$\n+/gm, '<h2>$1</h2>');
+    htmlText = htmlText.replace(/\n^# (.*)$\n+/gm, '<h1>$1</h1>');
+    htmlText = htmlText.replace(/^# (.*)$\n+/gm, '<h1>$1</h1>');
     htmlText = htmlText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
     htmlText = htmlText.replace(/^\s*[-\*]\s+(.*)$/gm, '<ul><li>$1</li></ul>');
     htmlText = htmlText.replace(/<\/?p>/g, '');
+    htmlText = htmlText.replace(/\n/g, '<br>');
     return { __html: htmlText };
   };
+
+  if (isLoadingChat) {
+    return (
+      <Box
+        height="100vh"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        width="100%"
+      >
+        <CircularProgress size={60}/>
+      </Box>
+    );
+  }
+  
   
   return (
-    <Box display="flex" flexDirection="column" height="90vh" width="85vw" overflow="hidden" p={2}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      flexGrow={1}
+      minHeight={0}
+      overflow="hidden"
+      p={2}
+    >
       <Box
         ref={listRef}
         flexGrow={1}
@@ -123,7 +126,7 @@ const Chat: React.FC = () => {
           </Box>
         </ListItem>
       ))}
-      {isLoading && (
+      {isLoadingDot && (
       <ListItem sx={{ justifyContent: 'flex-start' }}>
         <Box
           sx={{

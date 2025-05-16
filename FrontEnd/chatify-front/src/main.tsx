@@ -4,13 +4,17 @@ import './index.css'
 import App from './App.tsx'
 import {ConfirmProvider} from './components/Dialog.tsx'
 import { AlertProvider } from './components/Alert.tsx'
+import { ThemeProvider } from '@mui/material/styles';
+import {darkTheme} from './theme/DarkTheme'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AlertProvider>
-      <ConfirmProvider>
-        <App />
-      </ConfirmProvider>
-    </AlertProvider>
-  </StrictMode>,
+  <ThemeProvider theme={darkTheme}>
+    <StrictMode>
+      <AlertProvider>
+        <ConfirmProvider>
+          <App />
+        </ConfirmProvider>
+      </AlertProvider>
+    </StrictMode>
+  </ThemeProvider>
 )

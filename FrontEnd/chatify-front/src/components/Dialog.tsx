@@ -4,7 +4,6 @@ import { ReactNode, useState } from 'react';
 // Configuración de los botones
 type ButtonConfig = {
   label: string;
-  action: () => void;
   color?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
 };
 
@@ -15,54 +14,65 @@ type ConfirmDialogProps = {
   onConfirm: () => void;
   children: ReactNode;
   buttons?: ButtonConfig[];
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
 // Componente para mostrar el diálogo de confirmación
-const ConfirmDialog = (props: ConfirmDialogProps) => {
+const CustomDialog = (props: ConfirmDialogProps) => {
   const {
     open,
     onClose,
     onConfirm,
     children,
     buttons,
-    maxWidth = 'sm'
   } = props;
 
   const defaultButtons: ButtonConfig[] = [
-    { label: 'Cancelar', action: onClose, color: 'secondary' },
-    { label: 'Aceptar', action: onConfirm, color: 'primary' }
+    { label: 'Cancelar', color: 'secondary' },
+    { label: 'Aceptar', color: 'primary' }
   ];
-  //Usa 1 o 2 botones si el usuarios los especifica, sino usa los por defecto
-  const resolvedButtons = buttons?.length ? buttons.slice(0, 2) : defaultButtons;
+  //Si el usuarios los especifica usa maximo 2 botones, sino usa los por defecto
+  const resolvedButtons = buttons === undefined
+  ? defaultButtons
+  : buttons.slice(0, 2);
+
+  const buttonsWithActions = resolvedButtons.map((btn, i) => ({
+    ...btn,
+    action: i === 0 ? onClose : onConfirm,
+  }));
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={onClose}
-      maxWidth={maxWidth}
-      fullWidth
-      PaperProps={{
+      hideBackdrop
+      disableEscapeKeyDown
+      slotProps={{
+        paper: {
         sx: {
+          position: 'absolute',
+          top: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          bgcolor: '#1f1f1f',
           borderRadius: 2,
-          padding: 1,
-          bgcolor: "#1f1f1f",
           boxShadow: 3,
-          color: "#ffffff"
+          color: '#fff',
+          width: 'auto',
+          padding: 0,
         }
-      }}
+      }}}
     >
       <DialogContent>
-        <Box sx={{ padding: 2 }}>
+        <Box sx={{ padding: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', overflowX: 'hidden', width: '100%'}}>
           {children}
         </Box>
-        <Box mt={3} display="flex" justifyContent="flex-end" gap={1}>
-        {resolvedButtons.map((btn, idx) => (
+        <Box mt={3} display="flex" justifyContent="flex-end" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
+        {buttonsWithActions.map((btn, idx) => (
             <Button
               key={idx}
               onClick={btn.action}
               color={btn.color}
-              variant={idx === resolvedButtons.length - 1 ? 'contained' : 'outlined'}
+              variant={idx === buttonsWithActions.length - 1 ? 'contained' : 'outlined'}
               sx={{
                 textTransform: 'none',
                 fontWeight: 'bold',
@@ -107,6 +117,7 @@ let triggerConfirm: (options: {
 // Función para acceder a poner dialogos
 export const useConfirm = () => triggerConfirm;
 
+
 // Provedor de dialogos
 export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
@@ -143,16 +154,16 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
   return (
     <>
       {children}
-      <ConfirmDialog
+      <CustomDialog
         open={open}
         onClose={handleClose}
         onConfirm={onConfirm}
         buttons={buttons}
       >
         {content}
-      </ConfirmDialog>
+      </CustomDialog>
     </>
   );
 };
 
-export default ConfirmDialog;
+export default CustomDialog;
