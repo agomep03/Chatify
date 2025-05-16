@@ -5,12 +5,14 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Modal,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import CloseIcon from "@mui/icons-material/Close";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import Form from '../components/Form';
+import CustomDialog, { useConfirm, ConfirmProvider } from '../components/Dialog';
 
 interface Tab {
   id: string;
@@ -23,7 +25,7 @@ interface NavMenuProps {
   onTabChange: (tab: string) => void;
   closableTabs?: boolean[]; // Indica qué tabs se pueden editar y cerrrar
   onTabClose?: (tab: string) => void; // Callback eliminar conversacion
-  onTabRename?: (tab: string) => void; //Callback editar titulo conversacion
+  onTabRename?: (chatId: string, newTitle: string) => void | Promise<void>  ; //Callback editar titulo conversacion
 }
 
 const NavMenu: React.FC<NavMenuProps> = ({
@@ -37,6 +39,14 @@ const NavMenu: React.FC<NavMenuProps> = ({
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuTabId, setMenuTabId] = useState<string | null>(null);
+  const [openRenameForm, setOpenRenameForm] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleDialogAccept = () => {
+    formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+  };
+
+
   return (
     <List
       sx={{
@@ -116,15 +126,35 @@ const NavMenu: React.FC<NavMenuProps> = ({
           <MenuItem
             onClick={() => {
               setMenuAnchorEl(null);
-              const newname= "TODO";
-              console.log("TODO lógica para cambiar nombre");
-              if (onTabRename && newname) onTabRename(newname);
-              console.log("Cambiar nombre de", menuTabId);
+              setOpenRenameForm(true); // abrir el formulario
             }}
           >
             Cambiar nombre
           </MenuItem>
         </Menu>
+        {openRenameForm && (
+          <CustomDialog
+            open={openRenameForm}
+            onClose={() => setOpenRenameForm(false)}
+            onConfirm={handleDialogAccept}
+          >
+            <Form
+              ref={formRef}  // <-- aquí asignas el ref
+              title="Cambiar nombre"
+              fields={[{ name: "newName", label: "Nuevo nombre", type: "text" }]}
+              onSubmit={(data) => {
+                if (data.newName && onTabRename && menuTabId) {
+                  onTabRename(menuTabId, data.newName);
+                }
+                setOpenRenameForm(false);
+              }}
+              buttonText=""
+              showButton={false}
+              noBackground={true}
+            />
+          </CustomDialog>
+        )}
+
 
       </Box>
     </List>

@@ -1,27 +1,38 @@
-import { createTheme } from '@mui/material/styles';
+// theme.ts o donde defines el tema
+import { createTheme } from '@mui/material';
+import { PaletteOptions } from '@mui/material/styles/createPalette';
+
+declare module '@mui/material/styles' {
+  interface Palette {
+    custom: {
+      userDialogBg: string;
+      botDialogBg: string;
+      topBarBg: string;
+    };
+  }
+  interface PaletteOptions {
+    custom?: {
+      userDialogBg?: string;
+      botDialogBg?: string;
+      topBarBg?: string;
+    };
+  }
+}
 
 export const darkTheme = createTheme({
   palette: {
-    primary: {
-      main: '#3be477',       // main color
-      contrastText: '#000000', // texto cuando fondo es primary (botón)
-    },
+    primary: { main: '#3be477', contrastText: '#000000' },
     background: {
-      default: '#1f1f1f',    // fondo alertas y navmenu
-      paper: '#414141',      // fondo diálogo usuario
+      default: '#1f1f1f',
+      paper: '#191919',
     },
     text: {
-      primary: '#fff',       // textos alertas y diálogos
+      primary: '#fff',
     },
-    info: {
-      main: '#303030',       // fondo diálogo bot (usar info o custom)
-    },
-    success: {
-      main: '#1abc54',       // verde oscuro para seleccionado
-    },
-    topBar: {
-      main: '#121212',       // fondo topbar (custom, usar overrides)
-      contrastText: '#fff',  // texto topbar
+    custom: {
+      userDialogBg: '#414141',
+      botDialogBg: '#303030',
+      topBarBg: '#121212',
     },
   },
 });

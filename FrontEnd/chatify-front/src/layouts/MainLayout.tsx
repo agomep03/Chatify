@@ -98,13 +98,13 @@ const MainLayout = () => {
   // Actualizar el titulo del chat
   const updateChatTitle = async (chatId: string, newTitle: string) => {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${config.apiBaseUrl}/chat/${chatId}/title`, {
+    const res = await fetch(`${config.apiBaseUrl}/chat/${chatId}/rename`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ title: newTitle }),
+      body: newTitle,
     });
     if (!res.ok) throw new Error("Error al actualizar título");
   };
