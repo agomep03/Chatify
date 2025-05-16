@@ -1,6 +1,4 @@
-// theme.ts o donde defines el tema
 import { createTheme } from '@mui/material';
-import { PaletteOptions } from '@mui/material/styles/createPalette';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -8,6 +6,8 @@ declare module '@mui/material/styles' {
       userDialogBg: string;
       botDialogBg: string;
       topBarBg: string;
+      primaryHover: string;
+      outlinedBorder: string;
     };
   }
   interface PaletteOptions {
@@ -15,6 +15,8 @@ declare module '@mui/material/styles' {
       userDialogBg?: string;
       botDialogBg?: string;
       topBarBg?: string;
+      primaryHover?: string;
+      outlinedBorder?: string;
     };
   }
 }
@@ -27,12 +29,14 @@ export const darkTheme = createTheme({
       paper: '#191919',
     },
     text: {
-      primary: '#fff',
+      primary: '#ffffff',
     },
     custom: {
       userDialogBg: '#414141',
       botDialogBg: '#303030',
       topBarBg: '#121212',
+      primaryHover: '#1abc54',
+      outlinedBorder: '#7c7c7c',
     },
   },
 });

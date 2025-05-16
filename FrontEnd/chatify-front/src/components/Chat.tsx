@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, List, ListItem, ListItemText, TextField, IconButton, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import config from "../config";
+import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 
 type Message = {
   id: number;
@@ -10,8 +10,11 @@ type Message = {
 };
 
 
+type ChatProps = {
+  chatId: string; 
+};
 
-const Chat: React.FC= ( {chatId} ) => {
+const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoadingDot, setIsLoadingDot] = useState(false);
@@ -22,29 +25,9 @@ const Chat: React.FC= ( {chatId} ) => {
 
   useEffect(() => {
     if (!chatId) return;
-    setIsLoadingChat(true);
-    const token = localStorage.getItem("token");
-    fetch(`${config.apiBaseUrl}/chat/${chatId}/history`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        const historyMessages: Message[] = data.map((msg: any, index: number) => ({
-          id: Date.now() + index,
-          sender: msg.role === 'user' ? 'user' : 'bot',
-          text: msg.content,
-        }));
-        setMessages(historyMessages);
-      })
-      .catch(() => {
-        setMessages([]);
-      })
-      .finally(() => {
-        setIsLoadingChat(false);
-      });
+    fetchChatHistory(chatId, setMessages, setIsLoadingChat);
   }, [chatId]);
+  
   
 
   useEffect(() => {
@@ -71,45 +54,8 @@ const Chat: React.FC= ( {chatId} ) => {
 
   const handleSend = () => {
     if (!input.trim()) return;
-  
-    const userMessage: Message = {
-      id: Date.now(),
-      text: input,
-      sender: 'user',
-    };
-  
-    setMessages((prev) => [...prev, userMessage]);
+    fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot);
     setInput('');
-    setIsLoadingDot(true);
-    const token = localStorage.getItem("token");
-    fetch(`${config.apiBaseUrl}/chat/${chatId}/message`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "text/plain", 
-        },
-        body: input, 
-      })
-      .then(res => res.json())
-      .then(data => {
-        const botMessage: Message = {
-          id: Date.now() + 1,
-          text: data.answer || 'Sin respuesta',
-          sender: 'bot',
-        };
-        setMessages(prev => [...prev, botMessage]);
-      })
-      .catch(() => {
-        const errorMessage: Message = {
-          id: Date.now() + 1,
-          text: 'Error al obtener respuesta.',
-          sender: 'bot',
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      })
-      .finally(() => {
-        setIsLoadingDot(false);
-      });
   };
 
   const renderTextToHtml = (text: string) => {
@@ -136,7 +82,7 @@ const Chat: React.FC= ( {chatId} ) => {
         alignItems="center"
         width="100%"
       >
-        <CircularProgress size={60} sx={{color:"#3be477"}}/>
+        <CircularProgress size={60}/>
       </Box>
     );
   }

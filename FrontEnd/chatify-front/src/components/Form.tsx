@@ -35,6 +35,8 @@ interface Field {
  * @property {boolean} [loading] - Estado de carga (opcional).
  * @property {Record<string, string>} [initialValues] - Valores iniciales del formulario (opcional).
  * @property {React.ReactNode} [children] - Elementos hijos opcionales.
+ * @property {boolean} [noBackground] - Si se muestra sin fondo.
+ * @property {boolean} [showButton] - Controla la visibilidad del botón.
  */
 interface FormProps {
   title: string;

@@ -5,14 +5,14 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Modal,
 } from "@mui/material";
 import { useRef, useState } from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Form from '../components/Form';
-import CustomDialog, { useConfirm, ConfirmProvider } from '../components/Dialog';
+import CustomDialog from '../components/Dialog';
+import ScrollableText from '../components/ScrollableText';
 
 interface Tab {
   id: string;
@@ -41,6 +41,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
   const [menuTabId, setMenuTabId] = useState<string | null>(null);
   const [openRenameForm, setOpenRenameForm] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const lastAnchorEl = useRef<HTMLElement | null>(null);
 
   const handleDialogAccept = () => {
     formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
@@ -74,6 +75,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();
+                        lastAnchorEl.current = e.currentTarget;
                         setMenuAnchorEl(e.currentTarget);
                         setMenuTabId(tab.id);
                       }}
@@ -98,12 +100,9 @@ const NavMenu: React.FC<NavMenuProps> = ({
               }}
             >
               <ListItemText
-                primary={tab.title}
-                sx={{
-                  color: selectedTab === tab.id ? "#1abc54" : "#ffffff", // Color del texto cuando está seleccionado
-                  fontWeight: selectedTab === tab.id ? "bold" : "normal", // Fuente más gruesa para el tab seleccionado
-                }}
+                primary={<ScrollableText text={tab.title} selected={selectedTab === tab.id} />}
               />
+
             </ListItemButton>
           </ListItem>
         ))}
@@ -118,6 +117,9 @@ const NavMenu: React.FC<NavMenuProps> = ({
           <MenuItem
             onClick={() => {
               setMenuAnchorEl(null);
+              if (lastAnchorEl.current && document.contains(lastAnchorEl.current)) {
+                lastAnchorEl.current.focus();
+              }
               if (onTabClose && menuTabId) onTabClose(menuTabId);
             }}
           >
@@ -147,6 +149,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
                   onTabRename(menuTabId, data.newName);
                 }
                 setOpenRenameForm(false);
+                setMenuTabId(null);
               }}
               buttonText=""
               showButton={false}
