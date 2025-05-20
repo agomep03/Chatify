@@ -3,8 +3,14 @@ import { Box, CircularProgress } from "@mui/material";
 import TopBar from "../components/TopBar";
 import NavMenu from "../components/NavMenu";
 import Chat from "../components/Chat";
-import {useAlert} from "../components/Alert";
-import { fetchDeleteChat, fetchStartChat, fetchUpdateChatTitle, fetchObtainAllChats } from "../api/chatService";
+import { useAlert } from "../components/Alert";
+import {
+  fetchDeleteChat,
+  fetchStartChat,
+  fetchUpdateChatTitle,
+  fetchObtainAllChats,
+} from "../api/chatService";
+import PlaylistCards from "../components/PlaylistCards";
 
 interface Chat {
   id: string;
@@ -16,21 +22,20 @@ const MainLayout = () => {
   const [selectedTab, setSelectedTab] = useState<string>("playlists");
   const { customAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const allTabs = [
     { id: "playlists", title: "Playlists" },
     { id: "add", title: "Añadir conversación" },
-    ...chats
+    ...chats,
   ];
 
-  
   const closableTabs = [false, false, ...chats.map(() => true)];
 
   //Para eliminar un chat
   const handleTabClose = async (tadId: string) => {
     const chat = chats.find((c) => c.id === tadId);
     if (!chat) return;
-    setChats(prev => prev.filter(c => c.id !== chat.id)); //Actualizo localmente
+    setChats((prev) => prev.filter((c) => c.id !== chat.id)); //Actualizo localmente
 
     try {
       await fetchDeleteChat(chat.id);
@@ -44,11 +49,12 @@ const MainLayout = () => {
     await fetchChats();
   };
 
-
   // Para renombrar conversacion
   const handleTabRename = async (chatId: string, newTitle: string) => {
     try {
-      setChats(prev => prev.map(c => c.id === chatId ? {...c, title: newTitle} : c));
+      setChats((prev) =>
+        prev.map((c) => (c.id === chatId ? { ...c, title: newTitle } : c))
+      );
       await fetchUpdateChatTitle(chatId, newTitle);
     } catch (error) {
       console.error(error);
@@ -56,7 +62,6 @@ const MainLayout = () => {
     }
     await fetchChats();
   };
-  
 
   // Para empezar una nueva conversación
   const handleStartChat = async () => {
@@ -71,8 +76,7 @@ const MainLayout = () => {
     }
     setIsLoading(false);
   };
-  
-  
+
   // Actualizar los chats
   const fetchChats = async () => {
     try {
@@ -82,31 +86,29 @@ const MainLayout = () => {
       customAlert("error", "Error al obtener chats");
     }
   };
-  
+
   useEffect(() => {
     const loadChats = async () => {
       await fetchChats();
     };
     loadChats();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (selectedTab === "add") {
       handleStartChat();
     }
   }, [selectedTab]);
-  
-  
 
   const renderTabContent = () => {
     if (selectedTab === "playlists") {
-      return <div>Contenido de las playlists guardadas</div>;
+      return <PlaylistCards />;
     }
-    
-    if(selectedTab == "add"){
+
+    if (selectedTab == "add") {
       return <div></div>;
     }
-    
+
     const chat = chats.find((chat) => chat.id === selectedTab);
     if (chat) {
       return <Chat chatId={chat.id} />;
@@ -128,9 +130,18 @@ const MainLayout = () => {
       }}
     >
       <TopBar />
-      <Box sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}>
-        <Box sx={{ width: 280, flexShrink: 0, backgroundColor:'#1f1f1f', height:"100%"}}>
-        <NavMenu
+      <Box
+        sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}
+      >
+        <Box
+          sx={{
+            width: 280,
+            flexShrink: 0,
+            backgroundColor: "#1f1f1f",
+            height: "100%",
+          }}
+        >
+          <NavMenu
             tabs={allTabs}
             closableTabs={closableTabs}
             selectedTab={selectedTab}
@@ -139,20 +150,29 @@ const MainLayout = () => {
             onTabRename={handleTabRename}
           />
         </Box>
-        <Box sx={{ flexGrow: 1, p: 2, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {isLoading?
-                <Box
-                  height="100vh"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  width="100%"
-                >
-                  <CircularProgress size={60} sx={{color:"#3be477"}}/>
-                </Box>
-              :
-                renderTabContent()
-          }
+        <Box
+          sx={{
+            flexGrow: 1,
+            p: 2,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          {isLoading ? (
+            <Box
+              height="100vh"
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              width="100%"
+            >
+              <CircularProgress size={60} sx={{ color: "#3be477" }} />
+            </Box>
+          ) : (
+            renderTabContent()
+          )}
         </Box>
       </Box>
     </Box>
