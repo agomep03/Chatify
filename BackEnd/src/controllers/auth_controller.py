@@ -19,8 +19,7 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")  
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")  # tokenUrl ajustado para swagger
 
 def get_db():
     db = SessionLocal()
@@ -32,24 +31,32 @@ def get_db():
 def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=401,
-        detail="Unauthorized",
+        detail="No se pudo verificar las credenciales del usuario.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        logger.debug(f"Token recibido: {token}")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
+
         if email is None:
+            logger.warning("Token JWT inválido: no contiene 'sub'.")
             raise credentials_exception
-    except JWTError:
+
+        logger.info(f"🔎 Decodificado correctamente. Email extraído del token: {email}")
+
+    except JWTError as e:
+        logger.error(f"Fallo al decodificar token JWT: {str(e)}")
         raise credentials_exception
 
     user = db.query(User).filter(User.email == email).first()
+
     if user is None:
+        logger.warning(f"No se encontró usuario con email: {email}")
         raise credentials_exception
 
+    logger.info(f"Usuario autenticado: {user.username} ({user.email})")
     return user
-
-
 
 def validate_email_address(email: str):
     logger.info(f"Validating email: {email}")
@@ -121,3 +128,65 @@ def login_user(email: str, password: str, db: Session):
         "token_type": "bearer",
         "redirect_url": redirect_url
     }
+
+def get_user_info(user: User):
+    return {
+        "username": user.username,
+        "email": user.email
+    }
+
+def update_user_info(data, user: User, db: Session):
+    try:
+        updated = False
+
+        if data.username:
+            logger.info(f"Cambiando username: {user.username} → {data.username}")
+            user.username = data.username
+            updated = True
+
+        if data.email:
+            logger.info(f"Verificando nuevo email: {data.email}")
+            validate_email_address(data.email)
+
+            existing_user = db.query(User).filter(User.email == data.email).first()
+
+            if existing_user and existing_user.id != user.id:
+                logger.warning(f"El email '{data.email}' ya está en uso por el usuario ID {existing_user.id}")
+                raise HTTPException(status_code=400, detail="Este email ya está en uso por otro usuario")
+
+            if existing_user and existing_user.id == user.id:
+                logger.info("El email nuevo es igual al actual. No se realiza ningún cambio.")
+            else:
+                logger.info(f"Email actualizado a: {data.email}")
+                user.email = data.email
+                updated = True
+
+        if data.password:
+            logger.info(f"Actualizando contraseña del usuario ID {user.id}")
+            user.hashed_password = hash_password(data.password)
+            updated = True
+
+        if updated:
+            db.commit()
+            db.refresh(user)
+            logger.info(f"Usuario {user.id} actualizado correctamente")
+        else:
+            logger.info(f"No se realizaron cambios para el usuario ID {user.id}")
+
+        return {
+            "success": True,
+            "message": "Usuario actualizado correctamente" if updated else "No se realizaron cambios",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            }
+        }
+
+    except HTTPException as e:
+        logger.error(f"Error HTTP al actualizar usuario {user.id}: {e.detail}")
+        raise e
+
+    except Exception as e:
+        logger.exception(f"Error inesperado al actualizar usuario {user.id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor al actualizar el usuario")
