@@ -28,4 +28,4 @@ app.add_middleware(
 # Incluir tus rutas
 app.include_router(chat_routes.router, prefix="/chat", tags=["chat"])
 app.include_router(auth_routes.router, prefix="/auth", tags=["auth"])
-app.include_router(user_routes.router, tags=["user"])
+app.include_router(user_routes.router, tags=["user_spotify"])
