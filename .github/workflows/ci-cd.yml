@@ -7,6 +7,8 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    env:
+          DATABASE_URL: "sqlite:///:memory:"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
