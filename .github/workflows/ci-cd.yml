@@ -45,3 +45,9 @@ jobs:
         run: |
           cd FrontEnd/chatify-front
           docker build -t my-react-frontend .
+          
+      - name: Run tests with pytest
+        working-directory: BackEnd
+        run: |
+          pip install -r requirements.txt
+          pytest tests/
