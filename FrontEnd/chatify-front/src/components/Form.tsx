@@ -244,6 +244,9 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
                 borderRadius: "var(--encore-button-corner-radius, 9999px);",
                 textTransform: "none",
                 "&:hover": { backgroundColor: "#1abc54" },
+                "&:focus": { outline: "none", border: "none", boxShadow: "none" },
+                "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
+                "&:active": { outline: "none", border: "none", boxShadow: "none" },
               }}
               fullWidth
             >
