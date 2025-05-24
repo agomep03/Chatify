@@ -12,7 +12,7 @@ const TopBar: React.FC = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#121212', color: '#fff' }}>
+    <AppBar position="static"  sx={{ backgroundColor: '#121212', color: '#fff', zIndex: 10 }}>
       <Toolbar>
 
         <Box 

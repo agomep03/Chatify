@@ -109,11 +109,10 @@ const MainLayout = () => {
       return <div></div>;
     }
 
-    const chat = chats.find((chat) => chat.id === selectedTab);
+    const chat = chats.find((chat) => String(chat.id) === String(selectedTab));
     if (chat) {
       return <Chat chatId={chat.id} />;
     }
-
     return <div>Tab no encontrada</div>;
   };
 
