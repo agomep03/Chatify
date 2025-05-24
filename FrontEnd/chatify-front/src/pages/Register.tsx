@@ -53,7 +53,16 @@ const Register: React.FC = () => {
         navigate("/login");
       }
     } catch (error: any) {
-      customAlert("error", `Error: ${error.message || "Registro fallido"}`);
+      // Manejo de error personalizado
+      if (
+        error?.response?.data?.detail &&
+        error.response.data.detail.success === false &&
+        typeof error.response.data.detail.error === "string"
+      ) {
+        customAlert("error", error.response.data.detail.error);
+      } else {
+        customAlert("error", `Error: ${error.message || "Registro fallido"}`);
+      }
     } finally {
       setLoading(false);
     }

@@ -36,13 +36,36 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     <AlertContext.Provider value={{ customAlert }}>
       {children}
       <Snackbar open={open} autoHideDuration={30000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-        <Alert onClose={handleClose} severity={type}
-        sx={{
+        <Alert
+          onClose={handleClose}
+          severity={type}
+          sx={{
             width: '100%',
             backgroundColor: '#1f1f1f',
             color: '#fff',
             '& .MuiAlert-icon': { color: '#fff' },
-          }}>
+            '& .MuiIconButton-root': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+            '& .MuiIconButton-root:focus': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+            '& .MuiIconButton-root:focus-visible': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+            '& .MuiIconButton-root:active': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+          }}
+        >
           {message}
         </Alert>
       </Snackbar>

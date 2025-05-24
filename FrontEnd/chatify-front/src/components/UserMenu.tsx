@@ -28,7 +28,17 @@ const UserMenu: React.FC = () => {
 
   return (
     <>
-        <IconButton color="inherit" onClick={openUserMenu}>
+        <IconButton
+          color="inherit"
+          onClick={openUserMenu}
+          disableRipple
+          disableFocusRipple
+          sx={{
+            "&:focus": { outline: "none", border: "none", boxShadow: "none" },
+            "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
+            "&:active": { outline: "none", border: "none", boxShadow: "none" },
+          }}
+        >
             <AccountCircleIcon />
         </IconButton>
         <Menu
