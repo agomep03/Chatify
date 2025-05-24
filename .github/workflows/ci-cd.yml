@@ -49,7 +49,7 @@ jobs:
       - name: Run tests with pytest
         working-directory: BackEnd
         env:
-          DB_URL: "sqlite:///:memory:"
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
           pip install -r requirements.txt
           pytest tests/
