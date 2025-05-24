@@ -11,15 +11,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from BackEnd.main import app as original_app
 from BackEnd.src.routes.auth_routes import get_current_user, get_db
-from BackEnd.src.config import db
 
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
-db.engine = create_engine(
+engine = create_engine(
     TEST_DATABASE_URL, 
     connect_args={"check_same_thread": False},
     echo=False
 )
+Base = declarative_base()
 
 
 @pytest.fixture
@@ -40,24 +40,24 @@ def app(db_session):
 
 @pytest.fixture(scope="function")
 def db_session():
-    connection = db.engine.connect()
+    connection = engine.connect()
     transaction = connection.begin()
     session = Session(bind=connection)
-    db.Base.metadata.drop_all(bind=connection)
-    db.Base.metadata.create_all(bind=connection)
+    Base.metadata.drop_all(bind=connection)
+    Base.metadata.create_all(bind=connection)
     try:
         yield session
     finally:
         session.close()
         transaction.rollback()
         connection.close()
-        db.Base.metadata.drop_all(bind=connection)
+        Base.metadata.drop_all(bind=connection)
 
 
 @pytest.fixture(autouse=True)
 def reset_database():
-    db.Base.metadata.drop_all(bind=db.engine)
-    db.Base.metadata.create_all(bind=db.engine)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
 
 class FakeUser:
@@ -67,8 +67,8 @@ class FakeUser:
         self.email = email or f"testuser{user_id}@example.com"
 
 def build_test_client(user_id, username, email):
-    db.Base.metadata.drop_all(bind=db.engine)
-    db.Base.metadata.create_all(bind=db.engine)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     app_instance = FastAPI()
     app_instance.include_router(original_app.router)
     app_instance.dependency_overrides[get_current_user] = lambda: FakeUser(user_id, username, email)
