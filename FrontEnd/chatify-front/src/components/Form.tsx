@@ -8,6 +8,9 @@ import {
   Container,
 } from "@mui/material";
 import Logo from "./Logo";
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useTheme } from "@mui/material/styles"; // <-- Añadido
 
 /**
  * Componente de formulario reutilizable.
@@ -37,6 +40,7 @@ interface Field {
  * @property {React.ReactNode} [children] - Elementos hijos opcionales.
  * @property {boolean} [noBackground] - Si se muestra sin fondo.
  * @property {boolean} [showButton] - Controla la visibilidad del botón.
+ * @property {boolean} [showHomeButton] - <-- Añadido
  */
 interface FormProps {
   title: string;
@@ -49,7 +53,7 @@ interface FormProps {
   children?: React.ReactNode;
   noBackground?: boolean;
   showButton?: boolean;
-
+  showHomeButton?: boolean; // <-- Añadido
 }
 
 /**
@@ -68,10 +72,13 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
   children,
   noBackground = false,
   showButton = true,
+  showHomeButton = false, // <-- Añadido
 }, ref) => {
   // Estado para manejar los datos del formulario
   const [formData, setFormData] =
     useState<Record<string, string>>(initialValues);
+  const navigate = useNavigate();
+  const theme = useTheme(); // <-- Añadido
 
   /**
    * Manejador de cambios en los campos del formulario.
@@ -136,11 +143,54 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
           </Box>
         )}
         {/* Logo y título */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          {logoUrl && <Logo logoUrl={logoUrl} />}
-          <Typography variant="h5" sx={{ color: "#ffffff" }}>
-            {title}
-          </Typography>
+        <Box 
+          sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            mb: 2, 
+            width: "100%", 
+            justifyContent: "center", // Siempre centrado
+            gap: showHomeButton ? 2 : 0
+          }}
+        >
+          {showHomeButton && (
+            <Button
+              variant="contained"
+              size="small"
+              disableRipple
+              disableFocusRipple
+              disableElevation
+              sx={{
+                boxShadow: "none",
+                minWidth: 0,
+                p: "6px",
+                border: "none",
+                backgroundColor: theme.palette.background.default,
+                "&:hover": { backgroundColor: theme.palette.background.default, boxShadow: "none" },
+                "&:active": { border: "none", outline: "none", boxShadow: "none" },
+                "&:focus-visible": { border: "none", outline: "none", boxShadow: "none" },
+                "&:focus": { border: "none", outline: "none", boxShadow: "none" },
+                display: "flex",
+                alignItems: "center",
+              }}
+              onClick={() => navigate("/home")}
+            >
+              <ArrowBackIcon sx={{ color: theme.palette.text.primary }} />
+            </Button>
+          )}
+          <Box 
+            sx={{ 
+              display: "flex", 
+              alignItems: "center", 
+              flexGrow: 0, 
+              justifyContent: "center" // Siempre centrado
+            }}
+          >
+            {logoUrl && <Logo logoUrl={logoUrl} />}
+            <Typography variant="h5" sx={{ color: "#ffffff", ml: logoUrl ? 1 : 0 }}>
+              {title}
+            </Typography>
+          </Box>
         </Box>
         {/* Campos del formulario */}
         <Box
