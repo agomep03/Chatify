@@ -1,3 +1,4 @@
+#src/controllers/auth_controller.py
 import logging
 from fastapi import HTTPException, Depends, Security
 from fastapi.security import OAuth2PasswordBearer
@@ -9,6 +10,7 @@ from src.config.db import SessionLocal
 from email_validator import validate_email, EmailNotValidError
 from jose import JWTError, jwt
 import os
+from fastapi import status
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -77,29 +79,33 @@ def validate_email_address(email: str):
 def register_user(username: str, email: str, password: str, db: Session):
     validate_email_address(email)
 
-    if db.query(User).filter(User.email == email).first():
+    existing_user = db.query(User).filter(User.email == email).first()
+    if existing_user:
         logger.warning(f"Email {email} already registered.")
         raise HTTPException(
-            status_code=400,
-            detail={
-                "success": False,
-                "error": "Email already registered"
-            }
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"success": False, "error": "El correo ya está registrado"}
         )
     
     hashed = hash_password(password)
     new_user = User(username=username, email=email, hashed_password=hashed)
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+
+    try:
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except Exception as e:
+        logger.error(f"Database error al registrar usuario: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "error": "Error al registrar usuario"}
+        )
 
     token = create_access_token({"sub": new_user.email})
     redirect_url = get_spotify_login_url(email=new_user.email)
 
-    logger.info(f"User {username} registered successfully with email {email}.")
-    print(redirect_url)
     return {
+        "success": True,
         "access_token": token,
         "token_type": "bearer",
         "redirect_url": redirect_url
@@ -108,26 +114,30 @@ def register_user(username: str, email: str, password: str, db: Session):
 def login_user(email: str, password: str, db: Session):
     user = db.query(User).filter(User.email == email).first()
 
-    if not user or not verify_password(password, user.hashed_password):
-        logger.warning(f"Invalid login attempt for email: {email}")
+    if not user:
+        logger.warning(f"Email no encontrado: {email}")
         raise HTTPException(
-            status_code=401,
-            detail={
-                "success": False,
-                "error": "Invalid credentials"
-            }
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"success": False, "error": "Credenciales inválidas"}
         )
-    
+
+    if not verify_password(password, user.hashed_password):
+        logger.warning(f"Contraseña incorrecta para {email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"success": False, "error": "Credenciales inválidas"}
+        )
+
     token = create_access_token({"sub": user.email})
-
-    logger.info(f"User {user.username} logged in successfully.")
-
     redirect_url = get_spotify_login_url(email=user.email)
+
     return {
+        "success": True,
         "access_token": token,
         "token_type": "bearer",
         "redirect_url": redirect_url
     }
+
 
 def get_user_info(user: User):
     return {
@@ -140,9 +150,23 @@ def update_user_info(data, user: User, db: Session):
         updated = False
 
         if data.username:
-            logger.info(f"Cambiando username: {user.username} → {data.username}")
-            user.username = data.username
-            updated = True
+            logger.info(f"Verificando nuevo username: {data.username}")
+
+            existing_user = db.query(User).filter(User.username == data.username).first()
+
+            if existing_user and existing_user.id != user.id:
+                logger.warning(f"El nombre de usuario '{data.username}' ya está en uso por el usuario ID {existing_user.id}")
+                raise HTTPException(
+                    status_code=400,
+                    detail={"success": False, "error": "Este nombre de usuario ya está en uso por otro usuario"}
+                )
+
+            if existing_user and existing_user.id == user.id:
+                logger.info("El nuevo nombre de usuario es igual al actual. No se realiza ningún cambio.")
+            else:
+                logger.info(f"Cambiando username: {user.username} → {data.username}")
+                user.username = data.username
+                updated = True
 
         if data.email:
             logger.info(f"Verificando nuevo email: {data.email}")
