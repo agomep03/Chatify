@@ -79,7 +79,9 @@ const NavMenu: React.FC<NavMenuProps> = ({
                         setMenuAnchorEl(e.currentTarget);
                         setMenuTabId(tab.id);
                       }}
-                      sx={{ color: menuTabId === tab.id ? "white" : "grey" }}
+                      sx={{ color: menuTabId === tab.id ? "white" : "grey" ,
+                            '&:focus': { outline: 'none' },
+                      }}
                       >
                     <MoreVertIcon fontSize="small" />
                   </IconButton>
@@ -137,7 +139,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
         {openRenameForm && (
           <CustomDialog
             open={openRenameForm}
-            onClose={() => setOpenRenameForm(false)}
+            onClose={() => {setOpenRenameForm(false); setMenuTabId(null);}}
             onConfirm={handleDialogAccept}
           >
             <Form
