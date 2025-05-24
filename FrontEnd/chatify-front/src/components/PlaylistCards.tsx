@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Card,
@@ -7,7 +7,7 @@ import {
   CircularProgress,
   Button,
 } from "@mui/material";
-import CustomDialog, { useConfirm } from "./Dialog";
+import CustomDialog from "./Dialog";
 import Form from "./Form";
 
 /**
@@ -21,6 +21,9 @@ const PlaylistCards: React.FC = () => {
   // Estado para controlar el diálogo y la playlist seleccionada
   const [editOpen, setEditOpen] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
+
+  // Ref para el formulario de edición
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     // Simulación de datos de ejemplo
@@ -39,6 +42,11 @@ const PlaylistCards: React.FC = () => {
         id: 3,
         name: "Playlist 3",
         description: "Descripción de la playlist 3",
+      },
+      {
+        id: 4,
+        name: "Playlist 4",
+        description: "Descripción de la playlist 4",
       },
     ];
 
@@ -63,7 +71,6 @@ const PlaylistCards: React.FC = () => {
 
   // Handler para simular la edición (no hay endpoint)
   const handleEditSubmit = (formData: Record<string, string>) => {
-    // Simular actualización local (no persistente)
     setPlaylists((prev) =>
       prev.map((pl) =>
         pl.id === selectedPlaylist.id
@@ -72,6 +79,11 @@ const PlaylistCards: React.FC = () => {
       )
     );
     handleDialogClose();
+  };
+
+  // Handler para aceptar el dialog (dispara el submit del form)
+  const handleDialogAccept = () => {
+    formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
   };
 
   if (loading) {
@@ -116,14 +128,14 @@ const PlaylistCards: React.FC = () => {
       </Box>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))",
-          gap: 2,
+          display: "flex",
+          flexWrap: "wrap",
           justifyContent: "center",
+          gap: 2, // Espacio consistente entre cartas
         }}
       >
         {playlists.map((playlist) => (
-          <Card key={playlist.id} sx={{ width: 500, height: 500, position: "relative" }}>
+          <Card key={playlist.id} sx={{ width: 500, height: 500, position: "relative", margin: 1 }}>
             <CardContent>
               <Typography variant="h6" component="div">
                 {playlist.name}
@@ -139,7 +151,7 @@ const PlaylistCards: React.FC = () => {
                 sx={{
                   position: "absolute",
                   bottom: 16,
-                  right: 16,
+                  right: 130,
                   minWidth: 0,
                   width: "110px",
                   px: 2,
@@ -151,6 +163,8 @@ const PlaylistCards: React.FC = () => {
                   borderRadius: "9999px",
                   textTransform: "none",
                   boxShadow: "none",
+                  // Añadir gap con el botón de eliminar
+                  marginRight: "10px",
                   "&:hover": { backgroundColor: theme => theme.palette.custom.primaryHover },
                   "&:focus": { outline: "none", border: "none", boxShadow: "none" },
                   "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
@@ -160,19 +174,58 @@ const PlaylistCards: React.FC = () => {
               >
                 Editar
               </Button>
+              {/* Botón para eliminar */}
+              <Button
+                type="button"
+                variant="outlined"
+                size="small"
+                color="secondary"
+                sx={{
+                  position: "absolute",
+                  bottom: 16,
+                  right: 16,
+                  minWidth: 0,
+                  width: "110px",
+                  px: 2,
+                  py: 0.5,
+                  fontWeight: "bold",
+                  fontSize: "0.95rem",
+                  borderRadius: "9999px",
+                  textTransform: "none",
+                  boxShadow: "none",
+                  borderColor: theme => theme.palette.custom.outlinedBorder,
+                  color: theme => theme.palette.text.primary,
+                  "&:hover": {
+                    borderColor: theme => theme.palette.text.primary,
+                  },
+                  "&:focus": { outline: "none", border: "none", boxShadow: "none" },
+                  "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
+                  "&:active": { outline: "none", border: "none", boxShadow: "none" },
+                }}
+                onClick={() => {
+                  // Simular eliminación local (en el futuro llamar al endpoint)
+                  setPlaylists(prev => prev.filter(pl => pl.id !== playlist.id));
+                }}
+              >
+                Eliminar
+              </Button>
             </CardContent>
           </Card>
         ))}
       </Box>
-      {/* Dialogo de edición */}
+      {/* Dialogo de edición similar a NavMenu */}
       <CustomDialog
         open={editOpen}
         onClose={handleDialogClose}
-        onConfirm={() => {}} // No se usa, el Form maneja el submit
-        buttons={[]} // Oculta los botones por defecto
+        onConfirm={handleDialogAccept}
+        buttons={[
+          { label: "Cancelar", color: "secondary" },
+          { label: "Guardar", color: "primary" }
+        ]}
       >
         {selectedPlaylist && (
           <Form
+            ref={formRef}
             title="Editar Playlist"
             fields={[
               { name: "name", label: "Nombre", type: "text" },
@@ -183,7 +236,8 @@ const PlaylistCards: React.FC = () => {
               description: selectedPlaylist.description,
             }}
             onSubmit={handleEditSubmit}
-            buttonText="Guardar"
+            buttonText=""
+            showButton={false}
             showHomeButton={false}
             noBackground
           />

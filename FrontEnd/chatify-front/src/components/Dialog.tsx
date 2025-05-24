@@ -69,7 +69,7 @@ const CustomDialog = (props: ConfirmDialogProps) => {
         <Box sx={{ padding: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', overflowX: 'hidden', width: '100%'}}>
           {children}
         </Box>
-        <Box mt={3} display="flex" justifyContent="flex-end" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
+        <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
         {buttonsWithActions.map((btn, idx) => (
             <Button
               key={idx}

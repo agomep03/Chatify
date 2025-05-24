@@ -102,7 +102,22 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         flexGrow={1}
         overflow="hidden"
         mb={2}
-        sx={{ maxHeight: '90%', overflowY: 'auto', overflowX: 'hidden' }}
+        sx={{
+          maxHeight: '90%',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          // Scrollbar igual que PlaylistCards
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#888",
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#555",
+          },
+        }}
       >
         <List>
         {messages.map((msg) => (
