@@ -2,9 +2,9 @@ import { Box } from "@mui/material";
 import Form from "../components/Form";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import config from "../config";
-import {useAlert} from "../components/Alert";
+import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
+import { registerUser } from "../api/authService";
 
 /**
  * Pagina de registro.
@@ -36,55 +36,25 @@ const Register: React.FC = () => {
   const handleRegister = async (formData: Record<string, string>) => {
     // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
-      customAlert("error","Las contraseñas no coinciden.");
+      customAlert("error", "Las contraseñas no coinciden.");
       return;
     }
-
-    // Crear el payload para la API
-    const payload = {
-      username: formData.name,
-      email: formData.email,
-      password: formData.password,
-    };
-
-    // Cambiar a estado de carga
     setLoading(true);
-
-    // Hacer petición de registro a la API
     try {
-      const response = await fetch(`${config.apiBaseUrl}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      // Manejar la respuesta
-      if (!response.ok) {
-        // Obtener los datos de error
-        const errorData = await response.json();
-
-        // Manejar errores específicos
-        const errorMsg =
-          Array.isArray(errorData.detail) && errorData.detail.length > 0
-            ? errorData.detail[0].msg
-            : "Registro fallido";
-
-            customAlert("error",`Error: ${errorMsg}`);
-        return;
+      const data = await registerUser(formData.name, formData.email, formData.password);
+      // Guardar el token si está presente en la respuesta
+      const token = data?.token || data?.access_token;
+      if (token) {
+        localStorage.setItem("token", token);
+        customAlert("info", "Usuario registrado exitosamente");
+        navigate("/home");
+      } else {
+        customAlert("info", "Usuario registrado exitosamente. Inicia sesión.");
+        navigate("/login");
       }
-      // Si la respuesta es exitosa, redirigir al usuario a la página de inicio de sesión
-      // FIXME. La respuesta debería ser un JSON, ahora devuelve un string.
-      const data = await response.json();
-      customAlert("info","Usuario registrado exitosamente");
-      console.log(data);
-      navigate("/login");
-    } catch (error) {
-      console.error("Error de red:", error);
-      customAlert("error","No se pudo conectar con el servidor.");
+    } catch (error: any) {
+      customAlert("error", `Error: ${error.message || "Registro fallido"}`);
     } finally {
-      // Cambiar de nuevo a estado normal
       setLoading(false);
     }
   };
