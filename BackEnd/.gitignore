@@ -37,3 +37,4 @@ __pycache__
 *.dockerignore
 .env
 .coverage
+*.db

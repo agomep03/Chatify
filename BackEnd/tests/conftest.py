@@ -11,15 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from BackEnd.main import app as original_app
 from BackEnd.src.routes.auth_routes import get_current_user, get_db
-
-
-TEST_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    TEST_DATABASE_URL, 
-    connect_args={"check_same_thread": False},
-    echo=False
-)
-Base = declarative_base()
+from BackEnd.src.config.db import Base, engine
 
 
 @pytest.fixture
@@ -27,7 +19,6 @@ def app(db_session):
     new_app = FastAPI()
     new_app.include_router(original_app.router)
 
-    # Override get_db para que use la sesión de la fixture
     def override_get_db():
         try:
             yield db_session
@@ -42,23 +33,14 @@ def app(db_session):
 def db_session():
     connection = engine.connect()
     transaction = connection.begin()
-    session = Session(bind=connection)
-    Base.metadata.drop_all(bind=connection)
     Base.metadata.create_all(bind=connection)
+    session = Session(bind=connection)
     try:
         yield session
     finally:
         session.close()
         transaction.rollback()
         connection.close()
-        Base.metadata.drop_all(bind=connection)
-
-
-@pytest.fixture(autouse=True)
-def reset_database():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-
 
 class FakeUser:
     def __init__(self, user_id, username=None, email=None):
@@ -67,7 +49,6 @@ class FakeUser:
         self.email = email or f"testuser{user_id}@example.com"
 
 def build_test_client(user_id, username, email):
-    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     app_instance = FastAPI()
     app_instance.include_router(original_app.router)
