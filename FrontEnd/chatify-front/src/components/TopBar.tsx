@@ -3,16 +3,23 @@ import UserMenu from './UserMenu.tsx'
 import { useNavigate } from 'react-router-dom';
 import Logo from './Logo.tsx'
 import logo from '../assets/Logo.png';
+import { useTheme } from "@mui/material/styles";
+import ThemeButton from './ThemeButton.tsx';
 
-const TopBar: React.FC = () => {
+type TopBarProps = {
+  toggleTheme: () => void;
+};
+
+const TopBar: React.FC<TopBarProps> = ({ toggleTheme }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const handleNavegateChat = () => {
     navigate('/home');
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#121212', color: '#fff' }}>
+    <AppBar position="static"  sx={{ backgroundColor: theme.palette.custom.topBarBg, color: theme.palette.custom.topBarText, zIndex: 10 }}>
       <Toolbar>
 
         <Box 
@@ -26,6 +33,7 @@ const TopBar: React.FC = () => {
         </Box>
 
         <Box sx={{ flexGrow: 1 }} />
+        <ThemeButton toggleTheme={toggleTheme}/>
         <UserMenu />
       </Toolbar>
     </AppBar>

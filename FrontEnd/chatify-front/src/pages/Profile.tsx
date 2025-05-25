@@ -2,6 +2,10 @@ import { Box, Container, CircularProgress, Typography } from "@mui/material";
 import Form from "../components/Form";
 import { useEffect, useState } from "react";
 import logo from '../assets/Logo.png';
+import { useAlert } from "../components/Alert";
+import { fetchUserProfile, updateUserProfile } from "../api/authService";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Página de perfil de usuario.
@@ -12,12 +16,15 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const { customAlert } = useAlert();
+  const navigate = useNavigate();
+  const theme = useTheme();
 
   // Campos del formulario
   const profileFields = [
-    { name: "name", label: "Nombre Completo", type: "text" },
+    { name: "username", label: "Nombre Completo", type: "text" },
     { name: "email", label: "Correo Electrónico", type: "email" },
-    { name: "bio", label: "Biografía", type: "text" },
+    // Puedes agregar más campos si el backend lo soporta
   ];
 
   useEffect(() => {
@@ -27,22 +34,15 @@ const Profile: React.FC = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        // TODO: Aquí irá el fetch real
-        // const response = await fetch(`${config.apiBaseUrl}/user/profile`);
-        // const data = await response.json();
-
-        // Mock temporal
-        const data = {
-          name: "Juan Pérez",
-          email: "juan@example.com",
-          bio: "Desarrollador apasionado por la tecnología.",
-        };
-
-        setFormData(data);
+        const data = await fetchUserProfile();
+        setFormData({
+          username: data.username || "",
+          email: data.email || "",
+        });
       } catch (error) {
-        console.error("Error al obtener datos del perfil:", error);
+        customAlert("error", "Error al obtener datos del perfil.");
+        setFormData({});
       } finally {
-        // Cambiar el estado de carga
         setLoading(false);
       }
     };
@@ -57,8 +57,22 @@ const Profile: React.FC = () => {
   const handleProfileUpdate = async (data: Record<string, string>) => {
     setSubmitting(true);
     try {
-      console.log("Datos enviados (handler vacío):", data);
-      // Aquí irá la llamada a la API
+      const prevEmail = formData.email;
+      const updated = await updateUserProfile(data);
+      setFormData({
+        username: updated.user.username,
+        email: updated.user.email,
+      });
+      // Si el email fue cambiado, forzar logout y redirigir
+      if (data.email && data.email !== prevEmail) {
+        localStorage.removeItem("token");
+        localStorage.setItem("showEmailChangedAlert", "1");
+        navigate("/login");
+        return;
+      }
+      customAlert("success", "Perfil actualizado correctamente.");
+    } catch (error: any) {
+      customAlert("error", error.message || "Error al actualizar el perfil.");
     } finally {
       setSubmitting(false);
     }
@@ -72,7 +86,7 @@ const Profile: React.FC = () => {
         alignItems: "center",
         width: "100vw",
         height: "100vh",
-        backgroundColor: "#191919",
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <Container maxWidth="sm">
@@ -85,7 +99,7 @@ const Profile: React.FC = () => {
               height: "100%",
             }}
           >
-            <CircularProgress sx={{ color: "#ffffff" }} />
+            <CircularProgress sx={{ color: theme.palette.text.primary }} />
           </Box>
         ) : (
           <>
@@ -97,9 +111,10 @@ const Profile: React.FC = () => {
               logoUrl={logo}
               loading={submitting}
               initialValues={formData}
+              showHomeButton={true}
             >
               <Box mt={2} textAlign="center">
-                <Typography variant="body2" color="white">
+                <Typography variant="body2" color="text.secondary">
                   Actualiza tu información personal.
                 </Typography>
               </Box>

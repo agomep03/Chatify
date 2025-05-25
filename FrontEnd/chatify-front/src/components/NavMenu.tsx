@@ -13,6 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Form from '../components/Form';
 import CustomDialog from '../components/Dialog';
 import ScrollableText from '../components/ScrollableText';
+import { useTheme } from "@mui/material/styles";
 
 interface Tab {
   id: string;
@@ -42,6 +43,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
   const [openRenameForm, setOpenRenameForm] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const lastAnchorEl = useRef<HTMLElement | null>(null);
+  const theme = useTheme();
 
   const handleDialogAccept = () => {
     formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
@@ -53,7 +55,18 @@ const NavMenu: React.FC<NavMenuProps> = ({
       sx={{
         padding: 0, // Elimina el padding por defecto si lo quieres más limpio
         overflowY: 'auto',
-        height:'100%'
+        height:'100%',
+        // Scrollbar igual que PlaylistCards
+        "&::-webkit-scrollbar": {
+          width: "8px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: theme.palette.grey[600],
+          borderRadius: "4px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          backgroundColor:  theme.palette.grey[800],
+        },
       }}
     >
       <Box
@@ -79,7 +92,9 @@ const NavMenu: React.FC<NavMenuProps> = ({
                         setMenuAnchorEl(e.currentTarget);
                         setMenuTabId(tab.id);
                       }}
-                      sx={{ color: menuTabId === tab.id ? "white" : "grey" }}
+                      sx={{ color: menuTabId === tab.id ? theme.palette.text.primary : "grey" ,
+                            '&:focus': { outline: 'none' },
+                      }}
                       >
                     <MoreVertIcon fontSize="small" />
                   </IconButton>
@@ -90,14 +105,14 @@ const NavMenu: React.FC<NavMenuProps> = ({
             <ListItemButton
               selected={selectedTab === tab.id}
               onClick={() => onTabChange(tab.id)}
-              sx={{
+              sx={(theme)=>({
                 borderRadius: 2, // Bordes redondeados
                 backgroundColor:
-                  selectedTab === tab.id ? "#1abc54" : "transparent", // Fondo cuando está seleccionado
+                  selectedTab === tab.id ? theme.palette.custom.primaryHover : "transparent", // Fondo cuando está seleccionado
                 "&:hover": {
-                  backgroundColor: "#1abc54", // Color de fondo al pasar el ratón
+                  backgroundColor: theme.palette.custom.primaryHover, // Color de fondo al pasar el ratón
                 },
-              }}
+              })}
             >
               <ListItemText
                 primary={<ScrollableText text={tab.title} selected={selectedTab === tab.id} />}
@@ -137,7 +152,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
         {openRenameForm && (
           <CustomDialog
             open={openRenameForm}
-            onClose={() => setOpenRenameForm(false)}
+            onClose={() => {setOpenRenameForm(false); setMenuTabId(null);}}
             onConfirm={handleDialogAccept}
           >
             <Form

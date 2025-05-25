@@ -1,10 +1,12 @@
 import { Box } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "@mui/material/styles";
 
 const ScrollableText = ({ text, selected }: { text: string; selected: boolean }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -48,7 +50,7 @@ const ScrollableText = ({ text, selected }: { text: string; selected: boolean })
         className="scroll-text"
         sx={{
           display: "inline-block",
-          color: selected ? "#1abc54" : "#ffffff",
+          color: selected ? theme.palette.custom.primaryHover : theme.palette.text.primary,
           fontWeight: selected ? "bold" : "normal",
           paddingRight: "2em", // Espacio al final para mejor legibilidad
         }}

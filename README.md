@@ -2,7 +2,7 @@
 
 ## Ejercutar front sin docker
 
-nmp run dev
+npm run dev
 
 ## Crear contenedor
 

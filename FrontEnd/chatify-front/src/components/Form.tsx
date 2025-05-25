@@ -8,6 +8,9 @@ import {
   Container,
 } from "@mui/material";
 import Logo from "./Logo";
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Componente de formulario reutilizable.
@@ -37,6 +40,7 @@ interface Field {
  * @property {React.ReactNode} [children] - Elementos hijos opcionales.
  * @property {boolean} [noBackground] - Si se muestra sin fondo.
  * @property {boolean} [showButton] - Controla la visibilidad del botón.
+ * @property {boolean} [showHomeButton] - <-- Añadido
  */
 interface FormProps {
   title: string;
@@ -49,7 +53,7 @@ interface FormProps {
   children?: React.ReactNode;
   noBackground?: boolean;
   showButton?: boolean;
-
+  showHomeButton?: boolean; // <-- Añadido
 }
 
 /**
@@ -68,10 +72,18 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
   children,
   noBackground = false,
   showButton = true,
+  showHomeButton = false,
 }, ref) => {
   // Estado para manejar los datos del formulario
   const [formData, setFormData] =
     useState<Record<string, string>>(initialValues);
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
+
+  const logoSrc = isLight && logoUrl
+    ? logoUrl.replace('Logo.png', 'Logo_dark.png')
+    : logoUrl;
 
   /**
    * Manejador de cambios en los campos del formulario.
@@ -111,7 +123,7 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
           p: 4,
           boxShadow: noBackground ? 0 : 3,
           borderRadius: 2,
-          bgcolor: noBackground ? "transparent" : "#1f1f1f",
+          bgcolor: noBackground ? "transparent" : theme.palette.background.default,
           position: "relative",
         }}
       >
@@ -124,7 +136,7 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
               left: 0,
               width: "100%",
               height: "100%",
-              bgcolor: "#1f1f1f",
+              bgcolor: theme.palette.background.default,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
@@ -132,15 +144,58 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
               zIndex: 10,
             }}
           >
-            <CircularProgress sx={{ color: "#ffffff" }} />
+            <CircularProgress sx={{ color: theme.palette.text.primary }} />
           </Box>
         )}
         {/* Logo y título */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          {logoUrl && <Logo logoUrl={logoUrl} />}
-          <Typography variant="h5" sx={{ color: "#ffffff" }}>
-            {title}
-          </Typography>
+        <Box 
+          sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            mb: 2, 
+            width: "100%", 
+            justifyContent: "center", // Siempre centrado
+            gap: showHomeButton ? 2 : 0
+          }}
+        >
+          {showHomeButton && (
+            <Button
+              variant="contained"
+              size="small"
+              disableRipple
+              disableFocusRipple
+              disableElevation
+              sx={{
+                boxShadow: "none",
+                minWidth: 0,
+                p: "6px",
+                border: "none",
+                backgroundColor: theme.palette.background.default,
+                "&:hover": { backgroundColor: theme.palette.background.default, boxShadow: "none" },
+                "&:active": { border: "none", outline: "none", boxShadow: "none" },
+                "&:focus-visible": { border: "none", outline: "none", boxShadow: "none" },
+                "&:focus": { border: "none", outline: "none", boxShadow: "none" },
+                display: "flex",
+                alignItems: "center",
+              }}
+              onClick={() => navigate("/home")}
+            >
+              <ArrowBackIcon sx={{ color: theme.palette.text.primary }} />
+            </Button>
+          )}
+          <Box 
+            sx={{ 
+              display: "flex", 
+              alignItems: "center", 
+              flexGrow: 0, 
+              justifyContent: "center" // Siempre centrado
+            }}
+          >
+            {logoSrc && <Logo logoUrl={logoSrc} />}
+            <Typography variant="h5" sx={{ color: theme.palette.text.primary, ml: logoUrl ? 1 : 0 }}>
+              {title}
+            </Typography>
+          </Box>
         </Box>
         {/* Campos del formulario */}
         <Box
@@ -167,13 +222,17 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
               required
               disabled={loading}
               sx={{
-                "& .MuiInputBase-input": { color: "#ffffff" },
-                "& .MuiInputLabel-root": { color: "#7c7c7c" },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
+                "& .MuiInputBase-input": { color: theme.palette.text.primary },
+                "& .MuiInputLabel-root": { color: theme.palette.custom.outlinedBorder },
+                "& .MuiInputLabel-root.Mui-focused": { color: theme.palette.text.primary },
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: "#7c7c7c" },
-                  "&:hover fieldset": { borderColor: "#ffffff" },
-                  "&.Mui-focused fieldset": { borderColor: "#ffffff" },
+                  "& fieldset": { borderColor: theme.palette.custom.outlinedBorder },
+                  "&:hover fieldset": { borderColor: theme.palette.text.primary },
+                  "&.Mui-focused fieldset": { borderColor: theme.palette.text.primary },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
+                  WebkitTextFillColor: theme.palette.text.primary,
                 },
               }}
             />
@@ -187,13 +246,16 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
                 mt: "2rem",
                 width: "50%",
                 justifySelf: "center",
-                backgroundColor: "#3be477",
-                color: "#000000",
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
                 fontWeight: "bold",
                 fontSize: "1rem",
                 borderRadius: "var(--encore-button-corner-radius, 9999px);",
                 textTransform: "none",
-                "&:hover": { backgroundColor: "#1abc54" },
+                "&:hover": { backgroundColor: theme.palette.custom.primaryHover },
+                "&:focus": { outline: "none", border: "none", boxShadow: "none" },
+                "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
+                "&:active": { outline: "none", border: "none", boxShadow: "none" },
               }}
               fullWidth
             >
