@@ -1,5 +1,4 @@
-#src/routes/auth_routes.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -11,6 +10,7 @@ from src.controllers.auth_controller import (
     get_user_info,
     update_user_info
 )
+from src.services.spotify_service import login_spotify
 from src.models.auth_model import User
 
 router = APIRouter()
@@ -45,3 +45,7 @@ def update_profile(
     db: Session = Depends(get_db)
 ):
     return update_user_info(data, user, db)
+
+@router.get("/callback")
+async def spotify_callback(request: Request, db: Session = Depends(get_db)):
+    return login_spotify(request, db)

@@ -12,7 +12,7 @@ class Conversation(Base):
     title = Column(String, default="Sin título")
 
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
-    user = relationship("User", back_populates="conversation")
+    user = relationship("User", back_populates="conversations")
 
     def __repr__(self):
         return f"<Conversation id={self.id} user_id={self.user_id}>"
