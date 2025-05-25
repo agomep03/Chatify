@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
 import { loginUser } from "../api/authService";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Pagina de inicio de sesión.
@@ -16,6 +17,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
+  const theme = useTheme();
 
   // Mostrar alerta si el usuario cambió su correo
   useEffect(() => {
@@ -68,7 +70,7 @@ const Login: React.FC = () => {
         alignItems: "center",
         width: "100vw",
         height: "100vh",
-        backgroundColor: "#191919",
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       {/* Contenedor del formulario */}
@@ -82,7 +84,7 @@ const Login: React.FC = () => {
       >
         {/* Link para ir al registro */}
         <Box mt={2} textAlign="center">
-          <Typography variant="body2" color="white">
+          <Typography variant="body2" color="text.secondary">
             ¿No tienes una cuenta?{" "}
             <Link
               component={RouterLink}

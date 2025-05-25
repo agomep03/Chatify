@@ -13,6 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Form from '../components/Form';
 import CustomDialog from '../components/Dialog';
 import ScrollableText from '../components/ScrollableText';
+import { useTheme } from "@mui/material/styles";
 
 interface Tab {
   id: string;
@@ -42,6 +43,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
   const [openRenameForm, setOpenRenameForm] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const lastAnchorEl = useRef<HTMLElement | null>(null);
+  const theme = useTheme();
 
   const handleDialogAccept = () => {
     formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
@@ -79,7 +81,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
                         setMenuAnchorEl(e.currentTarget);
                         setMenuTabId(tab.id);
                       }}
-                      sx={{ color: menuTabId === tab.id ? "white" : "grey" ,
+                      sx={{ color: menuTabId === tab.id ? theme.palette.text.primary : "grey" ,
                             '&:focus': { outline: 'none' },
                       }}
                       >
@@ -95,9 +97,9 @@ const NavMenu: React.FC<NavMenuProps> = ({
               sx={{
                 borderRadius: 2, // Bordes redondeados
                 backgroundColor:
-                  selectedTab === tab.id ? "#1abc54" : "transparent", // Fondo cuando está seleccionado
+                  selectedTab === tab.id ? theme.palette.custom.primaryHover : "transparent", // Fondo cuando está seleccionado
                 "&:hover": {
-                  backgroundColor: "#1abc54", // Color de fondo al pasar el ratón
+                  backgroundColor: theme.palette.custom.primaryHover, // Color de fondo al pasar el ratón
                 },
               }}
             >

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box, List, ListItem, ListItemText, TextField, IconButton, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
+import { useTheme } from "@mui/material/styles";
 
 type Message = {
   id: number;
@@ -20,6 +21,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [isLoadingDot, setIsLoadingDot] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [dots, setDots] = useState('');
+  const theme = useTheme();
 
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -111,11 +113,11 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
             width: "8px",
           },
           "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#888",
+            backgroundColor: theme.palette.grey[600],
             borderRadius: "4px",
           },
           "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: "#555",
+            backgroundColor:  theme.palette.grey[800],
           },
         }}
       >
@@ -126,8 +128,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
             sx={{
               maxWidth: '80%',
               wordWrap: 'break-word',  // Hace que el texto se ajuste y no se desborde
-              backgroundColor: msg.sender === 'user' ? '#414141' : '#303030', //color user : bot
-              color: '#fff',
+              backgroundColor: msg.sender === 'user' ? theme.palette.custom.userDialogBg : theme.palette.custom.botDialogBg, //color user : bot
+              color: theme.palette.text.primary,
               borderRadius:  msg.sender === 'user' ? '15px 15px 0px 15px' : '15px 15px 15px 0px', //redondeo esquinas user : bot
               padding: '8px 12px', 
               wordBreak: 'break-word',
@@ -146,8 +148,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         <Box
           sx={{
             padding: '8px 12px',
-            backgroundColor: '#303030',
-            color: '#fff',
+            backgroundColor: theme.palette.custom.botDialogBg,
+            color: theme.palette.text.primary,
             borderRadius: '15px 15px 15px 0px',
           }}
         >
@@ -174,13 +176,13 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
             }
           }}
           sx={{
-            backgroundColor:'#303030',
+            backgroundColor: theme.palette.custom.botDialogBg,
             resize: 'none',
             overflow: 'auto',
             borderRadius: "15px",
-            color: '#fff',
+            color: theme.palette.text.primary,
             '& .MuiInputBase-input': {
-                color: '#fff', 
+                color: theme.palette.text.primary, 
             },
             '& .MuiOutlinedInput-root': { //Eliminamos el borde y sus variaciones cuando se toca el componente
                 '& fieldset': {
@@ -196,7 +198,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
           }}
     
         />
-        <IconButton onClick={handleSend} sx={{ color: '#3be477' }}>
+        <IconButton onClick={handleSend} sx={{ color: theme.palette.primary.main }}>
           <SendIcon />
         </IconButton>
       </Box>

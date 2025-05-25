@@ -5,6 +5,7 @@ import logo from '../assets/Logo.png';
 import { useAlert } from "../components/Alert";
 import { fetchUserProfile, updateUserProfile } from "../api/authService";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Página de perfil de usuario.
@@ -17,6 +18,7 @@ const Profile: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const { customAlert } = useAlert();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   // Campos del formulario
   const profileFields = [
@@ -84,7 +86,7 @@ const Profile: React.FC = () => {
         alignItems: "center",
         width: "100vw",
         height: "100vh",
-        backgroundColor: "#191919",
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <Container maxWidth="sm">
@@ -97,7 +99,7 @@ const Profile: React.FC = () => {
               height: "100%",
             }}
           >
-            <CircularProgress sx={{ color: "#ffffff" }} />
+            <CircularProgress sx={{ color: theme.palette.text.primary }} />
           </Box>
         ) : (
           <>
@@ -112,7 +114,7 @@ const Profile: React.FC = () => {
               showHomeButton={true}
             >
               <Box mt={2} textAlign="center">
-                <Typography variant="body2" color="white">
+                <Typography variant="body2" color="text.secondary">
                   Actualiza tu información personal.
                 </Typography>
               </Box>
