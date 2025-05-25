@@ -44,10 +44,10 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     setChats((prev) => prev.filter((c) => c.id !== chat.id)); //Actualizo localmente
 
     try {
-      await fetchDeleteChat(chat.id);
-      if (selectedTab === chat.id) {
+      if (String(selectedTab) === String(chat.id)) {
         setSelectedTab("playlists");
       }
+      await fetchDeleteChat(chat.id);
     } catch (error) {
       console.error(error);
       customAlert("error", "Error al eliminar conversación");

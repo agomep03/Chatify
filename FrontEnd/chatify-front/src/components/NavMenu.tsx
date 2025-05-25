@@ -55,7 +55,18 @@ const NavMenu: React.FC<NavMenuProps> = ({
       sx={{
         padding: 0, // Elimina el padding por defecto si lo quieres más limpio
         overflowY: 'auto',
-        height:'100%'
+        height:'100%',
+        // Scrollbar igual que PlaylistCards
+        "&::-webkit-scrollbar": {
+          width: "8px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: theme.palette.grey[600],
+          borderRadius: "4px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          backgroundColor:  theme.palette.grey[800],
+        },
       }}
     >
       <Box
@@ -94,14 +105,14 @@ const NavMenu: React.FC<NavMenuProps> = ({
             <ListItemButton
               selected={selectedTab === tab.id}
               onClick={() => onTabChange(tab.id)}
-              sx={{
+              sx={(theme)=>({
                 borderRadius: 2, // Bordes redondeados
                 backgroundColor:
                   selectedTab === tab.id ? theme.palette.custom.primaryHover : "transparent", // Fondo cuando está seleccionado
                 "&:hover": {
                   backgroundColor: theme.palette.custom.primaryHover, // Color de fondo al pasar el ratón
                 },
-              }}
+              })}
             >
               <ListItemText
                 primary={<ScrollableText text={tab.title} selected={selectedTab === tab.id} />}
