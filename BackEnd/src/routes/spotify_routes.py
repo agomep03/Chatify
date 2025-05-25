@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 
-from src.controllers.spotify_controller import get_user_playlists, update_playlist
+from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto
 from src.controllers.auth_controller import get_current_user, get_db
 from src.models.auth_model import User
 
@@ -15,7 +15,7 @@ class UpdatePlaylistRequest(BaseModel):
 
 @router.get("/playlists")
 def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return get_user_playlists(user, db)
+    return get_all_user_playlists(user, db)
 
 @router.get("/auth/spotify/connected")
 def check_spotify_connected(user: User = Depends(get_current_user)):
@@ -37,3 +37,12 @@ def update_playlist_endpoint(
         user=user,
         db=db
     )
+
+@router.post("/playlists/auto-generate")
+async def auto_generate_playlist(
+    prompt: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    playlist_url = await generate_playlist_auto(prompt, user, db)
+    return {"playlist_url": playlist_url}

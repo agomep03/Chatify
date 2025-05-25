@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-import requests
+import httpx  # librería async para HTTP
 
 load_dotenv()
 API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -25,7 +25,6 @@ class Agent:
         self.frequency_penalty = frequency_penalty
 
     async def chat(self, message_user: str, messages: list = []) -> str:
-        
         messages = [{"role": "system", "content": self.context}] + messages.copy() + [{"role": "user", "content": message_user}]
 
         payload = {
@@ -38,18 +37,18 @@ class Agent:
             "frequency_penalty": self.frequency_penalty
         }
 
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {API_KEY}"},
-            json=payload,
-            timeout=60
-        )
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                json=payload
+            )
 
         data = response.json()
 
         try:
             content = data["choices"][0]["message"]["content"]
-        except:
+        except (KeyError, IndexError):
             raise Exception("Openrouter no devuelve la respuesta en formato correcto.")
 
         return content
