@@ -6,7 +6,10 @@ def get_spotify_login_url(email: str = None):
         client_id=os.getenv("SPOTIFY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
         redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
-        scope="user-library-read user-read-private user-read-email",
+        scope=(
+            "user-library-read user-read-private user-read-email "
+            "playlist-modify-public playlist-modify-private ugc-image-upload"
+        ),
         show_dialog=True
     )
     url = sp_oauth.get_authorize_url(state=email)

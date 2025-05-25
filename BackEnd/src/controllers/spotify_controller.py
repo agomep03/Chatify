@@ -69,6 +69,7 @@ def get_user_playlists(user: User, db: Session):
             "Authorization": f"Bearer {access_token}"
         }
 
+        # Obtener listas de reproducción del usuario
         url = f"https://api.spotify.com/v1/users/{user.spotify_user_id}/playlists"
         response = requests.get(url, headers=headers)
 
@@ -81,13 +82,40 @@ def get_user_playlists(user: User, db: Session):
             raise HTTPException(status_code=response.status_code, detail="Error al obtener playlists")
 
         data = response.json()
-        playlists = [
-            {
-                "name": item["name"],
-                "id": item["id"],
-                "tracks": item["tracks"]["total"]
-            } for item in data.get("items", [])
-        ]
+        playlists = []
+
+        for item in data.get("items", []):
+            playlist_id = item["id"]
+            playlist_name = item["name"]
+            image_url = item["images"][0]["url"] if item.get("images") else None
+
+            # Obtener tracks de la playlist
+            tracks_url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+            tracks_response = requests.get(tracks_url, headers=headers)
+
+            if tracks_response.status_code != 200:
+                logger.warning(f"No se pudieron obtener tracks de la playlist {playlist_name}")
+                tracks = []
+            else:
+                track_items = tracks_response.json().get("items", [])
+                tracks = []
+                for track_item in track_items:
+                    track = track_item.get("track", {})
+                    if not track:
+                        continue
+                    track_name = track.get("name")
+                    artists = [artist["name"] for artist in track.get("artists", [])]
+                    tracks.append({
+                        "name": track_name,
+                        "artists": artists
+                    })
+
+            playlists.append({
+                "name": playlist_name,
+                "id": playlist_id,
+                "image": image_url,
+                "tracks": tracks
+            })
 
         logger.info(f"Playlists obtenidas correctamente para usuario {user.email}")
         return {"playlists": playlists}
@@ -95,3 +123,64 @@ def get_user_playlists(user: User, db: Session):
     except Exception as e:
         logger.exception(f"Error inesperado al obtener playlists para usuario {user.email}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno al obtener playlists")
+
+def update_playlist(playlist_id: str, title: str | None, image_base64: str | None, user: User, db: Session):
+    access_token = get_valid_spotify_token(user, db)
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+
+    # Verificar que el usuario es el dueño de la playlist
+    playlist_response = requests.get(
+        f"https://api.spotify.com/v1/playlists/{playlist_id}",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+
+    if playlist_response.status_code != 200:
+        logger.error(f"Error al obtener información de la playlist {playlist_id}: {playlist_response.status_code}, {playlist_response.text}")
+        raise HTTPException(status_code=playlist_response.status_code, detail="No se pudo verificar la propiedad de la playlist")
+
+    playlist_data = playlist_response.json()
+    owner_id = playlist_data.get("owner", {}).get("id")
+    if owner_id != user.spotify_user_id:
+        logger.warning(f"El usuario {user.email} intentó modificar una playlist que no le pertenece (owner: {owner_id})")
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta playlist")
+
+    # Actualizar título si se proporciona
+    if title:
+        logger.info(f"Actualizando título de la playlist {playlist_id} a '{title}'")
+        response = requests.put(
+            f"https://api.spotify.com/v1/playlists/{playlist_id}",
+            headers=headers,
+            json={"name": title}
+        )
+        if response.status_code != 200:
+            logger.error(f"Error al actualizar el título: {response.status_code}, {response.text}")
+            raise HTTPException(status_code=response.status_code, detail="Error al actualizar el título")
+
+    # Actualizar imagen si se proporciona
+    if image_base64:
+        logger.info(f"Actualizando imagen de la playlist {playlist_id}")
+        img_headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "image/jpeg"
+        }
+        try:
+            image_data = base64.b64decode(image_base64)
+        except Exception as e:
+            logger.exception("Falló la decodificación base64 de la imagen")
+            raise HTTPException(status_code=400, detail="La imagen no está correctamente codificada en base64")
+
+        response = requests.put(
+            f"https://api.spotify.com/v1/playlists/{playlist_id}/images",
+            headers=img_headers,
+            data=image_data
+        )
+        if response.status_code != 202:
+            logger.error(f"Error al actualizar la imagen: {response.status_code}, {response.text}")
+            raise HTTPException(status_code=response.status_code, detail="Error al actualizar la imagen")
+
+    logger.info(f"Playlist {playlist_id} actualizada correctamente por usuario {user.email}")
+    return {"message": "Playlist actualizada correctamente"}

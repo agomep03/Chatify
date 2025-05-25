@@ -8,6 +8,7 @@ import base64
 import logging
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from sqlalchemy.exc import IntegrityError
 
 load_dotenv()
 
@@ -87,6 +88,19 @@ def login_spotify(request: Request, db: Session):
             "message": "Conexión con Spotify realizada correctamente"
         }
 
+    except IntegrityError as e:
+        db.rollback()
+        if "duplicate key value violates unique constraint" in str(e.orig):
+            logger.warning(f"El ID de Spotify '{spotify_user_id}' ya está vinculado a otra cuenta.")
+            raise HTTPException(
+                status_code=409,
+                detail=f"El ID de Spotify ya está vinculado a otra cuenta."
+            )
+        else:
+            logger.error(f"Error de integridad: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error al guardar la información de Spotify")
+
     except Exception as e:
+        db.rollback()
         logger.exception(f"Error inesperado en login_spotify: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno del servidor al conectar con Spotify")
