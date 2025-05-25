@@ -7,7 +7,6 @@ class Conversation(Base):
     __tablename__ = 'conversations'
 
     id = Column(Integer, primary_key=True, index=True)
-    #user_id = Column(String, index=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
     created_at = Column(DateTime, default=datetime.utcnow)
     title = Column(String, default="Sin título")
