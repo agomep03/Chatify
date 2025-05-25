@@ -11,17 +11,23 @@ import {
   fetchObtainAllChats,
 } from "../api/chatService";
 import PlaylistCards from "../components/PlaylistCards";
+import { useTheme } from "@mui/material/styles";
 
 interface Chat {
   id: string;
   title: string;
 }
 
-const MainLayout = () => {
+type MainLayoitProps = {
+  toggleTheme: () => void;
+};
+
+const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>("playlists");
   const { customAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
+  const theme = useTheme();
 
   const allTabs = [
     { id: "playlists", title: "Playlists" },
@@ -38,10 +44,10 @@ const MainLayout = () => {
     setChats((prev) => prev.filter((c) => c.id !== chat.id)); //Actualizo localmente
 
     try {
-      await fetchDeleteChat(chat.id);
-      if (selectedTab === chat.id) {
+      if (String(selectedTab) === String(chat.id)) {
         setSelectedTab("playlists");
       }
+      await fetchDeleteChat(chat.id);
     } catch (error) {
       console.error(error);
       customAlert("error", "Error al eliminar conversación");
@@ -109,11 +115,10 @@ const MainLayout = () => {
       return <div></div>;
     }
 
-    const chat = chats.find((chat) => chat.id === selectedTab);
+    const chat = chats.find((chat) => String(chat.id) === String(selectedTab));
     if (chat) {
       return <Chat chatId={chat.id} />;
     }
-
     return <div>Tab no encontrada</div>;
   };
 
@@ -129,7 +134,7 @@ const MainLayout = () => {
         flexDirection: "column",
       }}
     >
-      <TopBar />
+      <TopBar toggleTheme={toggleTheme}/>
       <Box
         sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}
       >
@@ -137,7 +142,7 @@ const MainLayout = () => {
           sx={{
             width: 280,
             flexShrink: 0,
-            backgroundColor: "#1f1f1f",
+            backgroundColor: theme.palette.background.default,
             height: "100%",
           }}
         >
@@ -158,6 +163,7 @@ const MainLayout = () => {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            backgroundColor: theme.palette.custom.tabBg,
           }}
         >
           {isLoading ? (
@@ -168,7 +174,7 @@ const MainLayout = () => {
               alignItems="center"
               width="100%"
             >
-              <CircularProgress size={60} sx={{ color: "#3be477" }} />
+              <CircularProgress size={60} sx={{ color: theme.palette.primary.main }} />
             </Box>
           ) : (
             renderTabContent()

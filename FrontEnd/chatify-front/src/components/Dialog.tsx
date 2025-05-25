@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, Box, Button } from '@mui/material';
 import { ReactNode, useState } from 'react';
+import { useTheme } from '@mui/material/styles'; // Añadido
 
 // Configuración de los botones
 type ButtonConfig = {
@@ -25,6 +26,8 @@ const CustomDialog = (props: ConfirmDialogProps) => {
     children,
     buttons,
   } = props;
+
+  const theme = useTheme(); // Añadido
 
   const defaultButtons: ButtonConfig[] = [
     { label: 'Cancelar', color: 'secondary' },
@@ -53,10 +56,10 @@ const CustomDialog = (props: ConfirmDialogProps) => {
           top: '20%',
           left: '50%',
           transform: 'translateX(-50%)',
-          bgcolor: '#1f1f1f',
+          bgcolor: theme.palette.background.default,
           borderRadius: 2,
           boxShadow: 3,
-          color: '#fff',
+          color: theme.palette.text.primary,
           width: 'auto',
           padding: 0,
         }
@@ -66,7 +69,7 @@ const CustomDialog = (props: ConfirmDialogProps) => {
         <Box sx={{ padding: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', overflowX: 'hidden', width: '100%'}}>
           {children}
         </Box>
-        <Box mt={3} display="flex" justifyContent="flex-end" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
+        <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
         {buttonsWithActions.map((btn, idx) => (
             <Button
               key={idx}
@@ -80,19 +83,22 @@ const CustomDialog = (props: ConfirmDialogProps) => {
                 px: 3,
                 py: 1,
                 '&.MuiButton-contained': {
-                  backgroundColor: '#3be477',
-                  color: '#000000',
+                  backgroundColor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
                   '&:hover': {
-                    backgroundColor: '#1abc54'
+                    backgroundColor: theme.palette.custom.primaryHover
                   }
                 },
                 '&.MuiButton-outlined': {
-                  borderColor: '#7c7c7c',
-                  color: '#ffffff',
+                  borderColor: theme.palette.custom.outlinedBorder,
+                  color: theme.palette.text.primary,
                   '&:hover': {
-                    borderColor: '#ffffff'
+                    borderColor: theme.palette.text.primary
                   }
-                }
+                },
+                '&:focus': { outline: 'none', border: 'none', boxShadow: 'none' },
+                '&:focus-visible': { outline: 'none', border: 'none', boxShadow: 'none' },
+                '&:active': { outline: 'none', border: 'none', boxShadow: 'none' },
               }}
             >
               {btn.label}

@@ -16,6 +16,8 @@ def get_conversation_by_id(chat_id: int, db: Session):
 async def start_conversation(user_id: str, db: Session):
     logger.info(f"Start conversation for user with id {user_id}")
     try:
+        Conversation.__table__.create(bind=db.get_bind(), checkfirst=True)
+
         new_conversation = Conversation(user_id=user_id)
         db.add(new_conversation)
         db.commit()

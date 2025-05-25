@@ -16,8 +16,13 @@ export function isAuthenticated(): boolean {
 
   try {
     const decoded: DecodedToken = jwtDecode(token);
-    return decoded.exp * 1000 > Date.now(); // exp en segundos, Date.now() en ms
+    const isValid = decoded.exp * 1000 > Date.now();
+    if (!isValid) {
+      localStorage.removeItem("token");
+    }
+    return isValid;
   } catch {
+    localStorage.removeItem("token");
     return false;
   }
 }
