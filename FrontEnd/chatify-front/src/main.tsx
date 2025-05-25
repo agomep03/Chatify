@@ -8,16 +8,31 @@ import { ThemeProvider } from '@mui/material/styles'
 import {darkTheme} from './theme/DarkTheme'
 import { lightTheme } from './theme/LightTheme'
 
+const getInitialMode = (): 'light' | 'dark' => {
+  const saved = localStorage.getItem('themeMode');
+  if (saved === 'light' || saved === 'dark') return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
 const Root = () => {
-  const [mode, setMode] = useState<'light' | 'dark'>('dark');
+  const [mode, setMode] = useState<'light' | 'dark'>(getInitialMode);
   const theme = mode === 'light' ? lightTheme : darkTheme;
+  
+  const toggleTheme = () => {
+    setMode(prev => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('themeMode', next);
+      console.log(next);
+      return next;
+    });
+  };
 
   return (
     <StrictMode>
       <ThemeProvider theme={theme}>
         <AlertProvider>
           <ConfirmProvider>
-            <App toggleTheme={() => setMode(m => m === 'light' ? 'dark' : 'light')} />
+            <App toggleTheme={toggleTheme} />
           </ConfirmProvider>
         </AlertProvider>
       </ThemeProvider>
