@@ -1,32 +1,98 @@
+import os
 import logging
+
+from dotenv import load_dotenv
+from email_validator import validate_email, EmailNotValidError
 from fastapi import HTTPException, Depends, Security
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
-from src.models.auth_model import User
-from src.controllers.user_controller import get_spotify_login_url
-from src.utils.auth import hash_password, verify_password, create_access_token
-from src.config.db import SessionLocal
-from email_validator import validate_email, EmailNotValidError
 from jose import JWTError, jwt
-import os
-from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+from spotipy.oauth2 import SpotifyOAuth
 
+from src.config.db import SessionLocal
+from src.models.auth_model import User
+from src.utils.auth import hash_password, verify_password, create_access_token
+
+# Carga de variables de entorno
 load_dotenv()
-
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
+# Configuración del logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")  # tokenUrl ajustado para swagger
+# Configuración de OAuth2 para Swagger
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+# --- Utils ---
 def get_db():
     db = SessionLocal()
     try:
-        yield db  
+        yield db
     finally:
-        db.close() 
+        db.close()
+
+def validate_email_address(email: str):
+    logger.info(f"Validating email: {email}")
+    try:
+        validate_email(email)
+        logger.info(f"Email {email} is valid.")
+        return True
+    except EmailNotValidError as e:
+        logger.error(f"Invalid email: {email}. Error: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail={"success": False, "error": f"Invalid email: {e}"}
+        )
+
+# --- Auth ---
+def register_user(username: str, email: str, password: str, db: Session):
+    validate_email_address(email)
+
+    if db.query(User).filter(User.email == email).first():
+        logger.warning(f"Email {email} already registered.")
+        raise HTTPException(
+            status_code=400,
+            detail={"success": False, "error": "Email already registered"}
+        )
+
+    hashed = hash_password(password)
+    new_user = User(username=username, email=email, hashed_password=hashed)
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    token = create_access_token({"sub": new_user.email})
+    redirect_url = get_spotify_login_url(email=new_user.email)
+
+    logger.info(f"User {username} registered successfully with email {email}.")
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "redirect_url": redirect_url
+    }
+
+def login_user(email: str, password: str, db: Session):
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user or not verify_password(password, user.hashed_password):
+        logger.warning(f"Invalid login attempt for email: {email}")
+        raise HTTPException(
+            status_code=401,
+            detail={"success": False, "error": "Invalid credentials"}
+        )
+
+    token = create_access_token({"sub": user.email})
+    redirect_url = get_spotify_login_url(email=user.email)
+
+    logger.info(f"User {user.username} logged in successfully.")
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "redirect_url": redirect_url
+    }
 
 def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -44,7 +110,6 @@ def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends
             raise credentials_exception
 
         logger.info(f"🔎 Decodificado correctamente. Email extraído del token: {email}")
-
     except JWTError as e:
         logger.error(f"Fallo al decodificar token JWT: {str(e)}")
         raise credentials_exception
@@ -58,77 +123,7 @@ def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends
     logger.info(f"Usuario autenticado: {user.username} ({user.email})")
     return user
 
-def validate_email_address(email: str):
-    logger.info(f"Validating email: {email}")
-    try:
-        validate_email(email)
-        logger.info(f"Email {email} is valid.")
-        return True
-    except EmailNotValidError as e:
-        logger.error(f"Invalid email: {email}. Error: {e}")
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "success": False,
-                "error": f"Invalid email: {e}"
-            }
-        )
-
-def register_user(username: str, email: str, password: str, db: Session):
-    validate_email_address(email)
-
-    if db.query(User).filter(User.email == email).first():
-        logger.warning(f"Email {email} already registered.")
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "success": False,
-                "error": "Email already registered"
-            }
-        )
-    
-    hashed = hash_password(password)
-    new_user = User(username=username, email=email, hashed_password=hashed)
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    token = create_access_token({"sub": new_user.email})
-    redirect_url = get_spotify_login_url(email=new_user.email)
-
-    logger.info(f"User {username} registered successfully with email {email}.")
-    print(redirect_url)
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "redirect_url": redirect_url
-    }
-
-def login_user(email: str, password: str, db: Session):
-    user = db.query(User).filter(User.email == email).first()
-
-    if not user or not verify_password(password, user.hashed_password):
-        logger.warning(f"Invalid login attempt for email: {email}")
-        raise HTTPException(
-            status_code=401,
-            detail={
-                "success": False,
-                "error": "Invalid credentials"
-            }
-        )
-    
-    token = create_access_token({"sub": user.email})
-
-    logger.info(f"User {user.username} logged in successfully.")
-
-    redirect_url = get_spotify_login_url(email=user.email)
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "redirect_url": redirect_url
-    }
-
+# --- User Info ---
 def get_user_info(user: User):
     return {
         "username": user.username,
@@ -186,7 +181,21 @@ def update_user_info(data, user: User, db: Session):
     except HTTPException as e:
         logger.error(f"Error HTTP al actualizar usuario {user.id}: {e.detail}")
         raise e
-
     except Exception as e:
         logger.exception(f"Error inesperado al actualizar usuario {user.id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno del servidor al actualizar el usuario")
+
+# --- Spotify ---
+def get_spotify_login_url(email: str = None):
+    sp_oauth = SpotifyOAuth(
+        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
+        redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
+        scope=(
+            "user-library-read user-read-private user-read-email "
+            "playlist-modify-public playlist-modify-private ugc-image-upload"
+        ),
+        show_dialog=True
+    )
+    url = sp_oauth.get_authorize_url(state=email)
+    return url
