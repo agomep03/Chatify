@@ -1,4 +1,5 @@
 import config from '../config';
+import { handleUnauthorized } from '../utils/auth';
 
 // Login de usuario
 export const loginUser = async (email: string, password: string): Promise<string> => {
@@ -84,6 +85,7 @@ export const fetchUserProfile = async () => {
       "Authorization": `Bearer ${token}`,
     },
   });
+  if (handleUnauthorized(response)) return;
   if (!response.ok) {
     throw new Error("No se pudo obtener el perfil");
   }
@@ -101,6 +103,7 @@ export const updateUserProfile = async (data: Record<string, string>) => {
     },
     body: JSON.stringify(data),
   });
+  if (handleUnauthorized(response)) return;
   if (!response.ok) {
     const errorData = await response.json();
     const errorMsg =
