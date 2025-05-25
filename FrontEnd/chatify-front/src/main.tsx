@@ -22,7 +22,6 @@ const Root = () => {
     setMode(prev => {
       const next = prev === 'light' ? 'dark' : 'light';
       localStorage.setItem('themeMode', next);
-      console.log(next);
       return next;
     });
   };

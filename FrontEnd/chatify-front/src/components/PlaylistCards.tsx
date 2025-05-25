@@ -218,16 +218,16 @@ const PlaylistCards: React.FC = () => {
         ))}
       </Box>
       {/* Dialogo de edición similar a NavMenu */}
-      <CustomDialog
-        open={editOpen}
-        onClose={handleDialogClose}
-        onConfirm={handleDialogAccept}
-        buttons={[
-          { label: "Cancelar", color: "secondary" },
-          { label: "Guardar", color: "primary" }
-        ]}
-      >
-        {selectedPlaylist && (
+      {selectedPlaylist && (
+        <CustomDialog
+          open={editOpen}
+          onClose={handleDialogClose}
+          onConfirm={handleDialogAccept}
+          buttons={[
+            { label: "Cancelar", color: "secondary" },
+            { label: "Guardar", color: "primary" }
+          ]}
+        >
           <Form
             ref={formRef}
             title="Editar Playlist"
@@ -245,8 +245,8 @@ const PlaylistCards: React.FC = () => {
             showHomeButton={false}
             noBackground
           />
-        )}
-      </CustomDialog>
+        </CustomDialog>
+      )}
     </Box>
   );
 };

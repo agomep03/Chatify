@@ -1,5 +1,6 @@
 {
   "files": [],
+  "include": ["src", "src/theme"],
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
