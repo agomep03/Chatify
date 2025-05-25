@@ -1,6 +1,10 @@
+# src/controllers/auth_controller.py
+
+# --- Librerías estándar ---
 import os
 import logging
 
+# --- Librerías de terceros ---
 from dotenv import load_dotenv
 from email_validator import validate_email, EmailNotValidError
 from fastapi import HTTPException, Depends, Security
@@ -9,24 +13,27 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from spotipy.oauth2 import SpotifyOAuth
 
+# --- Módulos locales ---
 from src.config.db import SessionLocal
 from src.models.auth_model import User
 from src.utils.auth import hash_password, verify_password, create_access_token
 
-# Carga de variables de entorno
+# --- Configuración global ---
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
-# Configuración del logger
+# Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuración de OAuth2 para Swagger
+# OAuth2 para Swagger y FastAPI
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # --- Utils ---
+
 def get_db():
+    """Provee una sesión de base de datos y asegura su cierre."""
     db = SessionLocal()
     try:
         yield db
@@ -34,28 +41,25 @@ def get_db():
         db.close()
 
 def validate_email_address(email: str):
-    logger.info(f"Validating email: {email}")
+    """Valida el formato del correo electrónico."""
+    logger.info(f"Validando email: {email}")
     try:
         validate_email(email)
-        logger.info(f"Email {email} is valid.")
+        logger.info(f"Email válido: {email}")
         return True
     except EmailNotValidError as e:
-        logger.error(f"Invalid email: {email}. Error: {e}")
-        raise HTTPException(
-            status_code=400,
-            detail={"success": False, "error": f"Invalid email: {e}"}
-        )
+        logger.error(f"Email inválido: {email}. Error: {e}")
+        raise HTTPException(status_code=400, detail={"success": False, "error": f"Invalid email: {e}"})
 
-# --- Auth ---
+# --- Registro y Login ---
+
 def register_user(username: str, email: str, password: str, db: Session):
+    """Registra un nuevo usuario."""
     validate_email_address(email)
 
     if db.query(User).filter(User.email == email).first():
-        logger.warning(f"Email {email} already registered.")
-        raise HTTPException(
-            status_code=400,
-            detail={"success": False, "error": "Email already registered"}
-        )
+        logger.warning(f"Email ya registrado: {email}")
+        raise HTTPException(status_code=400, detail={"success": False, "error": "Email already registered"})
 
     hashed = hash_password(password)
     new_user = User(username=username, email=email, hashed_password=hashed)
@@ -67,7 +71,7 @@ def register_user(username: str, email: str, password: str, db: Session):
     token = create_access_token({"sub": new_user.email})
     redirect_url = get_spotify_login_url(email=new_user.email)
 
-    logger.info(f"User {username} registered successfully with email {email}.")
+    logger.info(f"Usuario registrado exitosamente: {username} ({email})")
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -75,19 +79,17 @@ def register_user(username: str, email: str, password: str, db: Session):
     }
 
 def login_user(email: str, password: str, db: Session):
+    """Autentica un usuario y retorna token y redirección a Spotify."""
     user = db.query(User).filter(User.email == email).first()
 
     if not user or not verify_password(password, user.hashed_password):
-        logger.warning(f"Invalid login attempt for email: {email}")
-        raise HTTPException(
-            status_code=401,
-            detail={"success": False, "error": "Invalid credentials"}
-        )
+        logger.warning(f"Intento de login fallido para: {email}")
+        raise HTTPException(status_code=401, detail={"success": False, "error": "Invalid credentials"})
 
     token = create_access_token({"sub": user.email})
     redirect_url = get_spotify_login_url(email=user.email)
 
-    logger.info(f"User {user.username} logged in successfully.")
+    logger.info(f"Login exitoso: {user.username} ({email})")
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -95,6 +97,7 @@ def login_user(email: str, password: str, db: Session):
     }
 
 def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db)):
+    """Obtiene el usuario autenticado desde el token JWT."""
     credentials_exception = HTTPException(
         status_code=401,
         detail="No se pudo verificar las credenciales del usuario.",
@@ -106,53 +109,54 @@ def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends
         email: str = payload.get("sub")
 
         if email is None:
-            logger.warning("Token JWT inválido: no contiene 'sub'.")
+            logger.warning("Token JWT inválido: sin 'sub'")
             raise credentials_exception
 
-        logger.info(f"🔎 Decodificado correctamente. Email extraído del token: {email}")
+        logger.info(f"Token decodificado correctamente. Email: {email}")
     except JWTError as e:
-        logger.error(f"Fallo al decodificar token JWT: {str(e)}")
+        logger.error(f"Error al decodificar token JWT: {str(e)}")
         raise credentials_exception
 
     user = db.query(User).filter(User.email == email).first()
 
     if user is None:
-        logger.warning(f"No se encontró usuario con email: {email}")
+        logger.warning(f"Usuario no encontrado: {email}")
         raise credentials_exception
 
     logger.info(f"Usuario autenticado: {user.username} ({user.email})")
     return user
 
-# --- User Info ---
+# --- Perfil de Usuario ---
+
 def get_user_info(user: User):
+    """Devuelve información básica del usuario."""
     return {
         "username": user.username,
         "email": user.email
     }
 
 def update_user_info(data, user: User, db: Session):
+    """Actualiza datos del usuario (username, email, password)."""
     try:
         updated = False
 
         if data.username:
-            logger.info(f"Cambiando username: {user.username} → {data.username}")
+            logger.info(f"Actualizando username: {user.username} → {data.username}")
             user.username = data.username
             updated = True
 
         if data.email:
-            logger.info(f"Verificando nuevo email: {data.email}")
+            logger.info(f"Validando nuevo email: {data.email}")
             validate_email_address(data.email)
 
             existing_user = db.query(User).filter(User.email == data.email).first()
 
             if existing_user and existing_user.id != user.id:
-                logger.warning(f"El email '{data.email}' ya está en uso por el usuario ID {existing_user.id}")
+                logger.warning(f"Email en uso por otro usuario: {data.email}")
                 raise HTTPException(status_code=400, detail="Este email ya está en uso por otro usuario")
 
-            if existing_user and existing_user.id == user.id:
-                logger.info("El email nuevo es igual al actual. No se realiza ningún cambio.")
-            else:
-                logger.info(f"Email actualizado a: {data.email}")
+            if not (existing_user and existing_user.id == user.id):
+                logger.info(f"Actualizando email a: {data.email}")
                 user.email = data.email
                 updated = True
 
@@ -164,9 +168,9 @@ def update_user_info(data, user: User, db: Session):
         if updated:
             db.commit()
             db.refresh(user)
-            logger.info(f"Usuario {user.id} actualizado correctamente")
+            logger.info(f"Usuario actualizado exitosamente: {user.id}")
         else:
-            logger.info(f"No se realizaron cambios para el usuario ID {user.id}")
+            logger.info(f"No se realizaron cambios para el usuario: {user.id}")
 
         return {
             "success": True,
@@ -179,14 +183,16 @@ def update_user_info(data, user: User, db: Session):
         }
 
     except HTTPException as e:
-        logger.error(f"Error HTTP al actualizar usuario {user.id}: {e.detail}")
+        logger.error(f"Error HTTP al actualizar usuario: {user.id} -> {e.detail}")
         raise e
     except Exception as e:
         logger.exception(f"Error inesperado al actualizar usuario {user.id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno del servidor al actualizar el usuario")
 
-# --- Spotify ---
+# --- Spotify Integration ---
+
 def get_spotify_login_url(email: str = None):
+    """Genera URL de autorización para Spotify con estado opcional (email)."""
     sp_oauth = SpotifyOAuth(
         client_id=os.getenv("SPOTIFY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
@@ -198,4 +204,5 @@ def get_spotify_login_url(email: str = None):
         show_dialog=True
     )
     url = sp_oauth.get_authorize_url(state=email)
+    logger.debug(f"URL de login de Spotify generada: {url}")
     return url

@@ -1,27 +1,33 @@
+# === Standard Libraries ===
 import base64
 import logging
 import os
 from datetime import datetime, timedelta
 
+# === Third-Party Libraries ===
 import requests
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+# === Internal Imports ===
 from src.models.auth_model import User
 from src.services.chatIA_service import Agent
 
-# Configuración de entorno y logging
+# === Configuration ===
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+# === Token Management ===
 
-def refresh_spotify_token(user: User, db: Session):
-    logger.info(f"Refrescando token Spotify para usuario {user.email}")
+def refresh_spotify_token(user: User, db: Session) -> str:
+    """Refresca el token de acceso de Spotify para el usuario dado."""
+    logger.info(f"[TOKEN] Refrescando token para {user.email}")
+
     if not user.spotify_refresh_token:
-        logger.warning(f"Usuario {user.email} no tiene refresh token de Spotify.")
+        logger.warning(f"[TOKEN] Usuario {user.email} sin refresh token.")
         raise HTTPException(status_code=401, detail="Usuario no autorizó Spotify correctamente.")
 
     token_url = "https://accounts.spotify.com/api/token"
@@ -41,7 +47,7 @@ def refresh_spotify_token(user: User, db: Session):
     try:
         response = requests.post(token_url, headers=headers, data=data)
         if response.status_code != 200:
-            logger.error(f"Error al refrescar el token: {response.status_code} {response.text}")
+            logger.error(f"[TOKEN] Error al refrescar: {response.status_code} {response.text}")
             raise HTTPException(status_code=502, detail="Error al refrescar el token de Spotify")
 
         token_info = response.json()
@@ -49,80 +55,78 @@ def refresh_spotify_token(user: User, db: Session):
         user.spotify_token_expires_at = datetime.utcnow() + timedelta(seconds=token_info.get("expires_in", 3600))
 
         db.commit()
-        logger.info(f"Token actualizado correctamente para usuario {user.email}")
+        logger.info(f"[TOKEN] Token actualizado correctamente para {user.email}")
         return user.spotify_access_token
 
     except Exception as e:
-        logger.exception(f"Excepción al refrescar token Spotify: {e}")
+        logger.exception(f"[TOKEN] Excepción durante refresh: {e}")
         raise HTTPException(status_code=500, detail="Error interno al refrescar token de Spotify")
 
 
-def get_valid_spotify_token(user: User, db: Session):
-    logger.info(f"Obteniendo token válido para usuario {user.email}")
+def get_valid_spotify_token(user: User, db: Session) -> str:
+    """Obtiene un token de acceso válido, refrescándolo si es necesario."""
+    logger.info(f"[TOKEN] Verificando token válido para {user.email}")
+
     if not user.spotify_access_token:
-        logger.warning(f"Usuario {user.email} no tiene token de acceso de Spotify.")
+        logger.warning(f"[TOKEN] Usuario {user.email} sin token de acceso.")
         raise HTTPException(status_code=401, detail="El usuario no está vinculado con Spotify")
 
-    if user.spotify_token_expires_at is None or user.spotify_token_expires_at <= datetime.utcnow():
-        logger.info(f"Token expirado para usuario {user.email}, refrescando...")
+    if not user.spotify_token_expires_at or user.spotify_token_expires_at <= datetime.utcnow():
+        logger.info(f"[TOKEN] Token expirado para {user.email}, refrescando...")
         return refresh_spotify_token(user, db)
 
-    logger.info(f"Token válido obtenido para usuario {user.email}")
+    logger.info(f"[TOKEN] Token aún válido para {user.email}")
     return user.spotify_access_token
 
+# === Playlist Retrieval ===
 
 def get_all_user_playlists(user: User, db: Session):
+    """Obtiene todas las playlists del usuario autenticado."""
     try:
         access_token = get_valid_spotify_token(user, db)
         headers = {"Authorization": f"Bearer {access_token}"}
 
         playlists = []
-        limit = 50
-        offset = 0
+        limit, offset = 50, 0
 
         while True:
             url = f"https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}"
             response = requests.get(url, headers=headers)
 
             if response.status_code == 401:
-                logger.warning(f"Token inválido incluso después del refresh para usuario {user.email}")
+                logger.warning(f"[PLAYLISTS] Token inválido tras refresh para {user.email}")
                 raise HTTPException(status_code=401, detail="Token inválido incluso después de refrescar")
 
             if response.status_code != 200:
-                logger.error(f"Error al obtener playlists: {response.status_code}, {response.text}")
+                logger.error(f"[PLAYLISTS] Error al obtener: {response.status_code}, {response.text}")
                 raise HTTPException(status_code=response.status_code, detail="Error al obtener playlists")
 
             data = response.json()
             items = data.get("items", [])
 
             if not items:
-                break  # No hay más playlists
+                break
 
             for item in items:
                 playlist_id = item["id"]
                 playlist_name = item["name"]
                 image_url = item["images"][0]["url"] if item.get("images") else None
 
-                # Obtener tracks de la playlist (opcional, si quieres)
+                # Obtener tracks
                 tracks_url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
                 tracks_response = requests.get(tracks_url, headers=headers)
 
-                if tracks_response.status_code != 200:
-                    logger.warning(f"No se pudieron obtener tracks de la playlist {playlist_name}")
-                    tracks = []
-                else:
-                    track_items = tracks_response.json().get("items", [])
-                    tracks = []
-                    for track_item in track_items:
+                tracks = []
+                if tracks_response.status_code == 200:
+                    for track_item in tracks_response.json().get("items", []):
                         track = track_item.get("track", {})
                         if not track:
                             continue
                         track_name = track.get("name")
-                        artists = [artist["name"] for artist in track.get("artists", [])]
-                        tracks.append({
-                            "name": track_name,
-                            "artists": artists
-                        })
+                        artists = [a["name"] for a in track.get("artists", [])]
+                        tracks.append({"name": track_name, "artists": artists})
+                else:
+                    logger.warning(f"[PLAYLISTS] Tracks no disponibles para {playlist_name}")
 
                 playlists.append({
                     "name": playlist_name,
@@ -132,21 +136,21 @@ def get_all_user_playlists(user: User, db: Session):
                 })
 
             offset += limit
-
             if not data.get("next"):
                 break
 
-        logger.info(f"Se obtuvieron {len(playlists)} playlists para usuario {user.email}")
+        logger.info(f"[PLAYLISTS] Se obtuvieron {len(playlists)} playlists de {user.email}")
         return {"playlists": playlists}
 
     except Exception as e:
-        logger.exception(f"Error inesperado al obtener playlists para usuario {user.email}: {str(e)}")
+        logger.exception(f"[PLAYLISTS] Error inesperado para {user.email}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno al obtener playlists")
 
-
+# === Playlist Update ===
 
 def update_playlist(playlist_id: str, title: str | None, image_base64: str | None, user: User, db: Session):
-    logger.info(f"Actualizando playlist {playlist_id} para usuario {user.email}")
+    """Actualiza el nombre o la imagen de una playlist del usuario."""
+    logger.info(f"[UPDATE] Actualizando playlist {playlist_id} de {user.email}")
     access_token = get_valid_spotify_token(user, db)
 
     headers = {
@@ -154,62 +158,55 @@ def update_playlist(playlist_id: str, title: str | None, image_base64: str | Non
         "Content-Type": "application/json"
     }
 
-    # Verificar propiedad
+    # Verificar propiedad de la playlist
     playlist_response = requests.get(
         f"https://api.spotify.com/v1/playlists/{playlist_id}",
         headers={"Authorization": f"Bearer {access_token}"}
     )
 
     if playlist_response.status_code != 200:
-        logger.error(f"Error al obtener info playlist {playlist_id}: {playlist_response.status_code}, {playlist_response.text}")
+        logger.error(f"[UPDATE] No se pudo verificar propiedad: {playlist_response.status_code}")
         raise HTTPException(status_code=playlist_response.status_code, detail="No se pudo verificar la propiedad de la playlist")
 
-    playlist_data = playlist_response.json()
-    owner_id = playlist_data.get("owner", {}).get("id")
+    owner_id = playlist_response.json().get("owner", {}).get("id")
     if owner_id != user.spotify_user_id:
-        logger.warning(f"Usuario {user.email} intentó modificar playlist ajena (owner: {owner_id})")
+        logger.warning(f"[UPDATE] Usuario {user.email} no es propietario de {playlist_id}")
         raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta playlist")
 
-    # Actualizar título
+    # Actualizar título si se proporciona
     if title:
-        logger.info(f"Actualizando título playlist {playlist_id} a '{title}'")
-        response = requests.put(
-            f"https://api.spotify.com/v1/playlists/{playlist_id}",
-            headers=headers,
-            json={"name": title}
-        )
+        logger.info(f"[UPDATE] Cambiando nombre a '{title}'")
+        response = requests.put(f"https://api.spotify.com/v1/playlists/{playlist_id}", headers=headers, json={"name": title})
         if response.status_code != 200:
-            logger.error(f"Error al actualizar título: {response.status_code}, {response.text}")
+            logger.error(f"[UPDATE] Error al cambiar título: {response.status_code}, {response.text}")
             raise HTTPException(status_code=response.status_code, detail="Error al actualizar el título")
 
-    # Actualizar imagen
+    # Actualizar imagen si se proporciona
     if image_base64:
-        logger.info(f"Actualizando imagen playlist {playlist_id}")
+        logger.info(f"[UPDATE] Actualizando imagen")
         img_headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "image/jpeg"
         }
         try:
             image_data = base64.b64decode(image_base64)
-        except Exception as e:
-            logger.exception("Falló la decodificación base64 de la imagen")
+        except Exception:
+            logger.exception("[UPDATE] Fallo en la decodificación de la imagen base64")
             raise HTTPException(status_code=400, detail="La imagen no está correctamente codificada en base64")
 
-        response = requests.put(
-            f"https://api.spotify.com/v1/playlists/{playlist_id}/images",
-            headers=img_headers,
-            data=image_data
-        )
+        response = requests.put(f"https://api.spotify.com/v1/playlists/{playlist_id}/images", headers=img_headers, data=image_data)
         if response.status_code != 202:
-            logger.error(f"Error al actualizar imagen: {response.status_code}, {response.text}")
+            logger.error(f"[UPDATE] Error al actualizar imagen: {response.status_code}, {response.text}")
             raise HTTPException(status_code=response.status_code, detail="Error al actualizar la imagen")
 
-    logger.info(f"Playlist {playlist_id} actualizada correctamente por usuario {user.email}")
+    logger.info(f"[UPDATE] Playlist {playlist_id} actualizada exitosamente")
     return {"message": "Playlist actualizada correctamente"}
 
+# === Playlist Autogenerada por IA ===
 
-async def generate_playlist_auto(prompt: str, user, db):
-    logger.info(f"Generando playlist automática para tema: {prompt}")
+async def generate_playlist_auto(prompt: str, user: User, db: Session):
+    """Genera automáticamente una playlist basada en un tema usando IA."""
+    logger.info(f"[IA] Generando playlist para: {prompt}")
     access_token = get_valid_spotify_token(user, db)
     headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -222,69 +219,68 @@ async def generate_playlist_auto(prompt: str, user, db):
     agent = Agent()
     try:
         response_text = await agent.chat(user_message)
-        logger.info(f"Respuesta del modelo recibida, longitud: {len(response_text)} caracteres")
+        logger.info(f"[IA] Respuesta del modelo: {len(response_text)} caracteres")
     except Exception as e:
-        logger.error(f"Error al generar canciones con el modelo: {e}")
+        logger.error(f"[IA] Error del modelo: {e}")
         raise HTTPException(status_code=500, detail="Error al generar canciones con el modelo")
 
-    # Parsear título y canciones
+    # Parsear respuesta
     title = None
     canciones = []
 
-    lines = response_text.split("\n")
-    for i, line in enumerate(lines):
+    for line in response_text.split("\n"):
         if line.lower().startswith("título:"):
             title = line.split(":", 1)[1].strip()
-            logger.info(f"Título extraído: {title}")
         elif "-" in line:
             try:
                 titulo, artista = map(str.strip, line.split("-", 1))
-                if titulo and artista:
-                    canciones.append((titulo, artista))
-            except Exception as e:
-                logger.warning(f"Línea ignorada por formato inválido: {line}")
+                canciones.append((titulo, artista))
+            except Exception:
+                logger.warning(f"[IA] Línea ignorada: {line}")
 
     if not title or not canciones:
-        logger.error("No se pudo extraer título o canciones correctamente del texto del modelo")
+        logger.error("[IA] No se pudo extraer título o canciones válidas")
         raise HTTPException(status_code=500, detail="Error al procesar la respuesta del modelo")
 
-    # Buscar las canciones en Spotify para obtener sus URIs
+    # Buscar canciones en Spotify
     track_uris = []
     for titulo, artista in canciones:
         query = f"track:{titulo} artist:{artista}"
         search_url = f"https://api.spotify.com/v1/search?q={requests.utils.quote(query)}&type=track&limit=1"
         search_resp = requests.get(search_url, headers=headers)
-        if search_resp.status_code != 200:
-            logger.warning(f"No se pudo buscar la canción '{titulo}' de '{artista}' en Spotify")
-            continue
 
-        items = search_resp.json().get("tracks", {}).get("items", [])
-        if items:
-            track_uris.append(items[0]["uri"])
+        if search_resp.status_code == 200:
+            items = search_resp.json().get("tracks", {}).get("items", [])
+            if items:
+                track_uris.append(items[0]["uri"])
+            else:
+                logger.info(f"[IA] No encontrada: '{titulo}' de '{artista}'")
         else:
-            logger.info(f"No se encontró en Spotify la canción '{titulo}' de '{artista}'")
+            logger.warning(f"[IA] Error en búsqueda de '{titulo}' - '{artista}'")
 
-    # Crear playlist en Spotify
+    # Crear playlist
     create_url = f"https://api.spotify.com/v1/users/{user.spotify_user_id}/playlists"
-    create_resp = requests.post(create_url, headers=headers, json={"name": title, "description": f"Playlist generada con IA sobre: {prompt}"})
+    create_resp = requests.post(create_url, headers=headers, json={
+        "name": title,
+        "description": f"Playlist generada con IA sobre: {prompt}"
+    })
 
     if create_resp.status_code != 201:
-        logger.error(f"Error al crear playlist en Spotify: {create_resp.status_code}, {create_resp.text}")
+        logger.error(f"[IA] Error al crear playlist: {create_resp.status_code}, {create_resp.text}")
         raise HTTPException(status_code=create_resp.status_code, detail="Error al crear playlist en Spotify")
 
     playlist_id = create_resp.json()["id"]
-    logger.info(f"Playlist creada en Spotify con ID: {playlist_id}")
+    logger.info(f"[IA] Playlist creada con ID: {playlist_id}")
 
-    # Agregar canciones a la playlist por chunks para no exceder límite
+    # Agregar canciones por chunks
     chunk_size = 100
     for i in range(0, len(track_uris), chunk_size):
         uris_chunk = track_uris[i:i + chunk_size]
-        add_tracks_url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
-        add_resp = requests.post(add_tracks_url, headers=headers, json={"uris": uris_chunk})
+        add_resp = requests.post(f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks", headers=headers, json={"uris": uris_chunk})
 
         if add_resp.status_code != 201:
-            logger.error(f"Error al agregar canciones a la playlist: {add_resp.status_code}, {add_resp.text}")
+            logger.error(f"[IA] Error al agregar canciones: {add_resp.status_code}, {add_resp.text}")
             raise HTTPException(status_code=add_resp.status_code, detail="Error al agregar canciones a la playlist")
 
-    logger.info(f"Playlist automática generada correctamente con {len(track_uris)} canciones")
+    logger.info(f"[IA] Playlist generada exitosamente con {len(track_uris)} canciones")
     return {"message": "Playlist creada exitosamente", "playlist_id": playlist_id, "title": title}
