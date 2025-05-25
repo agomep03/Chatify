@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import CustomDialog from "./Dialog";
 import Form from "./Form";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Componente para mostrar las playlists del usuario en forma de tarjetas.
@@ -24,6 +25,9 @@ const PlaylistCards: React.FC = () => {
 
   // Ref para el formulario de edición
   const formRef = useRef<HTMLFormElement>(null);
+
+  // Usamos theme para los colores
+  const theme = useTheme();
 
   useEffect(() => {
     // Simulación de datos de ejemplo
@@ -113,11 +117,11 @@ const PlaylistCards: React.FC = () => {
           width: "8px",
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#888",
+          backgroundColor: theme.palette.grey[600],
           borderRadius: "4px",
         },
         "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor: "#555",
+          backgroundColor: theme.palette.grey[800],
         },
       }}
     >

@@ -10,7 +10,7 @@ import {
 import Logo from "./Logo";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useTheme } from "@mui/material/styles"; // <-- Añadido
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Componente de formulario reutilizable.
@@ -72,13 +72,18 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
   children,
   noBackground = false,
   showButton = true,
-  showHomeButton = false, // <-- Añadido
+  showHomeButton = false,
 }, ref) => {
   // Estado para manejar los datos del formulario
   const [formData, setFormData] =
     useState<Record<string, string>>(initialValues);
   const navigate = useNavigate();
-  const theme = useTheme(); // <-- Añadido
+  const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
+
+  const logoSrc = isLight && logoUrl
+    ? logoUrl.replace('Logo.png', 'Logo_dark.png')
+    : logoUrl;
 
   /**
    * Manejador de cambios en los campos del formulario.
@@ -186,7 +191,7 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
               justifyContent: "center" // Siempre centrado
             }}
           >
-            {logoUrl && <Logo logoUrl={logoUrl} />}
+            {logoSrc && <Logo logoUrl={logoSrc} />}
             <Typography variant="h5" sx={{ color: theme.palette.text.primary, ml: logoUrl ? 1 : 0 }}>
               {title}
             </Typography>
@@ -224,6 +229,10 @@ const Form = forwardRef<HTMLFormElement, FormProps>(({
                   "& fieldset": { borderColor: theme.palette.custom.outlinedBorder },
                   "&:hover fieldset": { borderColor: theme.palette.text.primary },
                   "&.Mui-focused fieldset": { borderColor: theme.palette.text.primary },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
+                  WebkitTextFillColor: theme.palette.text.primary,
                 },
               }}
             />

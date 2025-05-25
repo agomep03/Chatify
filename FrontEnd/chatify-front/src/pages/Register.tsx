@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
 import { registerUser } from "../api/authService";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Pagina de registro.
@@ -15,6 +16,7 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
+  const theme = useTheme();
 
   // Campos del formulario
   const registerFields = [
@@ -77,7 +79,7 @@ const Register: React.FC = () => {
         alignItems: "center",
         width: "100vw",
         height: "100vh",
-        backgroundColor: "#191919",
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <Form
