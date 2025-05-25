@@ -10,7 +10,11 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import PrivateRoute from "./components/PrivateRoute";
 
-const App: React.FC = () => {
+type AppProps = {
+  toggleTheme: () => void;
+};
+
+const App: React.FC<AppProps> = ({ toggleTheme }) => {
   return (
     <Router>
       <Routes>
@@ -21,7 +25,7 @@ const App: React.FC = () => {
 
         {/* Rutas protegidas */}
         <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<Home />} />
+          <Route path="/home"  element={<Home toggleTheme={toggleTheme} />}  />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>

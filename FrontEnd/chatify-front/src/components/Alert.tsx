@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { Snackbar, Alert } from '@mui/material';
+import { useTheme } from "@mui/material/styles";
 
 // Posibles tipos de altertas
 type AlertType = 'success' | 'error' | 'info';
@@ -22,6 +23,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<AlertType>('info');
   const [message, setMessage] = useState('');
+  const theme = useTheme();
 
   // Función para personalizar la alerta
   const customAlert = (alertType: AlertType, msg: string) => {
@@ -36,13 +38,36 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     <AlertContext.Provider value={{ customAlert }}>
       {children}
       <Snackbar open={open} autoHideDuration={30000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-        <Alert onClose={handleClose} severity={type}
-        sx={{
+        <Alert
+          onClose={handleClose}
+          severity={type}
+          sx={{
             width: '100%',
-            backgroundColor: '#1f1f1f',
-            color: '#fff',
-            '& .MuiAlert-icon': { color: '#fff' },
-          }}>
+            backgroundColor: theme.palette.background.default,
+            color: theme.palette.text.primary,
+            '& .MuiAlert-icon': { color: theme.palette.text.primary },
+            '& .MuiIconButton-root': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+            '& .MuiIconButton-root:focus': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+            '& .MuiIconButton-root:focus-visible': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+            '& .MuiIconButton-root:active': {
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            },
+          }}
+        >
           {message}
         </Alert>
       </Snackbar>
