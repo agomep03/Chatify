@@ -7,11 +7,13 @@ class Conversation(Base):
     __tablename__ = 'conversations'
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, index=True)
+    #user_id = Column(String, index=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
     created_at = Column(DateTime, default=datetime.utcnow)
     title = Column(String, default="Sin título")
 
-    messages = relationship("Message", back_populates="conversation")
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="conversation")
 
     def __repr__(self):
         return f"<Conversation id={self.id} user_id={self.user_id}>"
