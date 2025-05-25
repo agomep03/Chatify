@@ -1,7 +1,7 @@
 # main.py
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from src.routes import auth_routes, chat_routes, user_routes, playlist_routes
+from src.routes import auth_routes, chat_routes, spotify_routes
 from src.config.db import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -28,5 +28,4 @@ app.add_middleware(
 # Incluir tus rutas
 app.include_router(chat_routes.router, prefix="/chat", tags=["chat"])
 app.include_router(auth_routes.router, prefix="/auth", tags=["auth"])
-app.include_router(user_routes.router, tags=["user_spotify"])
-app.include_router(playlist_routes.router, prefix="/spotify", tags=["spotify"])
+app.include_router(spotify_routes.router, prefix="/spotify", tags=["spotify"])
