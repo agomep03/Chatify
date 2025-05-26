@@ -44,16 +44,10 @@ const Register: React.FC = () => {
     setLoading(true);
     try {
       const data = await registerUser(formData.name, formData.email, formData.password);
-      // Guardar el token si está presente en la respuesta
-      const token = data?.token || data?.access_token;
-      if (token) {
-        localStorage.setItem("token", token);
-        customAlert("info", "Usuario registrado exitosamente");
-        navigate("/home");
-      } else {
-        customAlert("info", "Usuario registrado exitosamente. Inicia sesión.");
-        navigate("/login");
-      }
+      localStorage.setItem("token", data.access_token);
+      customAlert("info", "Datos guardados exitosamente");
+      window.location.href = data.redirect_url;
+      
     } catch (error: any) {
       // Manejo de error personalizado
       if (

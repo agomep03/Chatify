@@ -7,6 +7,7 @@ import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
 import { loginUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
+import { fetchVerifySpotifyConnection } from "../api/spotifyService";
 
 /**
  * Pagina de inicio de sesión.
@@ -53,13 +54,19 @@ const Login: React.FC = () => {
   const handleLogin = async (formData: Record<string, string>) => {
     setLoading(true);
     try {
-      const token = await loginUser(formData.email, formData.password);
+      const { token, redirect_url } = await loginUser(formData.email, formData.password);
       if (!token) {
         customAlert("error", "No se recibió un token válido.");
         return;
       }
       localStorage.setItem("token", token);
-      navigate("/home");
+      const spotifyConnected = await fetchVerifySpotifyConnection();
+      if(spotifyConnected){
+        navigate("/home");
+      }else{
+        customAlert("info","Debes volver a conectar tu cuenta de Spotify");
+        window.location.href = redirect_url;
+      }
     } catch (error: any) {
       customAlert("error", `Error: ${error.message || "Inicio de sesión fallido"}`);
     } finally {
