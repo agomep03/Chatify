@@ -1,6 +1,6 @@
-import { Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import Form from "../components/Form";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
 import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
@@ -13,7 +13,6 @@ import { useTheme } from "@mui/material/styles";
  * @description Este componente permite a los usuarios registrarse en la aplicación.
  */
 const Register: React.FC = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
   const theme = useTheme();
@@ -80,10 +79,29 @@ const Register: React.FC = () => {
         title="Registrarse"
         fields={registerFields}
         onSubmit={handleRegister}
-        buttonText="Sign In"
+        buttonText="Registrarse"
         logoUrl={logo}
         loading={loading}
-      />
+      >
+        <Box mt={2} textAlign="center">
+            <Typography variant="body2" color="text.secondary">
+              Ya tienes cuenta?{" "}
+              <Link
+                component={RouterLink}
+                to="/login"
+                underline="hover"
+                color="primary"
+                sx={{
+                  "&:hover": {
+                    color: theme => theme.palette.custom.primaryHover,
+                  },
+                }}
+              >
+                Inicia sesión aquí
+              </Link>
+            </Typography>
+          </Box>
+        </Form>
     </Box>
   );
 };

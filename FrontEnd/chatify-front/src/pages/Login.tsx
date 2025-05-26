@@ -91,7 +91,7 @@ const Login: React.FC = () => {
         title="Iniciar Sesión"
         fields={loginFields}
         onSubmit={handleLogin}
-        buttonText="Log In"
+        buttonText="Iniciar Sesión"
         logoUrl={logo}
         loading={loading}
       >
@@ -104,6 +104,11 @@ const Login: React.FC = () => {
               to="/register"
               underline="hover"
               color="primary"
+              sx={{
+                "&:hover": {
+                  color: theme => theme.palette.custom.primaryHover,
+                },
+              }}
             >
               Regístrate aquí
             </Link>
