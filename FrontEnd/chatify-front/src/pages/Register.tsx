@@ -1,11 +1,12 @@
-import { Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import Form from "../components/Form";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
 import { registerUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
+import { isAuthenticated } from "../utils/auth";
 
 /**
  * Pagina de registro.
@@ -13,10 +14,10 @@ import { useTheme } from "@mui/material/styles";
  * @description Este componente permite a los usuarios registrarse en la aplicación.
  */
 const Register: React.FC = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   // Campos del formulario
   const registerFields = [
@@ -29,6 +30,12 @@ const Register: React.FC = () => {
       type: "password",
     },
   ];
+
+  useEffect(() => {
+      if (isAuthenticated()) {
+        navigate("/home");
+      }
+    }, [navigate]);
 
   /**
    * Registra un nuevo usuario.
@@ -44,16 +51,10 @@ const Register: React.FC = () => {
     setLoading(true);
     try {
       const data = await registerUser(formData.name, formData.email, formData.password);
-      // Guardar el token si está presente en la respuesta
-      const token = data?.token || data?.access_token;
-      if (token) {
-        localStorage.setItem("token", token);
-        customAlert("info", "Usuario registrado exitosamente");
-        navigate("/home");
-      } else {
-        customAlert("info", "Usuario registrado exitosamente. Inicia sesión.");
-        navigate("/login");
-      }
+      localStorage.setItem("token", data.access_token);
+      customAlert("info", "Datos guardados exitosamente");
+      window.location.href = data.redirect_url;
+      
     } catch (error: any) {
       // Manejo de error personalizado
       if (
@@ -86,10 +87,29 @@ const Register: React.FC = () => {
         title="Registrarse"
         fields={registerFields}
         onSubmit={handleRegister}
-        buttonText="Sign In"
+        buttonText="Registrarse"
         logoUrl={logo}
         loading={loading}
-      />
+      >
+        <Box mt={2} textAlign="center">
+            <Typography variant="body2" color="text.secondary">
+              Ya tienes cuenta?{" "}
+              <Link
+                component={RouterLink}
+                to="/login"
+                underline="hover"
+                color="primary"
+                sx={{
+                  "&:hover": {
+                    color: theme => theme.palette.custom.primaryHover,
+                  },
+                }}
+              >
+                Inicia sesión aquí
+              </Link>
+            </Typography>
+          </Box>
+        </Form>
     </Box>
   );
 };
