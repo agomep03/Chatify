@@ -54,7 +54,11 @@ def update_profile(
 @router.get("/callback")
 async def spotify_callback(request: Request, db: Session = Depends(get_db)):
     try:
-        result = login_spotify(request, db)
+        result = await login_spotify(request, db)
+        if not result.json().sucess:
+            return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={result.json().message}")
         return RedirectResponse(url=f"{FRONTEND_URL}/home")
     except HTTPException as e:
         return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={e.detail}")
+    except:
+        return RedirectResponse(url=f"{FRONTEND_URL}/error")
