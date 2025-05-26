@@ -19,7 +19,7 @@ REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-async def login_spotify(request: Request, db: Session):
+def login_spotify(request: Request, db: Session):
     code = request.query_params.get("code")
     email = request.query_params.get("state")
 
