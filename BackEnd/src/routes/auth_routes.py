@@ -1,5 +1,7 @@
+from http.client import HTTPException
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from src.controllers.auth_controller import (
@@ -12,6 +14,9 @@ from src.controllers.auth_controller import (
 )
 from src.services.spotify_service import login_spotify
 from src.models.auth_model import User
+import os
+
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 router = APIRouter()
 
@@ -48,4 +53,12 @@ def update_profile(
 
 @router.get("/callback")
 async def spotify_callback(request: Request, db: Session = Depends(get_db)):
-    return login_spotify(request, db)
+    try:
+        result = login_spotify(request, db)
+        if not result.get("success", False):
+            return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={result.get('message', 'Error desconocido')}")
+        return RedirectResponse(url=f"{FRONTEND_URL}/home")
+    except HTTPException as e:
+        return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={e.detail}")
+    except Exception:
+        return RedirectResponse(url=f"{FRONTEND_URL}/error")
