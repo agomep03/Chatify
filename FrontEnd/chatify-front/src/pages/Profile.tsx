@@ -40,7 +40,14 @@ const Profile: React.FC = () => {
           email: data.email || "",
         });
       } catch (error) {
-        customAlert("error", "Error al obtener datos del perfil.");
+        // Mostrar alerta si viene de forcedLogoutMsg (token expirado/no autorizado)
+        const forcedLogoutMsg = localStorage.getItem("forcedLogoutMsg");
+        if (forcedLogoutMsg) {
+          customAlert("error", forcedLogoutMsg);
+          localStorage.removeItem("forcedLogoutMsg");
+        } else {
+          customAlert("error", "Error al obtener datos del perfil.");
+        }
         setFormData({});
       } finally {
         setLoading(false);
@@ -48,6 +55,7 @@ const Profile: React.FC = () => {
     };
 
     fetchUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**

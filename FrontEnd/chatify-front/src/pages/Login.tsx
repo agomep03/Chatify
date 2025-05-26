@@ -28,6 +28,12 @@ const Login: React.FC = () => {
       );
       localStorage.removeItem("showEmailChangedAlert");
     }
+    // Mostrar alerta si viene de un redirect por token inválido
+    const forcedLogoutMsg = localStorage.getItem("forcedLogoutMsg");
+    if (forcedLogoutMsg) {
+      customAlert("error", forcedLogoutMsg);
+      localStorage.removeItem("forcedLogoutMsg");
+    }
     if (isAuthenticated()) {
       navigate("/home");
     }
