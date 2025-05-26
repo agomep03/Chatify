@@ -1,11 +1,12 @@
 import { Box, Link, Typography } from "@mui/material";
 import Form from "../components/Form";
-import { Link as RouterLink } from "react-router-dom";
-import { useState } from "react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAlert } from "../components/Alert";
 import logo from '../assets/Logo.png';
 import { registerUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
+import { isAuthenticated } from "../utils/auth";
 
 /**
  * Pagina de registro.
@@ -16,6 +17,7 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   // Campos del formulario
   const registerFields = [
@@ -28,6 +30,12 @@ const Register: React.FC = () => {
       type: "password",
     },
   ];
+
+  useEffect(() => {
+      if (isAuthenticated()) {
+        navigate("/home");
+      }
+    }, [navigate]);
 
   /**
    * Registra un nuevo usuario.
