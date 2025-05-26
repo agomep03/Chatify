@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import Error from "./pages/Error";
 import PrivateRoute from "./components/PrivateRoute";
 
 type AppProps = {
@@ -22,6 +23,7 @@ const App: React.FC<AppProps> = ({ toggleTheme }) => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/error" element={<Error />} />
 
         {/* Rutas protegidas */}
         <Route element={<PrivateRoute />}>
