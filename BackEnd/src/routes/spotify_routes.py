@@ -7,7 +7,6 @@ import requests
 
 from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto
 from src.controllers.auth_controller import get_current_user, get_db
-from src.controllers.spotify_controller import remove_tracks_from_playlist
 from src.models.auth_model import User
 from src.services.lyrircs_service import LyricsFetcher
 
