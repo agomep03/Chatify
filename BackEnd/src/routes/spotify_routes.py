@@ -1,17 +1,26 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
+
+import requests
 
 from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto
 from src.controllers.auth_controller import get_current_user, get_db
+from src.controllers.spotify_controller import remove_tracks_from_playlist
 from src.models.auth_model import User
+from src.services.lyrircs_service import LyricsFetcher
+
 
 router = APIRouter()
 
 class UpdatePlaylistRequest(BaseModel):
     title: Optional[str] = None
     image_base64: Optional[str] = None
+
+class RemoveTracksRequest(BaseModel):
+    tracks: List[dict]
+    snapshot_id: Optional[str] = None
 
 @router.get("/playlists")
 def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -46,3 +55,12 @@ async def auto_generate_playlist(
 ):
     playlist_url = await generate_playlist_auto(prompt, user, db)
     return {"playlist_url": playlist_url}
+
+@router.get("/lyrics")
+def get_lyrics(
+    artist: str = Query(..., description="Nombre del artista"),
+    song: str = Query(..., description="Título de la canción")
+):
+    lyrics_fetcher = LyricsFetcher()
+    lyrics = lyrics_fetcher.search_song_lyrics(artist, song)
+    return {"artist": artist, "song": song, "lyrics": lyrics}

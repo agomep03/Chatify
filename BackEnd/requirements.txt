@@ -62,3 +62,4 @@ psycopg2==2.9.10
 psycopg2-binary==2.9.10
 passlib==1.7.4
 PyJWT==2.10.1
+lyricsgenius
