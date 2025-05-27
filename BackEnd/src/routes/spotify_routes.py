@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import requests
 
-from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto
+from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto, remove_tracks_from_playlist
 from src.controllers.auth_controller import get_current_user, get_db
 from src.models.auth_model import User
 from src.services.lyrircs_service import LyricsFetcher
@@ -17,8 +17,11 @@ class UpdatePlaylistRequest(BaseModel):
     title: Optional[str] = None
     image_base64: Optional[str] = None
 
+class TrackUri(BaseModel):
+    uri: str
+
 class RemoveTracksRequest(BaseModel):
-    tracks: List[dict]
+    tracks: List[TrackUri]
     snapshot_id: Optional[str] = None
 
 @router.get("/playlists")
@@ -54,6 +57,14 @@ async def auto_generate_playlist(
 ):
     playlist_url = await generate_playlist_auto(prompt, user, db)
     return {"playlist_url": playlist_url}
+
+@router.delete("/playlists/{playlist_id}/tracks")
+def remove_tracks_playlist(
+    playlist_id: str,
+    data: RemoveTracksRequest,
+    user: User = Depends(get_current_user)
+):
+    return remove_tracks_from_playlist(playlist_id, data, user)
 
 @router.get("/lyrics")
 def get_lyrics(
