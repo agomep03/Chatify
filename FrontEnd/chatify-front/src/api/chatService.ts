@@ -1,5 +1,5 @@
 import config from '../config';
-
+import { handleUnauthorized } from '../utils/auth';
 
 // Mandar un nuevo mensaje, guardarlo en la base de datos y obtener una respuesta de la IA
 // Llamada al enpint /chat/{chatId}/message
@@ -34,6 +34,7 @@ export const fetchSendMessage = async (
       },
       body: input,
     });
+    if (handleUnauthorized(res)) return;
 
     const data = await res.json();
     const botMessage: Message = {
@@ -72,7 +73,8 @@ export const fetchChatHistory = async (
           Authorization: `Bearer ${token}`,
         },
       });
-  
+      if (handleUnauthorized(res)) return;
+
       const data = await res.json();
       const historyMessages: Message[] = data.map((msg: any, index: number) => ({
         id: Date.now() + index,
@@ -100,6 +102,7 @@ export const fetchDeleteChat = async (chatId: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (handleUnauthorized(res)) return;
     if (!res.ok) throw new Error("No se pudo eliminar el chat");
   };
 
@@ -115,6 +118,7 @@ export const fetchStartChat = async (): Promise<string> => {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (handleUnauthorized(res)) return "";
     const newChat = await res.json();
     if (!res.ok || !newChat.chat_id) {
       throw new Error("Respuesta inválida del servidor");
@@ -136,6 +140,7 @@ export const fetchUpdateChatTitle = async (chatId: string, newTitle: string) => 
       },
       body: newTitle,
     });
+    if (handleUnauthorized(res)) return;
     if (!res.ok) throw new Error("Error al actualizar título");
   };
 
@@ -155,6 +160,7 @@ export const fetchObtainAllChats = async (): Promise<Chat[]> => {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (handleUnauthorized(res)) return [];
     if (!res.ok) throw new Error("Error al obtener chats");
     const data: Chat[] = await res.json();
     return data;

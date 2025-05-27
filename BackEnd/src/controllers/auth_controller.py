@@ -190,7 +190,6 @@ def update_user_info(data, user: User, db: Session):
         raise HTTPException(status_code=500, detail="Error interno del servidor al actualizar el usuario")
 
 # --- Spotify Integration ---
-
 def get_spotify_login_url(email: str = None):
     """Genera URL de autorización para Spotify con estado opcional (email)."""
     sp_oauth = SpotifyOAuth(
@@ -199,10 +198,12 @@ def get_spotify_login_url(email: str = None):
         redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
         scope=(
             "user-library-read user-read-private user-read-email "
-            "playlist-modify-public playlist-modify-private ugc-image-upload"
+            "playlist-modify-public playlist-modify-private ugc-image-upload "
+            "playlist-read-private"
         ),
         show_dialog=True
     )
     url = sp_oauth.get_authorize_url(state=email)
     logger.debug(f"URL de login de Spotify generada: {url}")
     return url
+

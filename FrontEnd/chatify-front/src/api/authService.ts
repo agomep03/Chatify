@@ -1,7 +1,11 @@
 import config from '../config';
+import { handleUnauthorized } from '../utils/auth';
 
 // Login de usuario
-export const loginUser = async (email: string, password: string): Promise<string> => {
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<{ token: string; redirect_url: string }> => {
   const urlEncoded = new URLSearchParams();
   urlEncoded.append("username", email);
   urlEncoded.append("password", password);
@@ -26,22 +30,17 @@ export const loginUser = async (email: string, password: string): Promise<string
     throw new Error(errorMsg);
   }
 
-  const contentType = response.headers.get("content-type");
-  let token: string | undefined;
+  const data = await response.json();
+  const token = data.token || data.access_token;
+  const redirect_url = data.redirect_url;
 
-  if (contentType?.includes("application/json")) {
-    const data = await response.json();
-    token = data.token || data.access_token;
-  } else {
-    token = await response.text();
+  if (!token || !redirect_url) {
+    throw new Error("Respuesta incompleta del servidor.");
   }
 
-  if (!token) {
-    throw new Error("No se recibió un token válido.");
-  }
-
-  return token;
+  return { token, redirect_url };
 };
+
 
 // Registro de usuario
 export const registerUser = async (name: string, email: string, password: string) => {
@@ -84,6 +83,7 @@ export const fetchUserProfile = async () => {
       "Authorization": `Bearer ${token}`,
     },
   });
+  if (handleUnauthorized(response)) return;
   if (!response.ok) {
     throw new Error("No se pudo obtener el perfil");
   }
@@ -101,6 +101,7 @@ export const updateUserProfile = async (data: Record<string, string>) => {
     },
     body: JSON.stringify(data),
   });
+  if (handleUnauthorized(response)) return;
   if (!response.ok) {
     const errorData = await response.json();
     const errorMsg =
