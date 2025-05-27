@@ -112,6 +112,7 @@ def get_all_user_playlists(user: User, db: Session):
             for item in items:
                 playlist_id = item["id"]
                 playlist_name = item["name"]
+                playlist_description = item["description"]
                 image_url = item["images"][0]["url"] if item.get("images") else None
 
                 # Obtener tracks
@@ -134,6 +135,7 @@ def get_all_user_playlists(user: User, db: Session):
                 playlists.append({
                     "name": playlist_name,
                     "id": playlist_id,
+                    "description": playlist_description,
                     "image": image_url,
                     "tracks": tracks
                 })
@@ -151,8 +153,15 @@ def get_all_user_playlists(user: User, db: Session):
 
 # === Playlist Update ===
 
-def update_playlist(playlist_id: str, title: str | None, image_base64: str | None, user: User, db: Session):
-    """Actualiza el nombre o la imagen de una playlist del usuario."""
+def update_playlist(
+    playlist_id: str,
+    title: str | None,
+    description: str | None,
+    image_base64: str | None,
+    user: User,
+    db: Session
+):
+    """Actualiza el nombre, la descripción o la imagen de una playlist del usuario."""
     logger.info(f"[UPDATE] Actualizando playlist {playlist_id} de {user.email}")
     access_token = get_valid_spotify_token(user, db)
 
@@ -164,7 +173,7 @@ def update_playlist(playlist_id: str, title: str | None, image_base64: str | Non
     # Verificar propiedad de la playlist
     playlist_response = requests.get(
         f"https://api.spotify.com/v1/playlists/{playlist_id}",
-        headers={"Authorization": f"Bearer {access_token}"}
+        headers=headers
     )
 
     if playlist_response.status_code != 200:
@@ -176,13 +185,24 @@ def update_playlist(playlist_id: str, title: str | None, image_base64: str | Non
         logger.warning(f"[UPDATE] Usuario {user.email} no es propietario de {playlist_id}")
         raise HTTPException(status_code=403, detail="No tienes permiso para modificar esta playlist")
 
-    # Actualizar título si se proporciona
+    # Construir el payload para el título y/o descripción
+    payload = {}
     if title:
         logger.info(f"[UPDATE] Cambiando nombre a '{title}'")
-        response = requests.put(f"https://api.spotify.com/v1/playlists/{playlist_id}", headers=headers, json={"name": title})
+        payload["name"] = title
+    if description:
+        logger.info(f"[UPDATE] Cambiando descripción a '{description}'")
+        payload["description"] = description
+
+    if payload:
+        response = requests.put(
+            f"https://api.spotify.com/v1/playlists/{playlist_id}",
+            headers=headers,
+            json=payload
+        )
         if response.status_code != 200:
-            logger.error(f"[UPDATE] Error al cambiar título: {response.status_code}, {response.text}")
-            raise HTTPException(status_code=response.status_code, detail="Error al actualizar el título")
+            logger.error(f"[UPDATE] Error al actualizar nombre/descr.: {response.status_code}, {response.text}")
+            raise HTTPException(status_code=response.status_code, detail="Error al actualizar título o descripción")
 
     # Actualizar imagen si se proporciona
     if image_base64:
@@ -197,13 +217,18 @@ def update_playlist(playlist_id: str, title: str | None, image_base64: str | Non
             logger.exception("[UPDATE] Fallo en la decodificación de la imagen base64")
             raise HTTPException(status_code=400, detail="La imagen no está correctamente codificada en base64")
 
-        response = requests.put(f"https://api.spotify.com/v1/playlists/{playlist_id}/images", headers=img_headers, data=image_data)
+        response = requests.put(
+            f"https://api.spotify.com/v1/playlists/{playlist_id}/images",
+            headers=img_headers,
+            data=image_data
+        )
         if response.status_code != 202:
             logger.error(f"[UPDATE] Error al actualizar imagen: {response.status_code}, {response.text}")
             raise HTTPException(status_code=response.status_code, detail="Error al actualizar la imagen")
 
     logger.info(f"[UPDATE] Playlist {playlist_id} actualizada exitosamente")
     return {"message": "Playlist actualizada correctamente"}
+
 
 # === Playlist Autogenerada por IA ===
 
@@ -214,8 +239,8 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
     headers = {"Authorization": f"Bearer {access_token}"}
 
     system_message = (
-        "Eres un asistente experto en música. Devuélveme un título para una playlist y una lista de 20 canciones relacionadas con el siguiente tema. "
-        "Formato:\nTítulo: <aquí el título>\nCanciones:\nCada canción en una línea, 'Título - Artista'. Sin otra explicación."
+        "Eres un asistente experto en música. Devuélveme un título para una playlist, una descripción clara para la playlist y una lista de 20 canciones relacionadas con el siguiente tema. "
+        "Formato:\nTítulo: <aquí el título>\nDescripcion: <aqui la descripcion>\nCanciones:\nCada canción en una línea, 'Título - Artista'. Sin otra explicación."
     )
     user_message = f"{system_message}\nTema: {prompt}"
 
@@ -229,11 +254,14 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
 
     # Parsear respuesta
     title = None
+    description = None
     canciones = []
 
     for line in response_text.split("\n"):
         if line.lower().startswith("título:"):
             title = line.split(":", 1)[1].strip()
+        elif line.lower().startswith("descripcion:"):
+            description = line.split(":", 1)[1].strip()
         elif "-" in line:
             try:
                 titulo, artista = map(str.strip, line.split("-", 1))
@@ -241,8 +269,8 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
             except Exception:
                 logger.warning(f"[IA] Línea ignorada: {line}")
 
-    if not title or not canciones:
-        logger.error("[IA] No se pudo extraer título o canciones válidas")
+    if not title or not description or not canciones:
+        logger.error("[IA] No se pudo extraer título, descripción o canciones válidas")
         raise HTTPException(status_code=500, detail="Error al procesar la respuesta del modelo")
 
     # Buscar canciones en Spotify
@@ -265,7 +293,7 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
     create_url = f"https://api.spotify.com/v1/users/{user.spotify_user_id}/playlists"
     create_resp = requests.post(create_url, headers=headers, json={
         "name": title,
-        "description": f"Playlist generada con IA sobre: {prompt}"
+        "description": description
     })
 
     if create_resp.status_code != 201:
@@ -314,3 +342,21 @@ def remove_tracks_from_playlist(playlist_id: str, data: RemoveTracksRequest, use
             "error": response.json(),
             "status_code": response.status_code
         }
+    
+def unfollow_playlist_logic(playlist_id: str, user: User):
+    access_token = user.spotify_access_token
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    response = requests.delete(
+        f"https://api.spotify.com/v1/playlists/{playlist_id}/followers",
+        headers=headers
+    )
+
+    if response.status_code == 200:
+        return {"message": "Playlist eliminada de tu cuenta (dejaste de seguirla)."}
+    elif response.status_code == 403:
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta playlist.")
+    else:
+        raise HTTPException(status_code=response.status_code, detail=response.json())

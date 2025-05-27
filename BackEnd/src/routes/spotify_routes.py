@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import requests
 
-from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto, remove_tracks_from_playlist
+from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto, remove_tracks_from_playlist, unfollow_playlist_logic
 from src.controllers.auth_controller import get_current_user, get_db
 from src.models.auth_model import User
 from src.services.lyrircs_service import LyricsFetcher
@@ -23,6 +23,11 @@ class TrackUri(BaseModel):
 class RemoveTracksRequest(BaseModel):
     tracks: List[TrackUri]
     snapshot_id: Optional[str] = None
+
+class UpdatePlaylistRequest(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    image_base64: Optional[str] = None
 
 @router.get("/playlists")
 def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -44,6 +49,7 @@ def update_playlist_endpoint(
     return update_playlist(
         playlist_id=playlist_id,
         title=data.title,
+        description=data.description,
         image_base64=data.image_base64,
         user=user,
         db=db
@@ -74,3 +80,10 @@ def get_lyrics(
     lyrics_fetcher = LyricsFetcher()
     lyrics = lyrics_fetcher.search_song_lyrics(artist, song)
     return {"artist": artist, "song": song, "lyrics": lyrics}
+
+@router.delete("/playlists/{playlist_id}/unfollow")
+def unfollow_playlist(
+    playlist_id: str,
+    user: User = Depends(get_current_user)
+):
+    return unfollow_playlist_logic(playlist_id, user)
