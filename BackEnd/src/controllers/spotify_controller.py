@@ -1,27 +1,29 @@
-# === Standard Libraries ===
 import base64
 import logging
 import os
 from datetime import datetime, timedelta
+from pydantic import BaseModel
+from typing import List, Optional
 
-# === Third-Party Libraries ===
+
 import requests
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-# === Internal Imports ===
 from src.models.auth_model import User
 from src.services.chatIA_service import Agent
 
-# === Configuration ===
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# === Token Management ===
+class RemoveTracksRequest(BaseModel):
+    tracks: List[dict]
+    snapshot_id: Optional[str] = None
 
+# === Token Management ===
 def refresh_spotify_token(user: User, db: Session) -> str:
     """Refresca el token de acceso de Spotify para el usuario dado."""
     logger.info(f"[TOKEN] Refrescando token para {user.email}")
@@ -122,9 +124,10 @@ def get_all_user_playlists(user: User, db: Session):
                         track = track_item.get("track", {})
                         if not track:
                             continue
+                        track_uri = track.get("uri")
                         track_name = track.get("name")
                         artists = [a["name"] for a in track.get("artists", [])]
-                        tracks.append({"name": track_name, "artists": artists})
+                        tracks.append({"name": track_name, "artists": artists, "uri":track_uri})
                 else:
                     logger.warning(f"[PLAYLISTS] Tracks no disponibles para {playlist_name}")
 
@@ -284,3 +287,30 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
 
     logger.info(f"[IA] Playlist generada exitosamente con {len(track_uris)} canciones")
     return {"message": "Playlist creada exitosamente", "playlist_id": playlist_id, "title": title}
+
+def remove_tracks_from_playlist(playlist_id: str, data: RemoveTracksRequest, user: User):
+    access_token = user.spotify_access_token
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "tracks": [track.dict() for track in data.tracks]
+    }
+    if data.snapshot_id:
+        body["snapshot_id"] = data.snapshot_id
+
+    response = requests.delete(
+        f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks",
+        headers=headers,
+        json=body
+    )
+
+    if response.status_code == 200:
+        return {"snapshot_id": response.json().get("snapshot_id")}
+    else:
+        return {
+            "error": response.json(),
+            "status_code": response.status_code
+        }
