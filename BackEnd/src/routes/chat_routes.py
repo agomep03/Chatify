@@ -3,8 +3,14 @@ from sqlalchemy.orm import Session
 from src.controllers import chat_controller
 from src.controllers.auth_controller import get_db, get_current_user
 from src.models.auth_model import User
+from pydantic import BaseModel
+from typing import Literal, Optional
 
 router = APIRouter()
+
+class ChatRequest(BaseModel):
+    question: str
+    mode: Optional[Literal["normal", "creatividad", "razonamiento"]] = "normal"
 
 @router.post("/start")
 async def start_chat(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -15,15 +21,21 @@ async def start_chat(current_user: User = Depends(get_current_user), db: Session
     return await chat_controller.start_conversation(user_id, db)
 
 @router.post("/{chat_id}/message")
-async def send_message(chat_id: int, question: str = Body(...), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def send_message(
+    chat_id: int,
+    body: ChatRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Envía un mensaje a una conversación existente.
+    Envía un mensaje a una conversación existente, con opción de modo.
     """
     conversation = chat_controller.get_conversation_by_id(str(chat_id), db)
 
     if not conversation or str(conversation.user_id) != str(current_user.id):
         raise HTTPException(status_code=403, detail="Unauthorized")
-    return await chat_controller.handle_message(chat_id, question, db)
+
+    return await chat_controller.handle_message(chat_id, body.question, db, mode=body.mode)
 
 @router.delete("/{chat_id}")
 def delete_chat(chat_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
