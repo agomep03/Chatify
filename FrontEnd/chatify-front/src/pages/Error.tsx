@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
-import CustomDialog from '../components/Dialog';
+import CustomDialog from '../components/Dialog/Dialog';
 
 
 const Error: React.FC = () => {

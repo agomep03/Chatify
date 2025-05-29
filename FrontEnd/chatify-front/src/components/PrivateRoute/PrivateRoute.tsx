@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { isAuthenticated } from "../utils/auth";
+import { isAuthenticated } from "../../utils/auth";
 import { useEffect } from "react";
-import {useAlert} from "../components/Alert";
+import {useAlert} from "../Alert/Alert";
 
 const PrivateRoute: React.FC = () => {
   const authenticated = isAuthenticated();
