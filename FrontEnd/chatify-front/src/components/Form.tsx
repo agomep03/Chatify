@@ -61,217 +61,272 @@ interface FormProps {
  * @param {FormProps} props - Propiedades del componente.
  * @returns {JSX.Element}
  */
-const Form = forwardRef<HTMLFormElement, FormProps>(({
-  title,
-  fields,
-  onSubmit,
-  buttonText,
-  logoUrl,
-  loading = false,
-  initialValues = {},
-  children,
-  noBackground = false,
-  showButton = true,
-  showHomeButton = false,
-}, ref) => {
-  // Estado para manejar los datos del formulario
-  const [formData, setFormData] =
-    useState<Record<string, string>>(initialValues);
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const isLight = theme.palette.mode === 'light';
+const Form = forwardRef<HTMLFormElement, FormProps>(
+  (
+    {
+      title,
+      fields,
+      onSubmit,
+      buttonText,
+      logoUrl,
+      loading = false,
+      initialValues = {},
+      children,
+      noBackground = false,
+      showButton = true,
+      showHomeButton = false,
+    },
+    ref
+  ) => {
+    // Estado para manejar los datos del formulario
+    const [formData, setFormData] =
+      useState<Record<string, string>>(initialValues);
+    const navigate = useNavigate();
+    const theme = useTheme();
+    const isLight = theme.palette.mode === "light";
 
-  const logoSrc = isLight && logoUrl
-    ? logoUrl.replace('Logo.png', 'Logo_dark.png')
-    : logoUrl;
+    const logoSrc =
+      isLight && logoUrl
+        ? logoUrl.replace("Logo.png", "Logo_dark.png")
+        : logoUrl;
 
-  /**
-   * Manejador de cambios en los campos del formulario.
-   * @param e - Evento de cambio.
-   */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+    /**
+     * Manejador de cambios en los campos del formulario.
+     * @param e - Evento de cambio.
+     */
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value,
+      });
+    };
 
-  /**
-   * Manejador de envío del formulario.
-   * @param e - Evento de envío.
-   */
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
+    /**
+     * Manejador de envío del formulario.
+     * @param e - Evento de envío.
+     */
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      onSubmit(formData);
+    };
 
-  return (
-    // Contenedor principal del formulario
-    <Container 
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}>
-      <Box
+    return (
+      // Contenedor principal del formulario
+      <Container
         sx={{
-          width: "400px",
           display: "flex",
-          flexDirection: "column",
+          justifyContent: "center",
           alignItems: "center",
-          gap: 2,
-          p: 4,
-          boxShadow: noBackground ? 0 : 3,
-          borderRadius: 2,
-          bgcolor: noBackground ? "transparent" : theme.palette.background.default,
-          position: "relative",
         }}
       >
-        {/* Overlay de carga */}
-        {loading && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              bgcolor: theme.palette.background.default,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 2,
-              zIndex: 10,
-            }}
-          >
-            <CircularProgress sx={{ color: theme.palette.text.primary }} />
-          </Box>
-        )}
-        {/* Logo y título */}
-        <Box 
-          sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            mb: 2, 
-            width: "100%", 
-            justifyContent: "center", // Siempre centrado
-            gap: showHomeButton ? 2 : 0
-          }}
-        >
-          {showHomeButton && (
-            <Button
-              variant="contained"
-              size="small"
-              disableRipple
-              disableFocusRipple
-              disableElevation
-              sx={{
-                boxShadow: "none",
-                minWidth: 0,
-                p: "6px",
-                border: "none",
-                backgroundColor: theme.palette.background.default,
-                "&:hover": { backgroundColor: theme.palette.background.default, boxShadow: "none" },
-                "&:active": { border: "none", outline: "none", boxShadow: "none" },
-                "&:focus-visible": { border: "none", outline: "none", boxShadow: "none" },
-                "&:focus": { border: "none", outline: "none", boxShadow: "none" },
-                display: "flex",
-                alignItems: "center",
-              }}
-              onClick={() => navigate("/home")}
-            >
-              <ArrowBackIcon sx={{ color: theme.palette.text.primary }} />
-            </Button>
-          )}
-          <Box 
-            sx={{ 
-              display: "flex", 
-              alignItems: "center", 
-              flexGrow: 0, 
-              justifyContent: "center" // Siempre centrado
-            }}
-          >
-            {logoSrc && <Logo logoUrl={logoSrc} />}
-            <Typography variant="h5" sx={{ color: theme.palette.text.primary, ml: logoUrl ? 1 : 0 }}>
-              {title}
-            </Typography>
-          </Box>
-        </Box>
-        {/* Campos del formulario */}
         <Box
-          component="form"
-          ref={ref} 
-          onSubmit={handleSubmit}
           sx={{
-            width: "100%",
+            width: "400px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            gap: 2,
+            p: 4,
+            boxShadow: noBackground ? 0 : 3,
+            borderRadius: 2,
+            bgcolor: noBackground
+              ? "transparent"
+              : theme.palette.background.default,
+            position: "relative",
           }}
         >
-          {fields.map((field) => (
-            <TextField
-              key={field.name}
-              fullWidth
-              label={field.label}
-              type={field.type}
-              name={field.name}
-              value={formData[field.name] || ""}
-              onChange={handleChange}
-              margin="normal"
-              required
-              disabled={loading}
+          {/* Overlay de carga */}
+          {loading && (
+            <Box
               sx={{
-                "& .MuiInputBase-input": { color: theme.palette.text.primary },
-                "& .MuiInputLabel-root": { color: theme.palette.custom.outlinedBorder },
-                "& .MuiInputLabel-root.Mui-focused": { color: theme.palette.text.primary },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: theme.palette.custom.outlinedBorder },
-                  "&:hover fieldset": { borderColor: theme.palette.text.primary },
-                  "&.Mui-focused fieldset": { borderColor: theme.palette.text.primary },
-                },
-                "& input:-webkit-autofill": {
-                  WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
-                  WebkitTextFillColor: theme.palette.text.primary,
-                },
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                bgcolor: noBackground
+                  ? "transparent"
+                  : theme.palette.background.default,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 2,
+                zIndex: 10,
               }}
-            />
-          ))}
-          {showButton&& (
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              sx={{
-                mt: "2rem",
-                width: "50%",
-                justifySelf: "center",
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                fontWeight: "bold",
-                fontSize: "1rem",
-                borderRadius: "var(--encore-button-corner-radius, 9999px);",
-                textTransform: "none",
-                "&:hover": { backgroundColor: theme.palette.custom.primaryHover },
-                "&:focus": { outline: "none", border: "none", boxShadow: "none" },
-                "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
-                "&:active": { outline: "none", border: "none", boxShadow: "none" },
-              }}
-              fullWidth
             >
-              {buttonText}
-            </Button>
+              <CircularProgress sx={{ color: theme.palette.text.primary }} />
+            </Box>
+          )}
+          {/* Logo y título */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mb: 2,
+              width: "100%",
+              justifyContent: "center", // Siempre centrado
+              gap: showHomeButton ? 2 : 0,
+            }}
+          >
+            {showHomeButton && (
+              <Button
+                variant="contained"
+                size="small"
+                disableRipple
+                disableFocusRipple
+                disableElevation
+                sx={{
+                  boxShadow: "none",
+                  minWidth: 0,
+                  p: "6px",
+                  border: "none",
+                  backgroundColor: theme.palette.background.default,
+                  "&:hover": {
+                    backgroundColor: theme.palette.background.default,
+                    boxShadow: "none",
+                  },
+                  "&:active": {
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                  "&:focus-visible": {
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                  "&:focus": {
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={() => navigate("/home")}
+              >
+                <ArrowBackIcon sx={{ color: theme.palette.text.primary }} />
+              </Button>
+            )}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexGrow: 0,
+                justifyContent: "center", // Siempre centrado
+              }}
+            >
+              {logoSrc && <Logo logoUrl={logoSrc} />}
+              <Typography
+                variant="h5"
+                sx={{ color: theme.palette.text.primary, ml: logoUrl ? 1 : 0 }}
+              >
+                {title}
+              </Typography>
+            </Box>
+          </Box>
+          {/* Campos del formulario */}
+          <Box
+            component="form"
+            ref={ref}
+            onSubmit={handleSubmit}
+            sx={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            {fields.map((field) => (
+              <TextField
+                key={field.name}
+                fullWidth
+                label={field.label}
+                type={field.type}
+                name={field.name}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
+                margin="normal"
+                required
+                disabled={loading}
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: theme.palette.text.primary,
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: theme.palette.custom.outlinedBorder,
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: theme.palette.text.primary,
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: theme.palette.custom.outlinedBorder,
+                    },
+                    "&:hover fieldset": {
+                      borderColor: theme.palette.text.primary,
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: theme.palette.text.primary,
+                    },
+                  },
+                  "& input:-webkit-autofill": {
+                    WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
+                    WebkitTextFillColor: theme.palette.text.primary,
+                  },
+                }}
+              />
+            ))}
+            {showButton && (
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  mt: "2rem",
+                  width: "50%",
+                  justifySelf: "center",
+                  backgroundColor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  borderRadius: "var(--encore-button-corner-radius, 9999px);",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: theme.palette.custom.primaryHover,
+                  },
+                  "&:focus": {
+                    outline: "none",
+                    border: "none",
+                    boxShadow: "none",
+                  },
+                  "&:focus-visible": {
+                    outline: "none",
+                    border: "none",
+                    boxShadow: "none",
+                  },
+                  "&:active": {
+                    outline: "none",
+                    border: "none",
+                    boxShadow: "none",
+                  },
+                }}
+                fullWidth
+              >
+                {buttonText}
+              </Button>
+            )}
+          </Box>
+          {/* Elementos hijos opcionales */}
+          {children && (
+            <Box mt={2} textAlign="center" width="100%">
+              {children}
+            </Box>
           )}
         </Box>
-        {/* Elementos hijos opcionales */}
-        {children && (
-          <Box mt={2} textAlign="center" width="100%">
-            {children}
-          </Box>
-        )}
-      </Box>
-    </Container>
-  );
-});
+      </Container>
+    );
+  }
+);
 
 export default Form;

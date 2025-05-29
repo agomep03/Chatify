@@ -57,9 +57,11 @@ const PlaylistCards: React.FC = () => {
     [key: string]: any;
   };
 
-  type PlaylistsResponse = {
-    playlists?: Playlist[];
-  } | Playlist[];
+  type PlaylistsResponse =
+    | {
+        playlists?: Playlist[];
+      }
+    | Playlist[];
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -68,7 +70,13 @@ const PlaylistCards: React.FC = () => {
       try {
         const data: PlaylistsResponse = await fetchUserPlaylists();
         // Ajuste: extraer el array de la propiedad 'playlists' si existe, o usar data si ya es array
-        setPlaylists(Array.isArray(data) ? data : (data && Array.isArray((data as any).playlists)) ? (data as any).playlists : []);
+        setPlaylists(
+          Array.isArray(data)
+            ? data
+            : data && Array.isArray((data as any).playlists)
+            ? (data as any).playlists
+            : []
+        );
       } catch (e: any) {
         if (e.message === "Sesión expirada") {
           setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
@@ -95,9 +103,13 @@ const PlaylistCards: React.FC = () => {
     setSelectedPlaylist(null);
   };
 
+  // Estado para el loading del edit
+  const [editLoading, setEditLoading] = useState(false);
+
   // Handler para editar la playlist usando el endpoint real
   const handleEditSubmit = async (formData: Record<string, string>) => {
     if (!selectedPlaylist) return;
+    setEditLoading(true);
     try {
       await updateUserPlaylist(selectedPlaylist.id, {
         title: formData.name,
@@ -105,20 +117,21 @@ const PlaylistCards: React.FC = () => {
       });
       setPlaylists((prev) =>
         prev.map((pl) =>
-          pl.id === selectedPlaylist.id
-            ? { ...pl, name: formData.name }
-            : pl
+          pl.id === selectedPlaylist.id ? { ...pl, name: formData.name } : pl
         )
       );
     } catch (e: any) {
       setError("Error al actualizar la playlist.");
     }
+    setEditLoading(false);
     handleDialogClose();
   };
 
   // Handler para aceptar el dialog (dispara el submit del form)
   const handleDialogAccept = () => {
-    formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    formRef.current?.dispatchEvent(
+      new Event("submit", { cancelable: true, bubbles: true })
+    );
   };
 
   // Handler para abrir el diálogo de generación automática
@@ -150,7 +163,7 @@ const PlaylistCards: React.FC = () => {
       setPlaylists(
         Array.isArray(data)
           ? data
-          : (data && Array.isArray((data as any).playlists))
+          : data && Array.isArray((data as any).playlists)
           ? (data as { playlists: Playlist[] }).playlists
           : []
       );
@@ -228,8 +241,8 @@ const PlaylistCards: React.FC = () => {
         {/* Card para crear playlist automáticamente */}
         <Card
           sx={{
-            width: 500,
-            height: 500,
+            width: 320,
+            height: 320,
             position: "relative",
             margin: 1,
             display: "flex",
@@ -253,132 +266,208 @@ const PlaylistCards: React.FC = () => {
           </Typography>
         </Card>
         {/* Resto de playlists */}
-        {Array.isArray(playlists) && playlists.map((playlist) => (
-          <Card
-            key={playlist.id}
-            sx={{
-              width: 320,
-              height: 320,
-              position: "relative",
-              margin: 1,
-              display: "flex",
-              flexDirection: "column",
-              boxSizing: "border-box",
-              p: 0,
-              alignItems: "center",
-              justifyContent: "center"
-            }}
-          >
-            {/* Botones en la parte superior derecha */}
-            <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 2, display: "flex", gap: 1 }}>
-              <Button
-                type="button"
-                variant="text"
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  p: 1,
-                  color: theme => theme.palette.text.primary,
-                  "&:hover": { backgroundColor: theme => theme.palette.action.hover }
-                }}
-                onClick={() => handleEditClick(playlist)}
-              >
-                <EditIcon />
-              </Button>
-              <Button
-                type="button"
-                variant="text"
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  p: 1,
-                  color: theme => theme.palette.error.main,
-                  "&:hover": { backgroundColor: theme => theme.palette.action.hover }
-                }}
-                onClick={() => {
-                  setPlaylists(prev => prev.filter(pl => pl.id !== playlist.id));
-                }}
-              >
-                <DeleteIcon />
-              </Button>
-            </Box>
-            <CardContent
+        {Array.isArray(playlists) &&
+          playlists.map((playlist) => (
+            <Card
+              key={playlist.id}
               sx={{
-                flex: 1,
-                pb: 2,
-                pt: 3,
-                px: 2,
+                width: 320,
+                height: 320,
+                position: "relative",
+                margin: 1,
                 display: "flex",
                 flexDirection: "column",
+                boxSizing: "border-box",
+                p: 0,
                 alignItems: "center",
                 justifyContent: "center",
-                boxSizing: "border-box",
-                height: "100%",
-                overflow: "hidden",
-                textAlign: "justify" // justifica el texto
               }}
             >
-              {/* Imagen de la playlist */}
-              {playlist.image && (
-                <Box sx={{ display: "flex", justifyContent: "center", mb: 2, width: "100%" }}>
-                  <img
-                    src={playlist.image}
-                    alt={playlist.name}
-                    style={{
-                      width: "70%",
-                      maxWidth: 120,
-                      height: "auto",
-                      aspectRatio: "1/1",
-                      borderRadius: 12,
-                      objectFit: "cover",
-                      display: "block",
-                      margin: "0 auto"
-                    }}
-                  />
-                </Box>
-              )}
-              {/* Nombre de la playlist */}
-              <Typography
-                variant="h6"
-                component="div"
+              {/* Botones en la parte superior derecha */}
+              <Box
                 sx={{
-                  mb: 1,
-                  width: "100%",
-                  textAlign: "center", // centrado
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis"
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  zIndex: 2,
+                  display: "flex",
+                  gap: 1,
                 }}
               >
-                {playlist.name}
-              </Typography>
-              {/* Botón para ver canciones */}
-              {playlist.tracks && Array.isArray(playlist.tracks) && (
                 <Button
-                  variant="outlined"
+                  type="button"
+                  variant="text"
                   size="small"
                   sx={{
-                    mb: 2,
-                    mt: 1,
-                    borderRadius: "9999px",
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    width: "100%",
-                    maxWidth: 220
+                    minWidth: 0,
+                    p: 1,
+                    color: (theme) => theme.palette.text.primary,
+                    "&:hover": {
+                      backgroundColor: (theme) => theme.palette.action.hover,
+                    },
+                    "&:focus": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:focus-visible": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:active": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                  }}
+                  onClick={() => handleEditClick(playlist)}
+                >
+                  <EditIcon />
+                </Button>
+                <Button
+                  type="button"
+                  variant="text"
+                  size="small"
+                  sx={{
+                    minWidth: 0,
+                    p: 1,
+                    color: (theme) => theme.palette.error.main,
+                    "&:hover": {
+                      backgroundColor: (theme) => theme.palette.action.hover,
+                    },
+                    "&:focus": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:focus-visible": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:active": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
                   }}
                   onClick={() => {
-                    setSongsPlaylist(playlist);
-                    setSongsDialogOpen(true);
+                    setPlaylists((prev) =>
+                      prev.filter((pl) => pl.id !== playlist.id)
+                    );
                   }}
                 >
-                  Ver canciones
+                  <DeleteIcon />
                 </Button>
-              )}
-              {/* Espaciador flexible para ajustar el contenido */}
-              <Box sx={{ flex: 1 }} />
-            </CardContent>
-          </Card>
-        ))}
+              </Box>
+              <CardContent
+                sx={{
+                  flex: 1,
+                  pb: 2,
+                  pt: 3,
+                  px: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center", // centrado horizontal
+                  justifyContent: "center", // centrado vertical
+                  boxSizing: "border-box",
+                  height: "100%",
+                  overflow: "hidden",
+                  textAlign: "justify", // justifica el texto
+                }}
+              >
+                {/* Imagen de la playlist */}
+                {playlist.image && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      mb: 2,
+                      width: "100%",
+                    }}
+                  >
+                    <img
+                      src={playlist.image}
+                      alt={playlist.name}
+                      style={{
+                        width: "120px",
+                        height: "120px",
+                        aspectRatio: "1/1",
+                        borderRadius: 12,
+                        objectFit: "cover",
+                        display: "block",
+                        margin: "0 auto",
+                      }}
+                    />
+                  </Box>
+                )}
+                {/* Nombre de la playlist */}
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{
+                    mb: 1,
+                    width: "100%",
+                    textAlign: "center", // centrado
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {playlist.name}
+                </Typography>
+                {/* Botón para ver canciones */}
+                {playlist.tracks && Array.isArray(playlist.tracks) && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    sx={{
+                      mb: 2,
+                      mt: 1,
+                      borderRadius:
+                        "var(--encore-button-corner-radius, 9999px)",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      textTransform: "none",
+                      backgroundColor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      width: 220, // Fija la anchura a 220px para todos los botones
+                      maxWidth: 220,
+                      minWidth: 220,
+                      "&:hover": {
+                        backgroundColor: theme.palette.custom.primaryHover,
+                      },
+                      "&:focus": {
+                        outline: "none",
+                        border: "none",
+                        boxShadow: "none",
+                      },
+                      "&:focus-visible": {
+                        outline: "none",
+                        border: "none",
+                        boxShadow: "none",
+                      },
+                      "&:active": {
+                        outline: "none",
+                        border: "none",
+                        boxShadow: "none",
+                      },
+                    }}
+                    onClick={() => {
+                      setSongsPlaylist(playlist);
+                      setSongsDialogOpen(true);
+                    }}
+                  >
+                    Ver canciones
+                  </Button>
+                )}
+                {/* Espaciador flexible para ajustar el contenido */}
+                {/* <Box sx={{ flex: 1 }} /> */}{" "}
+                {/* Eliminar o comentar esta línea para centrar el contenido */}
+              </CardContent>
+            </Card>
+          ))}
       </Box>
       {/* Dialogo de edición similar a NavMenu */}
       {selectedPlaylist && (
@@ -388,7 +477,7 @@ const PlaylistCards: React.FC = () => {
           onConfirm={handleDialogAccept}
           buttons={[
             { label: "Cancelar", color: "secondary" },
-            { label: "Guardar", color: "primary" }
+            { label: "Guardar", color: "primary" },
           ]}
         >
           <Form
@@ -407,6 +496,7 @@ const PlaylistCards: React.FC = () => {
             showButton={false}
             showHomeButton={false}
             noBackground
+            loading={editLoading}
           />
         </CustomDialog>
       )}
@@ -417,18 +507,21 @@ const PlaylistCards: React.FC = () => {
         onConfirm={handleAutoGenerate}
         buttons={[
           { label: "Cancelar", color: "secondary" },
-          { label: autoLoading ? "Generando..." : "Crear", color: "primary" }
+          { label: autoLoading ? "Generando..." : "Crear", color: "primary" },
         ]}
       >
         <Box
           component="form"
-          onSubmit={e => { e.preventDefault(); handleAutoGenerate(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAutoGenerate();
+          }}
           sx={{
             width: "600px", // <-- más ancho
             maxWidth: "100%",
             display: "flex",
             flexDirection: "column",
-            gap: 2
+            gap: 2,
           }}
         >
           <Typography variant="h6" sx={{ mb: 1 }}>
@@ -438,7 +531,7 @@ const PlaylistCards: React.FC = () => {
             <textarea
               ref={autoTextareaRef}
               value={autoPrompt}
-              onChange={e => setAutoPrompt(e.target.value)}
+              onChange={(e) => setAutoPrompt(e.target.value)}
               rows={5}
               style={{
                 width: "100%",
@@ -447,14 +540,16 @@ const PlaylistCards: React.FC = () => {
                 resize: "none",
                 padding: "12px",
                 borderRadius: "8px",
-                border: `1px solid ${theme.palette.custom?.outlinedBorder || "#ccc"}`,
+                border: `1px solid ${
+                  theme.palette.custom?.outlinedBorder || "#ccc"
+                }`,
                 fontSize: "1rem",
                 color: theme.palette.text.primary,
                 background: theme.palette.background.paper,
                 fontFamily: "inherit",
                 boxSizing: "border-box",
                 overflowY: "auto",
-                overflowX: "hidden"
+                overflowX: "hidden",
               }}
               disabled={autoLoading}
               placeholder="Ejemplo: Playlist para una tarde de lluvia y café"
@@ -472,7 +567,7 @@ const PlaylistCards: React.FC = () => {
                 justifyContent: "center",
                 alignItems: "center",
                 minHeight: "100px", // igual que el textarea
-                width: "100%"
+                width: "100%",
               }}
             >
               <CircularProgress size={28} />
@@ -485,22 +580,46 @@ const PlaylistCards: React.FC = () => {
         open={songsDialogOpen}
         onClose={() => setSongsDialogOpen(false)}
         onConfirm={() => setSongsDialogOpen(false)}
-        buttons={[
-          { label: "Cerrar", color: "primary" }
-        ]}
+        buttons={[{ label: "Cerrar", color: "primary" }]}
       >
-        <Box sx={{ width: "100%", maxWidth: 500, maxHeight: 400, overflowY: "auto" }}>
+        <Box
+          sx={{
+            m: 1, // margen
+            p: 3, // padding
+            width: "100%",
+            maxWidth: 500,
+            maxHeight: 400,
+            overflowY: "auto",
+            // Scrollbar igual que el de las cartas
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: theme.palette.grey[600],
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: theme.palette.grey[800],
+            },
+          }}
+        >
           <Typography variant="h6" sx={{ mb: 2 }}>
             Canciones de {songsPlaylist?.name}
           </Typography>
           {songsPlaylist?.tracks && Array.isArray(songsPlaylist.tracks) ? (
             songsPlaylist.tracks.map((track: any, idx: number) => (
               <Box key={idx} sx={{ mb: 2 }}>
-                <Typography variant="body1" color="text.primary" sx={{ fontWeight: 500 }}>
+                <Typography
+                  variant="body1"
+                  color="text.primary"
+                  sx={{ fontWeight: 500 }}
+                >
                   {track.name}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {Array.isArray(track.artists) ? track.artists.join(", ") : track.artists}
+                  {Array.isArray(track.artists)
+                    ? track.artists.join(", ")
+                    : track.artists}
                 </Typography>
               </Box>
             ))
