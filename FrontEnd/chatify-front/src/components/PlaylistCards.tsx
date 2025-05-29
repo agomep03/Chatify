@@ -1,23 +1,17 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Button,
-} from "@mui/material";
-import CustomDialog from "./Dialog";
-import Form from "./Form";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   fetchUserPlaylists,
   updateUserPlaylist,
   autoGeneratePlaylist,
 } from "../api/spotifyService";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import PlaylistList from "./PlaylistCards/PlaylistList";
+import AutoPlaylistCard from "./PlaylistCards/AutoPlaylistCard";
+import SongsDialog from "./PlaylistCards/SongsDialog";
+import EditPlaylistDialog from "./PlaylistCards/EditPlaylistDialog";
+import AutoPlaylistDialog from "./PlaylistCards/AutoPlaylistDialog";
+import { useAlert } from "./Alert";
 
 /**
  * Componente para mostrar las playlists del usuario en forma de tarjetas.
@@ -32,9 +26,6 @@ const PlaylistCards: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
 
-  // Ref para el formulario de edición
-  const formRef = useRef<HTMLFormElement>(null);
-
   // Usamos theme para los colores
   const theme = useTheme();
 
@@ -43,7 +34,6 @@ const PlaylistCards: React.FC = () => {
   const [autoPrompt, setAutoPrompt] = useState("");
   const [autoLoading, setAutoLoading] = useState(false);
   const [autoError, setAutoError] = useState<string | null>(null);
-  const autoTextareaRef = useRef<HTMLTextAreaElement>(null); // <-- Añadido
 
   // Estado para mostrar el dialog de canciones
   const [songsDialogOpen, setSongsDialogOpen] = useState(false);
@@ -127,13 +117,6 @@ const PlaylistCards: React.FC = () => {
     handleDialogClose();
   };
 
-  // Handler para aceptar el dialog (dispara el submit del form)
-  const handleDialogAccept = () => {
-    formRef.current?.dispatchEvent(
-      new Event("submit", { cancelable: true, bubbles: true })
-    );
-  };
-
   // Handler para abrir el diálogo de generación automática
   const handleOpenAutoDialog = () => {
     setAutoPrompt("");
@@ -147,6 +130,9 @@ const PlaylistCards: React.FC = () => {
     setAutoPrompt("");
     setAutoError(null);
   };
+
+  // Hook para mostrar alertas
+  const { customAlert } = useAlert();
 
   // Handler para enviar el prompt y crear la playlist automáticamente
   const handleAutoGenerate = async () => {
@@ -169,7 +155,8 @@ const PlaylistCards: React.FC = () => {
       );
       handleCloseAutoDialog();
     } catch (e: any) {
-      setAutoError("Error al generar la playlist.");
+      customAlert("error", "Error al generar la playlist.");
+      // setAutoError("Error al generar la playlist."); // Ya no se usa
     } finally {
       setAutoLoading(false);
     }
@@ -238,398 +225,41 @@ const PlaylistCards: React.FC = () => {
           gap: 2,
         }}
       >
-        {/* Card para crear playlist automáticamente */}
-        <Card
-          sx={{
-            width: 320,
-            height: 320,
-            position: "relative",
-            margin: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            cursor: "pointer",
-            border: `2px dashed ${theme.palette.primary.main}`,
-            color: theme.palette.primary.main,
-            transition: "box-shadow 0.2s",
-            "&:hover": {
-              boxShadow: 6,
-              backgroundColor: theme.palette.action.hover,
-            },
+        <AutoPlaylistCard onClick={handleOpenAutoDialog} />
+        <PlaylistList
+          playlists={playlists}
+          onEdit={handleEditClick}
+          onDelete={(playlistId) => {
+            setPlaylists((prev) => prev.filter((pl) => pl.id !== playlistId));
           }}
-          onClick={handleOpenAutoDialog}
-        >
-          <AddIcon sx={{ fontSize: 80 }} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Crear Playlist Automática
-          </Typography>
-        </Card>
-        {/* Resto de playlists */}
-        {Array.isArray(playlists) &&
-          playlists.map((playlist) => (
-            <Card
-              key={playlist.id}
-              sx={{
-                width: 320,
-                height: 320,
-                position: "relative",
-                margin: 1,
-                display: "flex",
-                flexDirection: "column",
-                boxSizing: "border-box",
-                p: 0,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Botones en la parte superior derecha */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  zIndex: 2,
-                  display: "flex",
-                  gap: 1,
-                }}
-              >
-                <Button
-                  type="button"
-                  variant="text"
-                  size="small"
-                  sx={{
-                    minWidth: 0,
-                    p: 1,
-                    color: (theme) => theme.palette.text.primary,
-                    "&:hover": {
-                      backgroundColor: (theme) => theme.palette.action.hover,
-                    },
-                    "&:focus": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:focus-visible": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:active": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                  }}
-                  onClick={() => handleEditClick(playlist)}
-                >
-                  <EditIcon />
-                </Button>
-                <Button
-                  type="button"
-                  variant="text"
-                  size="small"
-                  sx={{
-                    minWidth: 0,
-                    p: 1,
-                    color: (theme) => theme.palette.error.main,
-                    "&:hover": {
-                      backgroundColor: (theme) => theme.palette.action.hover,
-                    },
-                    "&:focus": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:focus-visible": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:active": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                  }}
-                  onClick={() => {
-                    setPlaylists((prev) =>
-                      prev.filter((pl) => pl.id !== playlist.id)
-                    );
-                  }}
-                >
-                  <DeleteIcon />
-                </Button>
-              </Box>
-              <CardContent
-                sx={{
-                  flex: 1,
-                  pb: 2,
-                  pt: 3,
-                  px: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center", // centrado horizontal
-                  justifyContent: "center", // centrado vertical
-                  boxSizing: "border-box",
-                  height: "100%",
-                  overflow: "hidden",
-                  textAlign: "justify", // justifica el texto
-                }}
-              >
-                {/* Imagen de la playlist */}
-                {playlist.image && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      mb: 2,
-                      width: "100%",
-                    }}
-                  >
-                    <img
-                      src={playlist.image}
-                      alt={playlist.name}
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        aspectRatio: "1/1",
-                        borderRadius: 12,
-                        objectFit: "cover",
-                        display: "block",
-                        margin: "0 auto",
-                      }}
-                    />
-                  </Box>
-                )}
-                {/* Nombre de la playlist */}
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{
-                    mb: 1,
-                    width: "100%",
-                    textAlign: "center", // centrado
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {playlist.name}
-                </Typography>
-                {/* Botón para ver canciones */}
-                {playlist.tracks && Array.isArray(playlist.tracks) && (
-                  <Button
-                    variant="contained"
-                    size="small"
-                    sx={{
-                      mb: 2,
-                      mt: 1,
-                      borderRadius:
-                        "var(--encore-button-corner-radius, 9999px)",
-                      fontWeight: "bold",
-                      fontSize: "1rem",
-                      textTransform: "none",
-                      backgroundColor: theme.palette.primary.main,
-                      color: theme.palette.primary.contrastText,
-                      width: 220, // Fija la anchura a 220px para todos los botones
-                      maxWidth: 220,
-                      minWidth: 220,
-                      "&:hover": {
-                        backgroundColor: theme.palette.custom.primaryHover,
-                      },
-                      "&:focus": {
-                        outline: "none",
-                        border: "none",
-                        boxShadow: "none",
-                      },
-                      "&:focus-visible": {
-                        outline: "none",
-                        border: "none",
-                        boxShadow: "none",
-                      },
-                      "&:active": {
-                        outline: "none",
-                        border: "none",
-                        boxShadow: "none",
-                      },
-                    }}
-                    onClick={() => {
-                      setSongsPlaylist(playlist);
-                      setSongsDialogOpen(true);
-                    }}
-                  >
-                    Ver canciones
-                  </Button>
-                )}
-                {/* Espaciador flexible para ajustar el contenido */}
-                {/* <Box sx={{ flex: 1 }} /> */}{" "}
-                {/* Eliminar o comentar esta línea para centrar el contenido */}
-              </CardContent>
-            </Card>
-          ))}
+          onShowSongs={(playlist) => {
+            setSongsPlaylist(playlist);
+            setSongsDialogOpen(true);
+          }}
+          theme={theme}
+        />
       </Box>
-      {/* Dialogo de edición similar a NavMenu */}
-      {selectedPlaylist && (
-        <CustomDialog
-          open={editOpen}
-          onClose={handleDialogClose}
-          onConfirm={handleDialogAccept}
-          buttons={[
-            { label: "Cancelar", color: "secondary" },
-            { label: "Guardar", color: "primary" },
-          ]}
-        >
-          <Form
-            ref={formRef}
-            title="Editar Playlist"
-            fields={[
-              { name: "name", label: "Nombre", type: "text" },
-              { name: "description", label: "Descripción", type: "text" },
-            ]}
-            initialValues={{
-              name: selectedPlaylist.name,
-              description: selectedPlaylist.description,
-            }}
-            onSubmit={handleEditSubmit}
-            buttonText=""
-            showButton={false}
-            showHomeButton={false}
-            noBackground
-            loading={editLoading}
-          />
-        </CustomDialog>
-      )}
-      {/* Diálogo para generación automática */}
-      <CustomDialog
+      <EditPlaylistDialog
+        open={editOpen}
+        playlist={selectedPlaylist}
+        onClose={handleDialogClose}
+        onSubmit={handleEditSubmit}
+        loading={editLoading}
+      />
+      <AutoPlaylistDialog
         open={autoDialogOpen}
+        prompt={autoPrompt}
+        loading={autoLoading}
+        error={autoError}
+        onPromptChange={setAutoPrompt}
         onClose={handleCloseAutoDialog}
-        onConfirm={handleAutoGenerate}
-        buttons={[
-          { label: "Cancelar", color: "secondary" },
-          { label: autoLoading ? "Generando..." : "Crear", color: "primary" },
-        ]}
-      >
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAutoGenerate();
-          }}
-          sx={{
-            width: "600px", // <-- más ancho
-            maxWidth: "100%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            Ingresa un prompt para tu playlist
-          </Typography>
-          {!autoLoading && (
-            <textarea
-              ref={autoTextareaRef}
-              value={autoPrompt}
-              onChange={(e) => setAutoPrompt(e.target.value)}
-              rows={5}
-              style={{
-                width: "100%",
-                minHeight: "100px",
-                maxHeight: "180px",
-                resize: "none",
-                padding: "12px",
-                borderRadius: "8px",
-                border: `1px solid ${
-                  theme.palette.custom?.outlinedBorder || "#ccc"
-                }`,
-                fontSize: "1rem",
-                color: theme.palette.text.primary,
-                background: theme.palette.background.paper,
-                fontFamily: "inherit",
-                boxSizing: "border-box",
-                overflowY: "auto",
-                overflowX: "hidden",
-              }}
-              disabled={autoLoading}
-              placeholder="Ejemplo: Playlist para una tarde de lluvia y café"
-            />
-          )}
-          {autoError && (
-            <Typography color="error" variant="body2">
-              {autoError}
-            </Typography>
-          )}
-          {autoLoading && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: "100px", // igual que el textarea
-                width: "100%",
-              }}
-            >
-              <CircularProgress size={28} />
-            </Box>
-          )}
-        </Box>
-      </CustomDialog>
-      {/* Dialog para ver canciones */}
-      <CustomDialog
+        onGenerate={handleAutoGenerate}
+      />
+      <SongsDialog
         open={songsDialogOpen}
+        playlist={songsPlaylist}
         onClose={() => setSongsDialogOpen(false)}
-        onConfirm={() => setSongsDialogOpen(false)}
-        buttons={[{ label: "Cerrar", color: "primary" }]}
-      >
-        <Box
-          sx={{
-            m: 1, // margen
-            p: 3, // padding
-            width: "100%",
-            maxWidth: 500,
-            maxHeight: 400,
-            overflowY: "auto",
-            // Scrollbar igual que el de las cartas
-            "&::-webkit-scrollbar": {
-              width: "8px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: theme.palette.grey[600],
-              borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: theme.palette.grey[800],
-            },
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Canciones de {songsPlaylist?.name}
-          </Typography>
-          {songsPlaylist?.tracks && Array.isArray(songsPlaylist.tracks) ? (
-            songsPlaylist.tracks.map((track: any, idx: number) => (
-              <Box key={idx} sx={{ mb: 2 }}>
-                <Typography
-                  variant="body1"
-                  color="text.primary"
-                  sx={{ fontWeight: 500 }}
-                >
-                  {track.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {Array.isArray(track.artists)
-                    ? track.artists.join(", ")
-                    : track.artists}
-                </Typography>
-              </Box>
-            ))
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No hay canciones en esta playlist.
-            </Typography>
-          )}
-        </Box>
-      </CustomDialog>
+      />
     </Box>
   );
 };
