@@ -1,13 +1,13 @@
 import { Card, CardContent, Box, Typography, Button } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AppButton from "../Buttons/AppButton/AppButton";
 
 const PlaylistCard = ({
   playlist,
   onEdit,
   onDelete,
   onShowSongs,
-  theme,
 }: {
   playlist: any;
   onEdit: (playlist: any) => void;
@@ -67,7 +67,7 @@ const PlaylistCard = ({
         sx={{
           minWidth: 0,
           p: 1,
-          color: (theme) => theme.palette.error.main,
+          color: (theme) => theme.palette.text.primary,
           "&:hover": { backgroundColor: (theme) => theme.palette.action.hover },
           "&:focus": { outline: "none", border: "none", boxShadow: "none" },
           "&:focus-visible": {
@@ -137,36 +137,13 @@ const PlaylistCard = ({
         {playlist.name}
       </Typography>
       {playlist.tracks && Array.isArray(playlist.tracks) && (
-        <Button
-          variant="contained"
+        <AppButton
           size="small"
-          sx={{
-            mb: 2,
-            mt: 1,
-            borderRadius: "var(--encore-button-corner-radius, 9999px)",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            textTransform: "none",
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            width: 220,
-            maxWidth: 220,
-            minWidth: 220,
-            "&:hover": {
-              backgroundColor: theme.palette.custom.primaryHover,
-            },
-            "&:focus": { outline: "none", border: "none", boxShadow: "none" },
-            "&:focus-visible": {
-              outline: "none",
-              border: "none",
-              boxShadow: "none",
-            },
-            "&:active": { outline: "none", border: "none", boxShadow: "none" },
-          }}
+          sx={{ mb: 2, mt: 1 }}
           onClick={() => onShowSongs(playlist)}
         >
           Ver canciones
-        </Button>
+        </AppButton>
       )}
     </CardContent>
   </Card>

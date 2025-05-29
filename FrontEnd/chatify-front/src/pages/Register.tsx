@@ -1,8 +1,8 @@
 import { Box, Link, Typography } from "@mui/material";
-import Form from "../components/Form";
+import Form from "../components/Form/Form";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useAlert } from "../components/Alert";
+import { useAlert } from "../components/Alert/Alert";
 import logo from '../assets/Logo.png';
 import { registerUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";

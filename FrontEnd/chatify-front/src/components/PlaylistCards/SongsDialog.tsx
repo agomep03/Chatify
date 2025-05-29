@@ -1,4 +1,4 @@
-import CustomDialog from "../Dialog";
+import CustomDialog from "../Dialog/Dialog";
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import CustomDialog from "../Dialog";
+import CustomDialog from "../Dialog/Dialog";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -47,7 +47,7 @@ const AutoPlaylistDialog = ({
           gap: 2,
         }}
       >
-        <Typography variant="h6" sx={{ mb: 1 }}>
+        <Typography variant="h6" sx={{ mb: 1, textAlign: "center" }}>
           Ingresa un prompt para tu playlist
         </Typography>
         {!loading && (

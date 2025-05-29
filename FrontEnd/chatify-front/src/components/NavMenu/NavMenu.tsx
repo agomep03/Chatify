@@ -10,9 +10,9 @@ import { useRef, useState } from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Form from '../components/Form';
-import CustomDialog from '../components/Dialog';
-import ScrollableText from '../components/ScrollableText';
+import Form from '../Form/Form';
+import CustomDialog from '../Dialog/Dialog';
+import ScrollableText from '../ScrollableText/ScrollableText';
 import { useTheme } from "@mui/material/styles";
 
 interface Tab {

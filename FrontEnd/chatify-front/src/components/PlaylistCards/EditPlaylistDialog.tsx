@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import CustomDialog from "../Dialog";
-import Form from "../Form";
+import CustomDialog from "../Dialog/Dialog";
+import Form from "../Form/Form";
 
 const EditPlaylistDialog = ({
   open,

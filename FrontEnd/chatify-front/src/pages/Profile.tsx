@@ -1,8 +1,8 @@
 import { Box, Container, CircularProgress, Typography } from "@mui/material";
-import Form from "../components/Form";
+import Form from "../components/Form/Form";
 import { useEffect, useState } from "react";
 import logo from '../assets/Logo.png';
-import { useAlert } from "../components/Alert";
+import { useAlert } from "../components/Alert/Alert";
 import { fetchUserProfile, updateUserProfile } from "../api/authService";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";

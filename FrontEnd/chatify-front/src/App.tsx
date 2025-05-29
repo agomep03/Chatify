@@ -9,7 +9,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Error from "./pages/Error";
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 
 type AppProps = {
   toggleTheme: () => void;

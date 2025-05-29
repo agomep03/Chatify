@@ -6,12 +6,12 @@ import {
   updateUserPlaylist,
   autoGeneratePlaylist,
 } from "../api/spotifyService";
-import PlaylistList from "./PlaylistCards/PlaylistList";
-import AutoPlaylistCard from "./PlaylistCards/AutoPlaylistCard";
-import SongsDialog from "./PlaylistCards/SongsDialog";
-import EditPlaylistDialog from "./PlaylistCards/EditPlaylistDialog";
-import AutoPlaylistDialog from "./PlaylistCards/AutoPlaylistDialog";
-import { useAlert } from "./Alert";
+import PlaylistList from "../components/PlaylistCards/PlaylistList";
+import AutoPlaylistCard from "../components/PlaylistCards/AutoPlaylistCard";
+import SongsDialog from "../components/PlaylistCards/SongsDialog";
+import EditPlaylistDialog from "../components/PlaylistCards/EditPlaylistDialog";
+import AutoPlaylistDialog from "../components/PlaylistCards/AutoPlaylistDialog";
+import { useAlert } from "../components/Alert/Alert";
 
 /**
  * Componente para mostrar las playlists del usuario en forma de tarjetas.

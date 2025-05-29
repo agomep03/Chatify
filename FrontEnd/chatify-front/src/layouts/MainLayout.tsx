@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
-import TopBar from "../components/TopBar";
-import NavMenu from "../components/NavMenu";
-import Chat from "../components/Chat";
-import { useAlert } from "../components/Alert";
+import TopBar from "../components/TopBar/TopBar";
+import NavMenu from "../components/NavMenu/NavMenu";
+import Chat from "./ChatLayout";
+import { useAlert } from "../components/Alert/Alert";
 import {
   fetchDeleteChat,
   fetchStartChat,
   fetchUpdateChatTitle,
   fetchObtainAllChats,
 } from "../api/chatService";
-import PlaylistCards from "../components/PlaylistCards";
+import PlaylistCards from "./PlaylistCardsLayout";
 import { useTheme } from "@mui/material/styles";
 
 interface Chat {

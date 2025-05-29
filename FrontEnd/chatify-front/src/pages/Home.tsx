@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import MainLayout from "../layouts/MainLayout";
 import {fetchVerifySpotifyConnection} from "../api/spotifyService";
-import { useAlert } from "../components/Alert";
+import { useAlert } from "../components/Alert/Alert";
 import { useNavigate } from "react-router";
 
 type HomeProps = {
