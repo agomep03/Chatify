@@ -3,6 +3,7 @@ import { Box, List, ListItem, ListItemText, TextField, IconButton, CircularProgr
 import SendIcon from '@mui/icons-material/Send';
 import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 import { useTheme } from "@mui/material/styles";
+import { getScrollbarStyles } from "../styles/scrollbarStyles";
 
 type Message = {
   id: number;
@@ -108,17 +109,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
           maxHeight: '90%',
           overflowY: 'auto',
           overflowX: 'hidden',
-          // Scrollbar igual que PlaylistCards
-          "&::-webkit-scrollbar": {
-            width: "8px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: theme.palette.grey[600],
-            borderRadius: "4px",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor:  theme.palette.grey[800],
-          },
+          ...getScrollbarStyles(theme),
         }}
       >
         <List>

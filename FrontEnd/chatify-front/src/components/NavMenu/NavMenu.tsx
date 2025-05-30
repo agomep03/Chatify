@@ -14,6 +14,7 @@ import Form from '../Form/Form';
 import CustomDialog from '../Dialog/Dialog';
 import ScrollableText from './ScrollableText';
 import { useTheme } from "@mui/material/styles";
+import { getScrollbarStyles } from "../styles/scrollbarStyles";
 
 interface Tab {
   id: string;
@@ -56,17 +57,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
         padding: 0, // Elimina el padding por defecto si lo quieres más limpio
         overflowY: 'auto',
         height:'100%',
-        // Scrollbar igual que PlaylistCards
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: theme.palette.grey[600],
-          borderRadius: "4px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor:  theme.palette.grey[800],
-        },
+        ...getScrollbarStyles(theme),
       }}
     >
       <Box

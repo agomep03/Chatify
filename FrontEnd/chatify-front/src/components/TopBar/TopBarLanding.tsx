@@ -17,7 +17,7 @@ const TopBarLanding: React.FC<TopBarLandingProps> = ({ toggleTheme }) => {
   return (
     <Box
       sx={{
-        position: 'fixed',
+        position: 'static',
         top: 0,
         left: 0,
         width: '100vw',
@@ -27,7 +27,7 @@ const TopBarLanding: React.FC<TopBarLandingProps> = ({ toggleTheme }) => {
         gap: 1.5,
         zIndex: 10,
         backgroundColor: theme.palette.background.paper,
-        padding: '8px 40px 8px 24px', // más padding a la derecha
+        padding: '8px 40px 8px 24px',
         boxShadow: theme.shadows[4],
         borderRadius: 0,
       }}
