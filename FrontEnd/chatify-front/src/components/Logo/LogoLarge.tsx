@@ -18,7 +18,7 @@ const LogoLarge: React.FC<LogoLargeProps> = ({ logoUrl }) => {
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
   const logoSrc = isLight
-    ? logoUrl.replace("Logo.png", "Logo_dark.png")
+    ? logoUrl.replace(".", "_dark.")
     : logoUrl;
 
   return (

@@ -1,7 +1,7 @@
 import CustomDialog from "../Dialog/Dialog";
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { getScrollbarStyles } from "../styles/scrollbarStyles";
+import { getScrollbarStyles } from "../../styles/scrollbarStyles";
 
 const SongsDialog = ({
   open,

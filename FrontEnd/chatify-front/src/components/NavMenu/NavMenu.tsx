@@ -14,7 +14,7 @@ import Form from '../Form/Form';
 import CustomDialog from '../Dialog/Dialog';
 import ScrollableText from './ScrollableText';
 import { useTheme } from "@mui/material/styles";
-import { getScrollbarStyles } from "../styles/scrollbarStyles";
+import { getScrollbarStyles } from "../../styles/scrollbarStyles";
 
 interface Tab {
   id: string;

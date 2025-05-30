@@ -1,13 +1,20 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import TopBarLanding from "../components/TopBar/TopBarLanding";
 import LogoLarge from "../components/Logo/LogoLarge";
-import logoImg from "../assets/Logo.png";
 import { useEffect, useState } from "react";
 import { fetchUserProfile } from "../api/authService";
 import InfoCard from "../layouts/InfoCardLanding";
 import AppButton from "../components/Buttons/AppButton/AppButton";
 import { useNavigate } from "react-router-dom";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
+import logoImg from "../assets/Logo.png";
+import logoSpotify from "../assets/Spotify.png";
+import logoPlaylist from "../assets/Playlist.png";
+import logoIA from "../assets/IA.png";
+import logoChat from "../assets/Bot.png";
+import logoLyrics from "../assets/Lyrics.png";
+import imageBackgroundLight from "../assets/background_music.jpeg";
+import imageBackgroundDark from "../assets/background_music_dark.jpeg";
 
 type LandingProps = {
   toggleTheme: () => void;
@@ -21,11 +28,51 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
   const [username, setUsername] = useState<string | null>(null);
   const navigate = useNavigate();
 
+
+  const backgroundImage =
+    theme.palette.mode === "dark"
+      ? `url(${imageBackgroundDark})`
+      : `url(${imageBackgroundLight})`;
+
+    
+  const infoCardsData = [
+    {
+      title: "Conecta tu cuenta de Spotify",
+      description: "Inicia sesión y vincula tu cuenta de Spotify para desbloquear todas las funcionalidades de Chatify.",
+      image: logoSpotify,
+    },
+    {
+      title: "Explora tus playlists",
+      description: "Accede rápidamente a tus playlists de Spotify. Administra tus listas, consulta sus detalles y descubre nueva música sin salir de la app.",
+      image: logoPlaylist,
+    },
+    {
+      title: "Crea con inteligencia artificial",
+      description: "Escribe una idea, un estado de ánimo o un tema, y deja que nuestra IA genere una playlist hecha a medida para ti. Rápido, fácil e inteligente.",
+      image: logoIA,
+    },
+    {
+      title: "Habla sobre música",
+      description: "Conversa con nuestra IA sobre géneros, artistas, recomendaciones y mucho más. Una experiencia interactiva para amantes de la música.",
+      image: logoChat,
+    },
+    {
+      title: "Ver letras de canciones",
+      description: "Accede a la letra de las canciones de tus playlists. Perfecto para cantar, entender mejor la música o simplemente disfrutarla más.",
+      image: logoLyrics,
+    },
+  ];
+
   useEffect(() => {
     if (loggedIn) {
       fetchUserProfile()
         .then(profile => setUsername(profile?.username || null))
-        .catch(() => setUsername(null));
+        .catch(() => {
+          // Si hay un error al obtener el perfil, se asume que se ha expirado la sesión
+          setUsername(null);
+          localStorage.removeItem("token");
+          window.location.reload();
+        });
     }
   }, [loggedIn]);
 
@@ -43,6 +90,9 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
         flexDirection: "column",
         position: "relative",
         backgroundColor: theme.palette.background.default,
+        backgroundImage: backgroundImage,
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
       }}
     >
       <TopBarLanding toggleTheme={toggleTheme} />
@@ -54,7 +104,6 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
           left: 0,
           width: "100%",
           height: "calc(100% - 64px)", // Resto de la pantalla
-          backgroundColor: theme.palette.background.default,
           overflowY: "auto",
           alignItems: "center",
           justifyContent: "center",
@@ -91,6 +140,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
                 flexDirection: "column",
                 alignItems: { xs: "center", md: "flex-start" },
                 textAlign: { xs: "center", md: "left" },
+                background: theme.palette.mode === "light" ? "rgba(254, 250, 247, 0.7)" : "none",
               }}
             >
               <Typography
@@ -108,8 +158,14 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
               </Typography>
               <Typography
                 variant="h5"
-                color="text.secondary"
-                sx={{ mb: 4, maxWidth: 500 }}
+                sx={{
+                  mb: 4,
+                  maxWidth: 500,
+                  color: theme.palette.mode === "light" ? "#222" : "text.secondary",
+                  borderRadius: 2,
+                  px: theme.palette.mode === "light" ? 1 : 0,
+                  py: theme.palette.mode === "light" ? 0.5 : 0,
+                }}
               >
                 {description}
               </Typography>
@@ -151,21 +207,46 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            justifyContent: "center",
-            alignItems: "center",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            alignItems: "stretch",
             gap: 4,
             px: 2,
             py: 4,
             width: "90%",
-            mx: "auto", 
+            mx: "auto",
           }}
         >
-          <InfoCard
-            title="Descubre Chatify"
-            description="Chatify es tu asistente musical inteligente. Crea playlists personalizadas, descubre letras de canciones y conversa sobre música con nuestra IA avanzada."
-            image={logoImg}
-          />
+          {infoCardsData.map((card, index) => (
+            <InfoCard
+              key={index}
+              title={card.title}
+              description={card.description}
+              image={card.image}
+            />
+          ))}
+        </Box>
+        <Box
+          sx={{
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            color: "#ffffff",
+            padding: 3,
+            textAlign: "center",
+            mt: 4,
+          }}
+        >
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            © {new Date().getFullYear()} Chatify. Todos los derechos reservados.
+          </Typography>
+          <Typography variant="body2">
+            ¿Dudas o problemas? Escríbenos a:{" "}
+            <a
+              href="mailto:chatify25@gmail.com"
+              style={{ color: "#ffffff", textDecoration: "underline" }}
+            >
+              chatify25@gmail.com
+            </a>
+          </Typography>
         </Box>
       </Box>
     </Box>

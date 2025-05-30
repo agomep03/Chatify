@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import Logo from "../components/Logo/LogoLarge";
 
 type InfoCardProps = {
   title: string;
@@ -22,25 +23,15 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, description, image }) => (
       my: 3,
     }}
   >
-    <Box
-      component="img"
-      src={image}
-      alt={title}
-      sx={{
-        width: { xs: 80, md: 140 },
-        height: { xs: 80, md: 140 },
-        objectFit: "cover",
-        borderRadius: "50%",
-        boxShadow: 2,
-        mr: { md: 3 },
-        mb: { xs: 2, md: 0 },
-      }}
-    />
+    <Box sx={{width:100}}>
+      <Logo logoUrl={image} />
+    </Box>
+
     <Box sx={{ flex: 1 }}>
-      <Typography variant="h5" fontWeight="bold" mb={1}>
+      <Typography variant="h3" fontWeight="bold" mb={1} color="text.primary">
         {title}
       </Typography>
-      <Typography variant="body1" color="text.secondary">
+      <Typography variant="h6" color="text.secondary">
         {description}
       </Typography>
     </Box>
