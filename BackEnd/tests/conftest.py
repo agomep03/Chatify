@@ -104,3 +104,22 @@ def client_with_user(app, authenticated_user):
     app.dependency_overrides[get_current_user] = lambda: authenticated_user
     with TestClient(app) as c:
         yield c, authenticated_user
+
+@pytest.fixture
+def user_without_spotify():
+    return FakeUser(
+        user_id=1,
+        username="testuser",
+        email="testuser@example.com",
+        access_token=None,
+        refresh_token="valid_refresh_token",
+        spotify_user_id=None,
+        token_expiry_minutes=60
+    )
+
+@pytest.fixture
+def client_with_user_without_spotify(app, user_without_spotify):
+    app.dependency_overrides[get_current_user] = lambda: user_without_spotify
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
