@@ -103,15 +103,32 @@ const PlaylistCards: React.FC = () => {
     try {
       await updateUserPlaylist(selectedPlaylist.id, {
         title: formData.name,
-        // Si quieres soportar imagen, añade aquí image_base64
+        description: formData.description,
+        image_base64: formData.image,
       });
       setPlaylists((prev) =>
         prev.map((pl) =>
-          pl.id === selectedPlaylist.id ? { ...pl, name: formData.name } : pl
+          pl.id === selectedPlaylist.id
+            ? {
+                ...pl,
+                name: formData.name,
+                description: formData.description,
+                image: formData.image,
+              }
+            : pl
         )
       );
     } catch (e: any) {
-      setError("Error al actualizar la playlist.");
+      // Mostrar el mensaje de error de la API si está disponible (detail o error)
+      let msg = "Error al actualizar la playlist.";
+      if (e?.response?.data?.detail) {
+        msg = e.response.data.detail;
+      } else if (e?.response?.data?.error) {
+        msg = e.response.data.error;
+      } else if (e?.message) {
+        msg = e.message;
+      }
+      customAlert("error", msg);
     }
     setEditLoading(false);
     handleDialogClose();
