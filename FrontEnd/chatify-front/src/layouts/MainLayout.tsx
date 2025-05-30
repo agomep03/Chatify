@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
-import TopBar from "../components/TopBar/TopBar";
+import TopBar from "../components/TopBar/TopBarHome";
 import NavMenu from "../components/NavMenu/NavMenu";
 import Chat from "./ChatLayout";
 import { useAlert } from "../components/Alert/Alert";

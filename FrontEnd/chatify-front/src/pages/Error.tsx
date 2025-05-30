@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import CustomDialog from '../components/Dialog/Dialog';
 
 
-const Error: React.FC = () => {
+const PageError: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -60,4 +60,4 @@ const Error: React.FC = () => {
 };
 
 
-export default Error;
+export default PageError;

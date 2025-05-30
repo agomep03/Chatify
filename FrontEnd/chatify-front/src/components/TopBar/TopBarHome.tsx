@@ -1,16 +1,16 @@
 import { AppBar, Toolbar, Typography, Box } from '@mui/material';
-import UserMenu from '../UserMenu/UserMenu.tsx'
+import UserMenu from './UserMenu.tsx'
 import { useNavigate } from 'react-router-dom';
 import Logo from '../Logo/Logo.tsx'
 import logo from '../../assets/Logo.png';
 import { useTheme } from "@mui/material/styles";
 import ThemeButton from '../Buttons/ThemeButton/ThemeButton.tsx';
 
-type TopBarProps = {
+type TopBarHomeProps = {
   toggleTheme: () => void;
 };
 
-const TopBar: React.FC<TopBarProps> = ({ toggleTheme }) => {
+const TopBarHome: React.FC<TopBarHomeProps> = ({ toggleTheme }) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -40,4 +40,4 @@ const TopBar: React.FC<TopBarProps> = ({ toggleTheme }) => {
   );
 };
 
-export default TopBar;
+export default TopBarHome;

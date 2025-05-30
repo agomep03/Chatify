@@ -8,13 +8,19 @@ import logo from '../assets/Logo.png';
 import { loginUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
 import { fetchVerifySpotifyConnection } from "../api/spotifyService";
+import LoginRegisterLayout from "../layouts/LoginRegisterLayout";
+
+type LoginProps = {
+  toggleTheme: () => void;
+};
 
 /**
  * Pagina de inicio de sesión.
  * @returns {JSX.Element} Componente de inicio de sesión.
  * @description Este componente permite a los usuarios iniciar sesión en la aplicación.
+ * @param {() => void} props.toggleTheme - Función para cambiar el tema de colores de la aplicación.
  */
-const Login: React.FC = () => {
+const Login: React.FC<LoginProps> = ({ toggleTheme }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
@@ -75,18 +81,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    // Contenedor principal
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: theme.palette.background.paper,
-      }}
-    >
-      {/* Contenedor del formulario */}
+    <LoginRegisterLayout toggleTheme={toggleTheme}>
       <Form
         title="Iniciar Sesión"
         fields={loginFields}
@@ -106,7 +101,7 @@ const Login: React.FC = () => {
               color="primary"
               sx={{
                 "&:hover": {
-                  color: theme => theme.palette.custom.primaryHover,
+                  color: theme.palette.custom.primaryHover,
                 },
               }}
             >
@@ -115,7 +110,7 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
       </Form>
-    </Box>
+    </LoginRegisterLayout>
   );
 };
 
