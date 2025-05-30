@@ -1,72 +1,106 @@
-import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-import sys
 import os
+import sys
+from dotenv import load_dotenv
 
+from sqlalchemy.orm import Session
+from fastapi.testclient import TestClient
+from datetime import datetime, timedelta
+import pytest
+
+# Cargar variables de entorno desde .env (ruta relativa)
+dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.env"))
+load_dotenv(dotenv_path=dotenv_path)
+
+# Añadir carpeta padre al path para importar módulos
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# Importar app FastAPI y dependencias
 from BackEnd.main import app as original_app
 from BackEnd.src.routes.auth_routes import get_current_user, get_db
 from BackEnd.src.config.db import Base, engine
 
 
-@pytest.fixture
-def app(db_session):
-    new_app = FastAPI()
-    new_app.include_router(original_app.router)
+class FakeUser:
+    def __init__(
+        self,
+        user_id,
+        username=None,
+        email=None,
+        access_token="fake_access_token",
+        refresh_token="fake_refresh_token",
+        spotify_user_id="fake_spotify_user_id",
+        token_expiry_minutes=60
+    ):
+        self.id = user_id
+        self.username = username or f"user{user_id}"
+        self.email = email or f"user{user_id}@test.com"
+        self.spotify_access_token = access_token
+        self.spotify_refresh_token = refresh_token
+        self.spotify_user_id = spotify_user_id
+        self.spotify_token_expires_at = datetime.utcnow() + timedelta(minutes=token_expiry_minutes)
 
-    def override_get_db():
-        try:
-            yield db_session
-        finally:
-            pass
-
-    new_app.dependency_overrides[get_db] = override_get_db
-    new_app.dependency_overrides[get_current_user] = lambda: FakeUser(1, "user1", "user1@test.com")
-    return new_app
 
 @pytest.fixture(scope="function")
 def db_session():
+    # Crear conexión y transacción para pruebas con rollback al final
     connection = engine.connect()
     transaction = connection.begin()
-    Base.metadata.create_all(bind=connection)
+    Base.metadata.create_all(bind=connection)  # Crear tablas
+
     session = Session(bind=connection)
+
     try:
         yield session
     finally:
         session.close()
-        transaction.rollback()
+        transaction.rollback()  # Deshacer cambios
         connection.close()
 
-class FakeUser:
-    def __init__(self, user_id, username=None, email=None):
-        self.id = user_id
-        self.username = username or f"testuser{user_id}"
-        self.email = email or f"testuser{user_id}@example.com"
-
-def build_test_client(user_id, username, email):
-    Base.metadata.create_all(bind=engine)
-    app_instance = FastAPI()
-    app_instance.include_router(original_app.router)
-    app_instance.dependency_overrides[get_current_user] = lambda: FakeUser(user_id, username, email)
-    return TestClient(app_instance)
 
 @pytest.fixture
-def client():
-    return build_test_client(1, "user1", "user1@test.com")
+def app(db_session):
+    # Sobrescribir dependencias para que usen la sesión de prueba
+    original_app.dependency_overrides[get_db] = lambda: db_session
+    return original_app
+
 
 @pytest.fixture
-def client2():
-    return build_test_client(2, "user2", "user2@test.com")
+def client(app):
+    # Client con usuario falso 1
+    app.dependency_overrides[get_current_user] = lambda: FakeUser(1, "user1", "user1@test.com")
+    with TestClient(app) as c:
+        yield c
+
+
+@pytest.fixture
+def client2(app):
+    # Client con usuario falso 2
+    app.dependency_overrides[get_current_user] = lambda: FakeUser(2, "user2", "user2@test.com")
+    with TestClient(app) as c:
+        yield c
 
 
 @pytest.fixture
 def client_no_auth(app):
-    app.dependency_overrides = {}
+    # Client sin usuario autenticado (None)
+    app.dependency_overrides[get_current_user] = lambda: None
     with TestClient(app) as c:
         yield c
 
+@pytest.fixture
+def authenticated_user():
+    return FakeUser(
+        user_id=1,
+        username="testuser",
+        email="testuser@example.com",
+        access_token="valid_access_token",
+        refresh_token="valid_refresh_token",
+        spotify_user_id="spotify_test_user",
+        token_expiry_minutes=60
+    )
+
+@pytest.fixture
+def client_with_user(app, authenticated_user):
+    app.dependency_overrides[get_current_user] = lambda: authenticated_user
+    with TestClient(app) as c:
+        yield c, authenticated_user

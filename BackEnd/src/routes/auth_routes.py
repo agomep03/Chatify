@@ -1,5 +1,4 @@
-from http.client import HTTPException
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -15,6 +14,8 @@ from src.controllers.auth_controller import (
 from src.services.spotify_service import login_spotify
 from src.models.auth_model import User
 import os
+from typing import Optional
+from urllib.parse import quote
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
@@ -26,9 +27,9 @@ class RegisterRequest(BaseModel):
     password: str
 
 class UpdateUserRequest(BaseModel):
-    username: str | None = None
-    email: str | None = None
-    password: str | None = None
+    username: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
 
 @router.post("/register")
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
@@ -56,9 +57,11 @@ async def spotify_callback(request: Request, db: Session = Depends(get_db)):
     try:
         result = login_spotify(request, db)
         if not result.get("success", False):
-            return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={result.get('message', 'Error desconocido')}")
+            reason = quote(result.get("message", "Error desconocido"))
+            return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={reason}")
         return RedirectResponse(url=f"{FRONTEND_URL}/home")
     except HTTPException as e:
-        return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={e.detail}")
+        reason = quote(str(e.detail))
+        return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={reason}")
     except Exception:
-        return RedirectResponse(url=f"{FRONTEND_URL}/error")
+        return RedirectResponse(url=f"{FRONTEND_URL}/error?reason=Error%20interno")
