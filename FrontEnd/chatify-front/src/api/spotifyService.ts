@@ -109,3 +109,40 @@ export const deleteUserPlaylist = async (playlistId: string): Promise<any> => {
   if (!res.ok) throw new Error("Error al eliminar la playlist.");
   return await res.json();
 };
+
+// Elimina canciones de una playlist
+export const removeTracksFromPlaylist = async (
+  playlistId: string,
+  tracks: { uri: string }[],
+  snapshot_id?: string
+): Promise<any> => {
+  const token = localStorage.getItem("token");
+  const body: any = { tracks };
+  if (snapshot_id) body.snapshot_id = snapshot_id;
+  const res = await fetch(`${config.apiBaseUrl}/spotify/playlists/${playlistId}/tracks`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (handleUnauthorized(res)) throw new Error("Sesión expirada");
+  if (!res.ok) throw new Error("Error al eliminar canciones de la playlist.");
+  return await res.json();
+};
+
+// Obtiene la letra de una canción
+export const fetchLyrics = async (artist: string, song: string): Promise<string> => {
+  const token = localStorage.getItem("token");
+  const url = `${config.apiBaseUrl}/spotify/lyrics?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (handleUnauthorized(res)) throw new Error("Sesión expirada");
+  if (!res.ok) throw new Error("Error al obtener la letra de la canción.");
+  const data = await res.json();
+  return data.lyrics;
+};

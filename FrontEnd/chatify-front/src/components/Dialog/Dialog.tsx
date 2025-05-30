@@ -82,23 +82,42 @@ const CustomDialog = (props: ConfirmDialogProps) => {
                 borderRadius: '9999px',
                 px: 3,
                 py: 1,
+                boxShadow: 'none',
                 '&.MuiButton-contained': {
                   backgroundColor: theme.palette.primary.main,
                   color: theme.palette.primary.contrastText,
+                  boxShadow: 'none',
                   '&:hover': {
-                    backgroundColor: theme.palette.custom.primaryHover
+                    backgroundColor: theme.palette.custom.primaryHover,
+                    boxShadow: 'none',
                   }
                 },
                 '&.MuiButton-outlined': {
                   borderColor: theme.palette.custom.outlinedBorder,
                   color: theme.palette.text.primary,
+                  boxShadow: 'none',
+                  // Mantener el borde en todos los estados
                   '&:hover': {
-                    borderColor: theme.palette.text.primary
-                  }
+                    borderColor: theme.palette.text.primary,
+                    boxShadow: 'none',
+                  },
+                  '&:active': {
+                    borderColor: theme.palette.custom.outlinedBorder,
+                    boxShadow: 'none',
+                  },
+                  '&:focus': {
+                    borderColor: theme.palette.custom.outlinedBorder,
+                    boxShadow: 'none',
+                  },
+                  '&:focus-visible': {
+                    borderColor: theme.palette.custom.outlinedBorder,
+                    boxShadow: 'none',
+                  },
                 },
-                '&:focus': { outline: 'none', border: 'none', boxShadow: 'none' },
-                '&:focus-visible': { outline: 'none', border: 'none', boxShadow: 'none' },
-                '&:active': { outline: 'none', border: 'none', boxShadow: 'none' },
+                // Eliminar outline y boxShadow pero NO el border para outlined
+                '&:focus': { outline: 'none', boxShadow: 'none' },
+                '&:focus-visible': { outline: 'none', boxShadow: 'none' },
+                '&:active': { outline: 'none', boxShadow: 'none' },
               }}
             >
               {btn.label}
