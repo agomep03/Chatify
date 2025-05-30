@@ -12,13 +12,7 @@ interface FormHeaderProps {
 
 const FormHeader = ({ title, logoUrl, showHomeButton = false }: FormHeaderProps) => {
   const theme = useTheme();
-  const isLight = theme.palette.mode === "light";
   const navigate = useNavigate();
-
-  const logoSrc =
-    isLight && logoUrl
-      ? logoUrl.replace("Logo.png", "Logo_dark.png")
-      : logoUrl;
 
   return (
     <Box
@@ -79,7 +73,7 @@ const FormHeader = ({ title, logoUrl, showHomeButton = false }: FormHeaderProps)
           justifyContent: "center",
         }}
       >
-        {logoSrc && <Logo logoUrl={logoSrc} />}
+        {logoUrl && <Logo logoUrl={logoUrl} />}
         <Typography
           variant="h5"
           sx={{ color: theme.palette.text.primary, ml: logoUrl ? 1 : 0 }}
