@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import List, Optional
+import re
 
 
 import requests
@@ -258,9 +259,9 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
     canciones = []
 
     for line in response_text.split("\n"):
-        if line.lower().startswith("título:"):
+        if re.match(r"(?i)^t[ií]tulo:", line):
             title = line.split(":", 1)[1].strip()
-        elif line.lower().startswith("descripcion:"):
+        elif re.match(r"(?i)^descripci[oó]n:", line):
             description = line.split(":", 1)[1].strip()
         elif "-" in line:
             try:
