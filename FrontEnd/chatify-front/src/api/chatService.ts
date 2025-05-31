@@ -12,7 +12,8 @@ export const fetchSendMessage = async (
   chatId: string,
   input: string,
   onAddMessage: (msg: Message) => void,
-  setLoading: (loading: boolean) => void
+  setLoading: (loading: boolean) => void,
+  mode: string = "normal"
 ) => {
   if (!input.trim()) return;
 
@@ -30,9 +31,9 @@ export const fetchSendMessage = async (
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/json',
       },
-      body: input,
+      body: JSON.stringify({ question: input, mode: mode }),
     });
     if (handleUnauthorized(res)) return;
 

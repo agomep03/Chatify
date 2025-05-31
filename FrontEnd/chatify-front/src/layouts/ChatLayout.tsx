@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, List, ListItem, ListItemText, TextField, IconButton, CircularProgress } from '@mui/material';
+import { Box, List, ListItem, ListItemText, TextField, IconButton, CircularProgress, Select, MenuItem, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 import { useTheme } from "@mui/material/styles";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
@@ -36,6 +38,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [isLoadingDot, setIsLoadingDot] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [dots, setDots] = useState('');
+  const [mode, setMode] = useState("normal");
   const theme = useTheme();
 
   const listRef = useRef<HTMLUListElement>(null);
@@ -72,7 +75,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   // Envía el mensaje del usuario
   const handleSend = () => {
     if (!input.trim()) return;
-    fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot);
+    fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot, mode);
     setInput('');
   };
 
@@ -107,7 +110,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         overflow="hidden"
         mb={2}
         sx={{
-          maxHeight: '90%',
+          maxHeight: '80%',
           overflowY: 'auto',
           overflowX: 'hidden',
           ...getScrollbarStyles(theme),
@@ -160,48 +163,153 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         </List>
       </Box>
       {/* Input para escribir y enviar mensajes */}
-      <Box display="flex" overflow="hidden">
-        <TextField
-          fullWidth
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe un mensaje..."
-          multiline
-          minRows={1}
-          maxRows={6}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              handleSend();
-              setInput('');
-            }
-          }}
-          sx={{
-            backgroundColor: theme.palette.custom.botDialogBg,
-            resize: 'none',
-            overflow: 'auto',
-            borderRadius: "15px",
-            color: theme.palette.text.primary,
-            '& .MuiInputBase-input': {
-                color: theme.palette.text.primary, 
-            },
-            '& .MuiOutlinedInput-root': { //Eliminamos el borde y sus variaciones cuando se toca el componente
-                '& fieldset': {
-                    border: 'none',
+      <Box display="flex" overflow="hidden" flexDirection="column">
+        <Box display="flex" overflow="hidden">
+          <Box
+              sx={{
+                width: "100%",
+                backgroundColor: theme.palette.custom.botDialogBg,
+                resize: 'none',
+                overflow: 'hidden',
+                borderRadius: "15px",
+                color: theme.palette.text.primary,
+                '& .MuiInputBase-input': {
+                    color: theme.palette.text.primary, 
                 },
-                '&:hover fieldset': {
-                    border: 'none',
+                '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                        border: 'none',
+                    },
+                    '&:hover fieldset': {
+                        border: 'none',
+                    },
+                    '&.Mui-focused fieldset': {
+                        border: 'none',
+                    },
                 },
-                '&.Mui-focused fieldset': {
-                    border: 'none',
-                },
-            },
-          }}
-    
-        />
-        <IconButton onClick={handleSend} sx={{ color: theme.palette.primary.main }}>
-          <SendIcon />
-        </IconButton>
+              }}
+          >
+            <ToggleButtonGroup
+              value={mode === "normal" ? null : mode}
+              exclusive
+              onChange={(event: React.MouseEvent<HTMLElement>, newMode: string | null) => {
+                setMode(newMode || "normal");
+                if (event && event.currentTarget) {
+                  (event.currentTarget as HTMLElement).blur();
+                }
+              }}
+              sx={{ mb: 1, maxWidth: 300, ml: 1, mt: 1 }}
+            >
+              <ToggleButton
+                value="creatividad"
+                selected={mode === "creatividad"}
+                sx={{
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  '&': {
+                    transition: 'none',
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                  },
+                  '&:not(.Mui-selected)': {
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                  },
+                  '&.Mui-selected': {
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                    background: theme.palette.action.selected,
+                  },
+                  '&.Mui-selected:hover': {
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                    background: theme.palette.action.selected,
+                  },
+                  '&:focus, &:active, &:focus-visible': {
+                    outline: 'none !important',
+                    border: '1px solid transparent !important',
+                    boxShadow: 'none !important',
+                    borderColor: theme.palette.action.selected,
+                  },
+
+                }}
+              >
+                <LightbulbIcon sx={{ fontSize: 18, mr: 1 }} />
+                Se creativo
+              </ToggleButton>
+              <ToggleButton
+                value="razonamiento"
+                selected={mode === "razonamiento"}
+                sx={{
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  '&': {
+                    transition: 'none',
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                  },
+                  '&:not(.Mui-selected)': {
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                  },
+                  '&.Mui-selected': {
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                    background: theme.palette.action.selected,
+                  },
+                  '&.Mui-selected:hover': {
+                    border: '1px solid',
+                    borderColor: theme.palette.action.selected,
+                    background: theme.palette.action.selected,
+                  },
+                  '&:focus, &:active, &:focus-visible': {
+                    outline: 'none !important',
+                    border: '1px solid transparent !important',
+                    boxShadow: 'none !important',
+                    borderColor: theme.palette.action.selected,
+                  },
+                }}
+              >
+                <PsychologyIcon sx={{ fontSize: 18, mr: 1 }} />
+                Razona
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <TextField
+              fullWidth
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Escribe un mensaje..."
+              multiline
+              minRows={1}
+              maxRows={6}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSend();
+                  setInput('');
+                }
+              }}
+              sx={{overflow: 'auto',}}
+            />
+          </Box>
+          <IconButton onClick={handleSend} sx={{ color: theme.palette.primary.main }}>
+            <SendIcon />
+          </IconButton>
+        </Box>
       </Box>
     </Box>
   );
