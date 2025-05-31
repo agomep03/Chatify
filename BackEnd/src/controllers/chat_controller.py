@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from src.services.chatIA_service import Agent
 from src.models.conversation_model import Conversation
 from src.models.message_model import Message
+from src.controllers.spotify_controller import get_user_full_top_info
+from src.models.auth_model import User
 
 logger = logging.getLogger(__name__)
 agent = Agent()
@@ -40,7 +42,7 @@ async def save_message(chat_id: int, role: str, content: str, db: Session):
         logger.error(f"Error saving message for conversation {chat_id}: {e}")
         raise HTTPException(status_code=500, detail="Error saving the message")
 
-async def handle_message(chat_id: int, question: str, db: Session, mode: str = "normal"):
+async def handle_message(chat_id: int, question: str, user: User, db: Session, mode: str = "normal"):
     conversation = db.query(Conversation).filter(Conversation.id == chat_id).first()
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
@@ -53,9 +55,24 @@ async def handle_message(chat_id: int, question: str, db: Session, mode: str = "
             .limit(5)
             .all()
     ][::-1]
-    
+
+    top_info = get_user_full_top_info(user, db)
+
+    def format_top_info(title: str, data: dict) -> str:
+        return (
+            f"{title} esta semana: {', '.join(data['semanal'])}.\n"
+            f"{title} en los últimos 6 meses: {', '.join(data['seis_meses'])}.\n"
+            f"{title} en todo el tiempo: {', '.join(data['todo_el_tiempo'])}."
+        )
+
+    extra_context = (
+        format_top_info("Top artistas", top_info["top_artists"]) + "\n\n" +
+        format_top_info("Top canciones", top_info["top_tracks"]) + "\n\n" +
+        format_top_info("Top géneros", top_info["top_genres"])
+    )
+
     try:
-        answer = await agent.chat(question, history, mode=mode)
+        answer = await agent.chat(question, history, mode=mode, extra_context=extra_context)
     except Exception as e:
         logger.error(f"Error creating the answer: {e}")
         raise HTTPException(status_code=500, detail="Error creating the answer")

@@ -35,7 +35,7 @@ async def send_message(
     if not conversation or str(conversation.user_id) != str(current_user.id):
         raise HTTPException(status_code=403, detail="Unauthorized")
 
-    return await chat_controller.handle_message(chat_id, body.question, db, mode=body.mode)
+    return await chat_controller.handle_message(chat_id, body.question, current_user, db, mode=body.mode)
 
 @router.delete("/{chat_id}")
 def delete_chat(chat_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import requests
 
-from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto, remove_tracks_from_playlist, unfollow_playlist_logic
+from src.controllers.spotify_controller import get_all_user_playlists, update_playlist, generate_playlist_auto, remove_tracks_from_playlist, unfollow_playlist_logic, get_user_full_top_info
 from src.controllers.auth_controller import get_current_user, get_db
 from src.models.auth_model import User
 from src.services.lyrircs_service import LyricsFetcher
@@ -82,3 +82,15 @@ def unfollow_playlist(
     user: User = Depends(get_current_user)
 ):
     return unfollow_playlist_logic(playlist_id, user)
+
+@router.get("/user/top-info")
+def get_user_top_info_endpoint(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Devuelve los top 3 artistas, canciones y géneros del usuario desde Spotify
+    para tres períodos de tiempo: esta semana, últimos seis meses y todo el tiempo.
+    """
+    top_info = get_user_full_top_info(user, db)
+    return top_info
