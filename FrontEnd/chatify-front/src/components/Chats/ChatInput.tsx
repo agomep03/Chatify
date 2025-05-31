@@ -36,7 +36,7 @@ export default function ChatInput({
   theme,
 }: ChatInputBarProps) {
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <Box display="flex" flexDirection="column" gap={1} sx={{backgroundColor: 'transparent', borderRadius: "15px"}}>
       {/* Toggle buttons siempre arriba */}
       <ChatModeToggle mode={mode} setMode={setMode} theme={theme} />
       {/* Input y botón de enviar */}
