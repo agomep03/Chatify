@@ -8,8 +8,6 @@ from src.models.message_model import Message
 logger = logging.getLogger(__name__)
 agent = Agent()
 
-
-
 def get_conversation_by_id(chat_id: int, db: Session):
     return db.query(Conversation).filter(Conversation.id == chat_id).first()
 
@@ -41,14 +39,14 @@ async def save_message(chat_id: int, role: str, content: str, db: Session):
         logger.error(f"Error saving message for conversation {chat_id}: {e}")
         raise HTTPException(status_code=500, detail="Error saving the message")
 
-async def handle_message(chat_id: int, question: str, db: Session):
+async def handle_message(chat_id: int, question: str, db: Session, mode: str = "normal"):
     conversation = db.query(Conversation).filter(Conversation.id == chat_id).first()
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     history = [{"role": msg.role, "content": msg.content} for msg in conversation.messages]
     try:
-        answer = await agent.chat(question, history)
+        answer = await agent.chat(question, history, mode=mode)
     except Exception as e:
         logger.error(f"Error creating the answer: {e}")
         raise HTTPException(status_code=500, detail="Error creating the answer")

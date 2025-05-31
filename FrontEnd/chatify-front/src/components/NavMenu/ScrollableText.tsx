@@ -2,6 +2,18 @@ import { Box } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 
+/**
+ * Texto con scroll automático si desborda su contenedor.
+ * @component
+ * @param {string} text - Texto a mostrar.
+ * @param {boolean} selected - Si la tab está seleccionada (aplica estilos destacados).
+ * @returns {JSX.Element} Texto que se desplaza horizontalmente al hacer hover si es muy largo.
+ * @description
+ * Este componente muestra un texto que, si es más largo que su contenedor, se desplaza automáticamente al hacer hover.
+ * Útil para mostrar títulos largos en tabs/conversaciones.
+ * El texto se resalta si la tab está seleccionada.
+ */
+
 const ScrollableText = ({ text, selected }: { text: string; selected: boolean }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -36,9 +48,11 @@ const ScrollableText = ({ text, selected }: { text: string; selected: boolean })
         overflow: "hidden",
         whiteSpace: "nowrap",
         position: "relative",
+        // Al hacer hover, si el texto desborda, se activa la animación de scroll
         "&:hover .scroll-text": {
           animation: shouldScroll ? "scroll-text 5s linear infinite" : "none",
         },
+        // Animación de scroll
         "@keyframes scroll-text": {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: `translateX(calc(-100% + ${containerRef.current?.clientWidth}px))` },

@@ -1,17 +1,28 @@
 import { useEffect, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
-import TopBar from "../components/TopBar";
-import NavMenu from "../components/NavMenu";
-import Chat from "../components/Chat";
-import { useAlert } from "../components/Alert";
+import TopBar from "../components/TopBar/TopBarHome";
+import NavMenu from "../components/NavMenu/NavMenu";
+import Chat from "./ChatLayout";
+import { useAlert } from "../components/Alert/Alert";
 import {
   fetchDeleteChat,
   fetchStartChat,
   fetchUpdateChatTitle,
   fetchObtainAllChats,
 } from "../api/chatService";
-import PlaylistCards from "../components/PlaylistCards";
+import PlaylistCards from "./PlaylistCardsLayout";
 import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
+/**
+ * Layout principal de la aplicación (zona privada tras login).
+ * @component
+ * @param {() => void} toggleTheme - Función para alternar entre modo claro y oscuro.
+ * @returns {JSX.Element} Layout con barra superior, menú lateral de navegación, y contenido principal (chats o playlists).
+ * @description
+ * Gestiona la navegación entre chats y playlists, el estado de los chats, y muestra el contenido correspondiente según la tab seleccionada.
+ * Permite crear, eliminar y renombrar chats. El menú lateral es responsivo y puede ocultarse en pantallas pequeñas.
+ */
 
 interface Chat {
   id: string;
@@ -27,17 +38,23 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
   const [selectedTab, setSelectedTab] = useState<string>("playlists");
   const { customAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
+  const [showNav, setShowNav] = useState(true);
   const theme = useTheme();
+  const computerScreenIsSmall = useMediaQuery("(max-width:1200px)");
 
   const allTabs = [
     { id: "playlists", title: "Playlists" },
-    { id: "add", title: "Añadir conversación" },
+    { id: "add", title: "Nueva conversación" },
     ...chats,
   ];
 
   const closableTabs = [false, false, ...chats.map(() => true)];
 
-  //Para eliminar un chat
+  /**
+   * Elimina un chat por id.
+   * Si el chat eliminado estaba seleccionado, vuelve a la tab de playlists.
+   * Actualiza la lista de chats tras la eliminación.
+   */
   const handleTabClose = async (tadId: string) => {
     const chat = chats.find((c) => c.id === tadId);
     if (!chat) return;
@@ -55,7 +72,10 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     await fetchChats();
   };
 
-  // Para renombrar conversacion
+  /**
+   * Renombra un chat.
+   * Actualiza el título localmente y en el backend.
+   */
   const handleTabRename = async (chatId: string, newTitle: string) => {
     try {
       setChats((prev) =>
@@ -69,7 +89,10 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     await fetchChats();
   };
 
-  // Para empezar una nueva conversación
+  /**
+   * Inicia una nueva conversación.
+   * Crea el chat en backend y lo selecciona.
+   */
   const handleStartChat = async () => {
     try {
       setIsLoading(true);
@@ -83,7 +106,9 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     setIsLoading(false);
   };
 
-  // Actualizar los chats
+  /**
+   * Obtiene todos los chats del usuario.
+   */
   const fetchChats = async () => {
     try {
       const data = await fetchObtainAllChats();
@@ -93,6 +118,7 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     }
   };
 
+  // Carga los chats al montar el componente
   useEffect(() => {
     const loadChats = async () => {
       await fetchChats();
@@ -100,12 +126,27 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     loadChats();
   }, []);
 
+  // Si la tab seleccionada es "add", inicia una nueva conversación
   useEffect(() => {
     if (selectedTab === "add") {
       handleStartChat();
     }
   }, [selectedTab]);
 
+  /**
+   * Cambia la tab seleccionada y oculta el menú lateral en pantallas pequeñas.
+   */
+  const handleOnTabChange = (tab: string) => {
+    setSelectedTab(tab);
+    if (computerScreenIsSmall) setShowNav(false);
+  };
+
+  /**
+   * Renderiza el contenido principal según la tab seleccionada.
+   * - "playlists": muestra las playlists
+   * - "add": muestra un placeholder vacío
+   * - id de chat: muestra el chat correspondiente
+   */
   const renderTabContent = () => {
     if (selectedTab === "playlists") {
       return <PlaylistCards />;
@@ -134,27 +175,36 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
         flexDirection: "column",
       }}
     >
-      <TopBar toggleTheme={toggleTheme}/>
+      {/* Barra superior con botón de menú y cambio de tema */}
+      <TopBar toggleTheme={toggleTheme} onToggleNav={() => setShowNav(prev => !prev)}/>
       <Box
         sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}
       >
+        {/* Menú lateral de navegación (NavMenu) */}
         <Box
           sx={{
-            width: 280,
+            width: showNav ? 280 : 0,
             flexShrink: 0,
             backgroundColor: theme.palette.background.default,
             height: "100%",
+            '@media (max-width:600px)': {
+              position: 'absolute',
+              zIndex: 10,
+              height: '100%',
+              boxShadow: showNav ? 4 : 0,
+            },
           }}
         >
           <NavMenu
             tabs={allTabs}
             closableTabs={closableTabs}
             selectedTab={selectedTab}
-            onTabChange={setSelectedTab}
+            onTabChange={handleOnTabChange}
             onTabClose={handleTabClose}
             onTabRename={handleTabRename}
           />
         </Box>
+        {/* Contenido principal: playlists o chat */}
         <Box
           sx={{
             flexGrow: 1,

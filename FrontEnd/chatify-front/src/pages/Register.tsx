@@ -1,19 +1,26 @@
 import { Box, Link, Typography } from "@mui/material";
-import Form from "../components/Form";
+import Form from "../components/Form/Form";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useAlert } from "../components/Alert";
+import { useAlert } from "../components/Alert/Alert";
 import logo from '../assets/Logo.png';
 import { registerUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
 import { isAuthenticated } from "../utils/auth";
+import LoginRegisterLayout from "../layouts/LoginRegisterLayout";
+
+type RegisterProps = {
+  toggleTheme: () => void;
+};
 
 /**
  * Pagina de registro.
  * @returns {JSX.Element} Componente de registro.
  * @description Este componente permite a los usuarios registrarse en la aplicación.
+ * @param {() => void} props.toggleTheme - Función para cambiar el tema de colores de la aplicación.
  */
-const Register: React.FC = () => {
+const Register: React.FC<RegisterProps> = ({ toggleTheme }) => {
+
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
   const theme = useTheme();
@@ -21,13 +28,14 @@ const Register: React.FC = () => {
 
   // Campos del formulario
   const registerFields = [
-    { name: "name", label: "Nombre Completo", type: "text" },
-    { name: "email", label: "Correo Electrónico", type: "email" },
-    { name: "password", label: "Contraseña", type: "password" },
+    { name: "name", label: "Nombre Completo", type: "text", required: true },
+    { name: "email", label: "Correo Electrónico", type: "email", required: true },
+    { name: "password", label: "Contraseña", type: "password", required: true },
     {
       name: "confirmPassword",
       label: "Confirmar Contraseña",
       type: "password",
+      required: true,
     },
   ];
 
@@ -73,16 +81,7 @@ const Register: React.FC = () => {
 
   return (
     // Contenedor principal
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: theme.palette.background.paper,
-      }}
-    >
+    <LoginRegisterLayout toggleTheme={toggleTheme}>
       <Form
         title="Registrarse"
         fields={registerFields}
@@ -101,7 +100,7 @@ const Register: React.FC = () => {
                 color="primary"
                 sx={{
                   "&:hover": {
-                    color: theme => theme.palette.custom.primaryHover,
+                    color: theme.palette.custom.primaryHover,
                   },
                 }}
               >
@@ -110,7 +109,7 @@ const Register: React.FC = () => {
             </Typography>
           </Box>
         </Form>
-    </Box>
+    </LoginRegisterLayout>
   );
 };
 

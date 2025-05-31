@@ -8,7 +8,6 @@ API_KEY = os.getenv("OPENROUTER_API_KEY")
 class Agent:
     def __init__(
         self,
-        context="Eres un asistente experto en música. Responde en español.",
         model="openai/gpt-4o-mini",
         max_tokens=300,
         temperature=0.7,
@@ -16,7 +15,6 @@ class Agent:
         presence_penalty=0.0,
         frequency_penalty=0.0
     ):
-        self.context = context
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
@@ -24,8 +22,17 @@ class Agent:
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
 
-    async def chat(self, message_user: str, messages: list = []) -> str:
-        messages = [{"role": "system", "content": self.context}] + messages.copy() + [{"role": "user", "content": message_user}]
+    def get_context(self, mode: str) -> str:
+        if mode == "creatividad":
+            return "Eres un asistente musical extremadamente creativo. Responde en español con ideas originales, metáforas, e inspiración artística."
+        elif mode == "razonamiento":
+            return "Eres un asistente musical lógico y analítico. Responde en español explicando los razonamientos paso a paso con claridad."
+        else:
+            return "Eres un asistente experto en música. Responde en español."
+
+    async def chat(self, message_user: str, messages: list = [], mode: str = "normal") -> str:
+        context = self.get_context(mode)
+        messages = [{"role": "system", "content": context}] + messages.copy() + [{"role": "user", "content": message_user}]
 
         payload = {
             "model": self.model,
