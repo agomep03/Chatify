@@ -3,6 +3,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AppButton from "../Buttons/AppButton/AppButton";
 import { deleteUserPlaylist } from "../../api/spotifyService";
+import { useState } from "react";
+import ConfirmDeleteDialog from "../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 
 const PlaylistCard = ({
   playlist,
@@ -16,14 +18,19 @@ const PlaylistCard = ({
   onShowSongs: (playlist: any) => void;
   theme: any;
 }) => {
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
   const handleDelete = async () => {
+    setLoadingDelete(true);
     try {
       await deleteUserPlaylist(playlist.id);
       onDelete(playlist.id);
     } catch (e) {
       // Manejo de error opcional
-      // Puedes mostrar un mensaje de error aquí si lo deseas
     }
+    setLoadingDelete(false);
+    setOpenConfirm(false);
   };
 
   return (
@@ -89,7 +96,7 @@ const PlaylistCard = ({
             },
             "&:active": { outline: "none", border: "none", boxShadow: "none" },
           }}
-          onClick={handleDelete}
+          onClick={() => setOpenConfirm(true)}
         >
           <DeleteIcon />
         </Button>
@@ -158,6 +165,13 @@ const PlaylistCard = ({
           </AppButton>
         )}
       </CardContent>
+      <ConfirmDeleteDialog
+        open={openConfirm}
+        onClose={() => { if (!loadingDelete) setOpenConfirm(false); }}
+        onConfirm={handleDelete}
+        itemName={playlist.name}
+        loading={loadingDelete}
+      />
     </Card>
   );
 };

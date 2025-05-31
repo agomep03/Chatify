@@ -6,6 +6,7 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import React, { useState } from "react";
 import { removeTracksFromPlaylist, fetchLyrics } from "../../api/spotifyService";
 import LyricsDialog from "./LyricsDialog";
+import ConfirmDeleteDialog from "../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 
 const SongsDialog = ({
   open,
@@ -23,6 +24,8 @@ const SongsDialog = ({
   const [lyricsLoading, setLyricsLoading] = useState(false);
   const [lyrics, setLyrics] = useState<string>("");
   const [lyricsSong, setLyricsSong] = useState<{ artist: string; name: string } | null>(null);
+  const [openConfirm, setOpenConfirm] = useState<{ idx: number; track: any } | null>(null);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   // Actualiza tracks si cambia la playlist
   React.useEffect(() => {
@@ -30,7 +33,7 @@ const SongsDialog = ({
   }, [playlist]);
 
   const handleRemoveTrack = async (trackUri: string, idx: number) => {
-    setLoading(trackUri);
+    setLoadingDelete(true);
     try {
       await removeTracksFromPlaylist(
         playlist.id,
@@ -41,7 +44,8 @@ const SongsDialog = ({
     } catch (e) {
       // Manejo de error opcional
     }
-    setLoading(null);
+    setLoadingDelete(false);
+    setOpenConfirm(null);
   };
 
   const handleShowLyrics = async (track: any) => {
@@ -174,7 +178,7 @@ const SongsDialog = ({
                     boxShadow: "none",
                   },
                 }}
-                onClick={() => handleRemoveTrack(track.uri, idx)}
+                onClick={() => setOpenConfirm({ idx, track })}
                 disabled={loading === track.uri}
               >
                 <DeleteIcon />
@@ -193,6 +197,13 @@ const SongsDialog = ({
         lyrics={lyrics}
         loading={lyricsLoading}
         song={lyricsSong}
+      />
+      <ConfirmDeleteDialog
+        open={!!openConfirm}
+        onClose={() => { if (!loadingDelete) setOpenConfirm(null); }}
+        onConfirm={() => openConfirm && handleRemoveTrack(openConfirm.track.uri, openConfirm.idx)}
+        itemName={openConfirm?.track?.name}
+        loading={loadingDelete}
       />
     </CustomDialog>
   );

@@ -1,5 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, Typography, CircularProgress, Box, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Typography, CircularProgress, Box } from "@mui/material";
+import CustomDialogDarkBackground from "../Dialog/CustomDialogs/CustomDialogDarkBackground";
 
 const LyricsDialog = ({
   open,
@@ -14,44 +14,38 @@ const LyricsDialog = ({
   loading: boolean;
   song: { artist: string; name: string } | null;
 }) => (
-  <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-    <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-      {song ? `Letra de "${song.name}"` : "Letra"}
-      <IconButton
-        onClick={onClose}
-        size="small"
+  <CustomDialogDarkBackground
+    open={open}
+    onClose={onClose}
+    onConfirm={onClose}
+    buttons={[
+      {
+        label: "Cerrar",
+        color: "primary",
+        action: onClose,
+      },
+    ]}
+    title={song ? `Letra de "${song.name}"` : "Letra"}
+    showCloseIcon
+  >
+    {loading ? (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 120 }}>
+        <CircularProgress />
+      </Box>
+    ) : (
+      <Typography
+        variant="body2"
         sx={{
-          outline: "none",
-          border: "none",
-          boxShadow: "none",
-          "&:focus": { outline: "none", border: "none", boxShadow: "none" },
-          "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
-          "&:active": { outline: "none", border: "none", boxShadow: "none" },
+          whiteSpace: "pre-line",
+          fontFamily: "monospace",
+          maxHeight: 350,
+          overflowY: "auto",
         }}
       >
-        <CloseIcon />
-      </IconButton>
-    </DialogTitle>
-    <DialogContent dividers>
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 120 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Typography
-          variant="body2"
-          sx={{
-            whiteSpace: "pre-line",
-            fontFamily: "monospace",
-            maxHeight: 350,
-            overflowY: "auto",
-          }}
-        >
-          {lyrics}
-        </Typography>
-      )}
-    </DialogContent>
-  </Dialog>
+        {lyrics}
+      </Typography>
+    )}
+  </CustomDialogDarkBackground>
 );
 
 export default LyricsDialog;
