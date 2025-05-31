@@ -21,13 +21,14 @@ const Register: React.FC = () => {
 
   // Campos del formulario
   const registerFields = [
-    { name: "name", label: "Nombre Completo", type: "text" },
-    { name: "email", label: "Correo Electrónico", type: "email" },
-    { name: "password", label: "Contraseña", type: "password" },
+    { name: "name", label: "Nombre Completo", type: "text", required: true },
+    { name: "email", label: "Correo Electrónico", type: "email", required: true },
+    { name: "password", label: "Contraseña", type: "password", required: true },
     {
       name: "confirmPassword",
       label: "Confirmar Contraseña",
       type: "password",
+      required: true,
     },
   ];
 
