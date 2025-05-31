@@ -9,7 +9,7 @@ class Conversation(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
     created_at = Column(DateTime, default=datetime.utcnow)
-    title = Column(String, default="Sin título")
+    title = Column(String, default=lambda: "Conversación " + datetime.utcnow().strftime("%d/%m/%Y %H:%M"))
 
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
     user = relationship("User", back_populates="conversations")

@@ -1,4 +1,5 @@
 import logging
+import re
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from src.services.chatIA_service import Agent
@@ -54,7 +55,32 @@ async def handle_message(chat_id: int, question: str, db: Session, mode: str = "
     await save_message(chat_id, "user", question, db)
     await save_message(chat_id, "assistant", answer, db)
 
-    return {"answer": answer}
+    default_title_pattern = r"^Conversación \d{2}/\d{2}/\d{4} \d{2}:\d{2}$"
+    title_changed = False
+
+    if conversation.title and re.match(default_title_pattern, conversation.title):
+        agent_temp = Agent() 
+        history.append({"role": "user", "content": question})
+        prompt = (
+            "Dada la siguiente conversación de música, sugiere un título muy breve en español. No me digas nada más.\n"
+            "Si no hay suficiente contexto, responde SOLO con 'NO_TITULO'.\n\n"
+            "Conversación:\n"
+        )
+        for msg in history:
+            prompt += f"{msg['role']}: {msg['content']}\n"
+        prompt += "\nTítulo:"
+
+        try:
+            generated_title = await agent_temp.chat(prompt, [])
+            if generated_title and "NO_TITULO" not in generated_title.upper():
+                conversation.title = generated_title.strip()
+                db.commit()
+                db.refresh(conversation)
+                title_changed = True
+        except Exception as e:
+            logger.error(f"Error generando título automático: {e}")
+
+    return {"answer": answer, "title_changed": title_changed}
 
 
 def get_history(chat_id: int, db: Session):
