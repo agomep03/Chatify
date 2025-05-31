@@ -2,7 +2,17 @@ import { Card, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useTheme } from "@mui/material/styles";
 
-const AutoPlaylistCard = ({ onClick }: { onClick: () => void }) => {
+/**
+ * Tarjeta para crear una nueva playlist.
+ * @component
+ * @param {() => void} onClick - Función que se ejecuta al hacer click en la tarjeta.
+ * @returns {JSX.Element} Tarjeta estilizada con icono y texto para crear una playlist.
+ * @description
+ * Muestra una tarjeta con borde punteado, icono de suma y texto "Crear Playlist".
+ * Al hacer click, ejecuta la función onClick recibida por props.
+ * El diseño es responsivo y resalta al pasar el mouse.
+ */
+const CreatePlaylistCard = ({ onClick }: { onClick: () => void }) => {
   const theme = useTheme();
   return (
     <Card
@@ -28,10 +38,10 @@ const AutoPlaylistCard = ({ onClick }: { onClick: () => void }) => {
     >
       <AddIcon sx={{ fontSize: 80 }} />
       <Typography variant="h6" sx={{ mt: 2 }}>
-        Crear Playlist Automática
+        Crear Playlist
       </Typography>
     </Card>
   );
 };
 
-export default AutoPlaylistCard;
+export default CreatePlaylistCard;

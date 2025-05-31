@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
@@ -10,12 +10,7 @@ from src.controllers.auth_controller import get_current_user, get_db
 from src.models.auth_model import User
 from src.services.lyrircs_service import LyricsFetcher
 
-
 router = APIRouter()
-
-class UpdatePlaylistRequest(BaseModel):
-    title: Optional[str] = None
-    image_base64: Optional[str] = None
 
 class TrackUri(BaseModel):
     uri: str
@@ -27,7 +22,6 @@ class RemoveTracksRequest(BaseModel):
 class UpdatePlaylistRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    image_base64: Optional[str] = None
 
 @router.get("/playlists")
 def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -35,6 +29,8 @@ def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_
 
 @router.get("/auth/spotify/connected")
 def check_spotify_connected(user: User = Depends(get_current_user)):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     if user.spotify_user_id and user.spotify_access_token:
         return {"connected": True}
     return {"connected": False}
@@ -50,7 +46,6 @@ def update_playlist_endpoint(
         playlist_id=playlist_id,
         title=data.title,
         description=data.description,
-        image_base64=data.image_base64,
         user=user,
         db=db
     )

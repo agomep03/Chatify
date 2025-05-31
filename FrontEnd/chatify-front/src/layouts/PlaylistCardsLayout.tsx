@@ -7,11 +7,12 @@ import {
   autoGeneratePlaylist,
 } from "../api/spotifyService";
 import PlaylistList from "../components/PlaylistCards/PlaylistList";
-import AutoPlaylistCard from "../components/PlaylistCards/AutoPlaylistCard";
-import SongsDialog from "../components/PlaylistCards/SongsDialog";
-import EditPlaylistDialog from "../components/PlaylistCards/EditPlaylistDialog";
-import AutoPlaylistDialog from "../components/PlaylistCards/AutoPlaylistDialog";
+import CreatePlaylistCard from "../components/PlaylistCards/CreatePlaylistCard/CreatePlaylistCard";
+import SongsDialog from "../components/PlaylistCards/PlaylistCard/PlaylistCardComponents/SongsDialog";
+import EditPlaylistDialog from "../components/PlaylistCards/PlaylistCard/PlaylistCardComponents/EditPlaylistDialog";
+import CreatePlaylistDialog from "../components/PlaylistCards/CreatePlaylistCard/CreatePlaylistDialog";
 import { useAlert } from "../components/Alert/Alert";
+import { getScrollbarStyles } from "../styles/scrollbarStyles";
 
 /**
  * Componente para mostrar las playlists del usuario en forma de tarjetas.
@@ -103,15 +104,32 @@ const PlaylistCards: React.FC = () => {
     try {
       await updateUserPlaylist(selectedPlaylist.id, {
         title: formData.name,
-        // Si quieres soportar imagen, añade aquí image_base64
+        description: formData.description,
+        image_base64: formData.image,
       });
       setPlaylists((prev) =>
         prev.map((pl) =>
-          pl.id === selectedPlaylist.id ? { ...pl, name: formData.name } : pl
+          pl.id === selectedPlaylist.id
+            ? {
+                ...pl,
+                name: formData.name,
+                description: formData.description,
+                image: formData.image,
+              }
+            : pl
         )
       );
     } catch (e: any) {
-      setError("Error al actualizar la playlist.");
+      // Mostrar el mensaje de error de la API si está disponible (detail o error)
+      let msg = "Error al actualizar la playlist.";
+      if (e?.response?.data?.detail) {
+        msg = e.response.data.detail;
+      } else if (e?.response?.data?.error) {
+        msg = e.response.data.error;
+      } else if (e?.message) {
+        msg = e.message;
+      }
+      customAlert("error", msg);
     }
     setEditLoading(false);
     handleDialogClose();
@@ -200,16 +218,7 @@ const PlaylistCards: React.FC = () => {
         height: "100%",
         overflowY: "auto",
         padding: 2,
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: theme.palette.grey[600],
-          borderRadius: "4px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor: theme.palette.grey[800],
-        },
+        ...getScrollbarStyles(theme),
       }}
     >
       <Box sx={{ textAlign: "center", marginBottom: 4 }}>
@@ -225,7 +234,7 @@ const PlaylistCards: React.FC = () => {
           gap: 2,
         }}
       >
-        <AutoPlaylistCard onClick={handleOpenAutoDialog} />
+        <CreatePlaylistCard onClick={handleOpenAutoDialog} />
         <PlaylistList
           playlists={playlists}
           onEdit={handleEditClick}
@@ -236,7 +245,6 @@ const PlaylistCards: React.FC = () => {
             setSongsPlaylist(playlist);
             setSongsDialogOpen(true);
           }}
-          theme={theme}
         />
       </Box>
       <EditPlaylistDialog
@@ -246,7 +254,7 @@ const PlaylistCards: React.FC = () => {
         onSubmit={handleEditSubmit}
         loading={editLoading}
       />
-      <AutoPlaylistDialog
+      <CreatePlaylistDialog
         open={autoDialogOpen}
         prompt={autoPrompt}
         loading={autoLoading}

@@ -5,8 +5,10 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import List, Optional
 import re
+import io
+import sys
 
-
+from typing import Optional
 import requests
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -158,7 +160,6 @@ def update_playlist(
     playlist_id: str,
     title: str | None,
     description: str | None,
-    image_base64: str | None,
     user: User,
     db: Session
 ):
@@ -203,33 +204,10 @@ def update_playlist(
         )
         if response.status_code != 200:
             logger.error(f"[UPDATE] Error al actualizar nombre/descr.: {response.status_code}, {response.text}")
-            raise HTTPException(status_code=response.status_code, detail="Error al actualizar título o descripción")
-
-    # Actualizar imagen si se proporciona
-    if image_base64:
-        logger.info(f"[UPDATE] Actualizando imagen")
-        img_headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "image/jpeg"
-        }
-        try:
-            image_data = base64.b64decode(image_base64)
-        except Exception:
-            logger.exception("[UPDATE] Fallo en la decodificación de la imagen base64")
-            raise HTTPException(status_code=400, detail="La imagen no está correctamente codificada en base64")
-
-        response = requests.put(
-            f"https://api.spotify.com/v1/playlists/{playlist_id}/images",
-            headers=img_headers,
-            data=image_data
-        )
-        if response.status_code != 202:
-            logger.error(f"[UPDATE] Error al actualizar imagen: {response.status_code}, {response.text}")
-            raise HTTPException(status_code=response.status_code, detail="Error al actualizar la imagen")
+            raise HTTPException(status_code=response.status_code, detail="Error al actualizar título o descripción")      
 
     logger.info(f"[UPDATE] Playlist {playlist_id} actualizada exitosamente")
     return {"message": "Playlist actualizada correctamente"}
-
 
 # === Playlist Autogenerada por IA ===
 

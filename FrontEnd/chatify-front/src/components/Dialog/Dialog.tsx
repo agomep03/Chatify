@@ -1,11 +1,31 @@
-import { Dialog, DialogContent, Box, Button } from '@mui/material';
 import { ReactNode, useState } from 'react';
-import { useTheme } from '@mui/material/styles'; // Añadido
+import CustomDialogDefault from './CustomDialogs/CustomDialogDefault';
+import CustomDialogDarkBackground from './CustomDialogs/CustomDialogDarkBackground';
+
+/**
+ * Componente genérico para mostrar diálogos de confirmación o acciones importantes.
+ * @component
+ * @param {boolean} open - Si el diálogo está abierto.
+ * @param {() => void} onClose - Función para cerrar el diálogo.
+ * @param {() => void} onConfirm - Función que se ejecuta al confirmar la acción principal.
+ * @param {ReactNode} children - Contenido del diálogo.
+ * @param {Array} [buttons] - Configuración de los botones a mostrar (label, color, action).
+ * @param {"default"|"darkBackground"} [dialogStyle="default"] - Estilo visual del diálogo.
+ * @param {string} [title] - Título del diálogo (solo para darkBackground).
+ * @param {boolean} [showCloseIcon=false] - Si se muestra el icono de cerrar (solo para darkBackground).
+ * @returns {JSX.Element} Diálogo estilizado con botones personalizados.
+ * @description
+ * Este componente centraliza la lógica para mostrar diálogos de confirmación.
+ * Permite elegir entre un estilo por defecto o uno con fondo oscuro.
+ * Los botones pueden ser personalizados o usar los predeterminados.
+ * Se integra con un proveedor para mostrar diálogos desde cualquier parte de la app.
+ */
 
 // Configuración de los botones
 type ButtonConfig = {
   label: string;
   color?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
+  action?: () => void;
 };
 
 // Propiedades del diálogo de confirmación
@@ -15,6 +35,9 @@ type ConfirmDialogProps = {
   onConfirm: () => void;
   children: ReactNode;
   buttons?: ButtonConfig[];
+  dialogStyle?: "default" | "darkBackground";
+  title?: string; // Para modo darkBackground
+  showCloseIcon?: boolean; // Para modo darkBackground
 };
 
 // Componente para mostrar el diálogo de confirmación
@@ -25,92 +48,55 @@ const CustomDialog = (props: ConfirmDialogProps) => {
     onConfirm,
     children,
     buttons,
+    dialogStyle = "default",
+    title,
+    showCloseIcon = false,
   } = props;
 
-  const theme = useTheme(); // Añadido
-
+  // Botones por defecto si no se especifican
   const defaultButtons: ButtonConfig[] = [
     { label: 'Cancelar', color: 'secondary' },
     { label: 'Aceptar', color: 'primary' }
   ];
-  //Si el usuarios los especifica usa maximo 2 botones, sino usa los por defecto
+  // Si el usuario los especifica usa máximo 2 botones, sino usa los por defecto
   const resolvedButtons = buttons === undefined
-  ? defaultButtons
-  : buttons.slice(0, 2);
+    ? defaultButtons
+    : buttons.slice(0, 2);
 
+  // Asigna las acciones a los botones: el primero cierra, el segundo confirma
   const buttonsWithActions = resolvedButtons.map((btn, i) => ({
     ...btn,
     action: i === 0 ? onClose : onConfirm,
   }));
 
+  // Renderiza el diálogo con fondo oscuro si se indica
+  if (dialogStyle === "darkBackground") {
+    return (
+      <CustomDialogDarkBackground
+        open={open}
+        onClose={onClose}
+        onConfirm={onConfirm}
+        children={children}
+        buttons={buttonsWithActions}
+        title={title}
+        showCloseIcon={showCloseIcon}
+      />
+    );
+  }
+
+  // Renderiza el diálogo por defecto
   return (
-    <Dialog
+    <CustomDialogDefault
       open={open}
       onClose={onClose}
-      hideBackdrop
-      disableEscapeKeyDown
-      slotProps={{
-        paper: {
-        sx: {
-          position: 'absolute',
-          top: '20%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          bgcolor: theme.palette.background.default,
-          borderRadius: 2,
-          boxShadow: 3,
-          color: theme.palette.text.primary,
-          width: 'auto',
-          padding: 0,
-        }
-      }}}
-    >
-      <DialogContent>
-        <Box sx={{ padding: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', overflowX: 'hidden', width: '100%'}}>
-          {children}
-        </Box>
-        <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
-        {buttonsWithActions.map((btn, idx) => (
-            <Button
-              key={idx}
-              onClick={btn.action}
-              color={btn.color}
-              variant={idx === buttonsWithActions.length - 1 ? 'contained' : 'outlined'}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 'bold',
-                borderRadius: '9999px',
-                px: 3,
-                py: 1,
-                '&.MuiButton-contained': {
-                  backgroundColor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  '&:hover': {
-                    backgroundColor: theme.palette.custom.primaryHover
-                  }
-                },
-                '&.MuiButton-outlined': {
-                  borderColor: theme.palette.custom.outlinedBorder,
-                  color: theme.palette.text.primary,
-                  '&:hover': {
-                    borderColor: theme.palette.text.primary
-                  }
-                },
-                '&:focus': { outline: 'none', border: 'none', boxShadow: 'none' },
-                '&:focus-visible': { outline: 'none', border: 'none', boxShadow: 'none' },
-                '&:active': { outline: 'none', border: 'none', boxShadow: 'none' },
-              }}
-            >
-              {btn.label}
-            </Button>
-          ))}
-        </Box>
-      </DialogContent>
-    </Dialog>
+      onConfirm={onConfirm}
+      children={children}
+      buttons={buttonsWithActions}
+    />
   );
 };
 
-// Función para activar el diálogo de confirmación
+// Función global para activar el diálogo de confirmación desde cualquier parte de la app
 let triggerConfirm: (options: {
   content: ReactNode;
   onConfirm: () => void;
@@ -120,17 +106,17 @@ let triggerConfirm: (options: {
   button2Color?: ButtonConfig['color'];
 }) => void = () => {};
 
-// Función para acceder a poner dialogos
+// Hook para acceder a la función de mostrar diálogos
 export const useConfirm = () => triggerConfirm;
 
-
-// Provedor de dialogos
+// Proveedor de diálogos: envuelve la app y permite mostrar diálogos desde cualquier sitio
 export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState<ReactNode>(null);
   const [onConfirm, setOnConfirm] = useState<() => void>(() => {});
   const [buttons, setButtons] = useState<ButtonConfig[]>([]);
 
+  // Función que activa el diálogo con los parámetros recibidos
   triggerConfirm = ({ 
     content, 
     onConfirm, 

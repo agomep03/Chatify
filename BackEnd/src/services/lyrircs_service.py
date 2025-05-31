@@ -16,13 +16,13 @@ class LyricsFetcher:
         self.genius.remove_section_headers = True
         logger.info("[LyricsFetcher] Cliente Genius inicializado correctamente.")
 
-    def search_song_lyrics(self, artist_name, song_title):
-        logger.info(f"[LyricsFetcher] Buscando letra: '{song_title}' por {artist_name}")
+    def search_song_url(self, artist_name, song_title):
+        logger.info(f"[LyricsFetcher] Buscando URL para: '{song_title}' por {artist_name}")
         try:
             song = self.genius.search_song(song_title, artist_name)
             if song:
                 logger.info(f"[LyricsFetcher] Canción encontrada: {song.title} de {song.artist}")
-                return song.lyrics
+                return song.url
             else:
                 logger.warning(f"[LyricsFetcher] No se encontró la canción '{song_title}' de '{artist_name}'.")
                 return "No se encontró la canción."

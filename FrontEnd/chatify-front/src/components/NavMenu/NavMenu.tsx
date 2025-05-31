@@ -12,8 +12,26 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Form from '../Form/Form';
 import CustomDialog from '../Dialog/Dialog';
-import ScrollableText from '../ScrollableText/ScrollableText';
+import ScrollableText from './ScrollableText';
 import { useTheme } from "@mui/material/styles";
+import ConfirmDeleteDialog from '../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog';
+import { getScrollbarStyles } from "../../styles/scrollbarStyles";
+
+/**
+ * Menú de navegación lateral para tabs/conversaciones.
+ * @component
+ * @param {Tab[]} tabs - Lista de tabs/conversaciones a mostrar.
+ * @param {string} selectedTab - ID de la tab actualmente seleccionada.
+ * @param {(tab: string) => void} onTabChange - Callback al seleccionar una tab.
+ * @param {boolean[]} [closableTabs] - Indica qué tabs pueden editarse/cerrarse.
+ * @param {(tab: string) => void} [onTabClose] - Callback para eliminar una tab.
+ * @param {(chatId: string, newTitle: string) => void | Promise<void>} [onTabRename] - Callback para renombrar una tab.
+ * @returns {JSX.Element} Lista de tabs con opciones de menú contextual (eliminar/renombrar).
+ * @description
+ * Muestra una lista de tabs/conversaciones con scroll y opciones de menú contextual para cada una (si es cerrable).
+ * Permite eliminar o renombrar una tab mediante diálogos de confirmación y formularios.
+ * El diseño es responsivo y usa estilos personalizados para el scroll y los elementos seleccionados.
+ */
 
 interface Tab {
   id: string;
@@ -41,14 +59,16 @@ const NavMenu: React.FC<NavMenuProps> = ({
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuTabId, setMenuTabId] = useState<string | null>(null);
   const [openRenameForm, setOpenRenameForm] = useState(false);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const [tabToDelete, setTabToDelete] = useState<Tab | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const lastAnchorEl = useRef<HTMLElement | null>(null);
   const theme = useTheme();
 
+  // Lanza el submit del formulario de renombrar desde el diálogo
   const handleDialogAccept = () => {
     formRef.current?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
   };
-
 
   return (
     <List
@@ -56,17 +76,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
         padding: 0, // Elimina el padding por defecto si lo quieres más limpio
         overflowY: 'auto',
         height:'100%',
-        // Scrollbar igual que PlaylistCards
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: theme.palette.grey[600],
-          borderRadius: "4px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor:  theme.palette.grey[800],
-        },
+        ...getScrollbarStyles(theme),
       }}
     >
       <Box
@@ -75,6 +85,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
           flexShrink: 0,
         }}
       >
+        {/* Renderiza cada tab/conversación */}
         {tabs.map((tab, index) => (
           <ListItem
             key={tab.id}
@@ -117,10 +128,10 @@ const NavMenu: React.FC<NavMenuProps> = ({
               <ListItemText
                 primary={<ScrollableText text={tab.title} selected={selectedTab === tab.id} />}
               />
-
             </ListItemButton>
           </ListItem>
         ))}
+        {/* Menú contextual para eliminar o renombrar */}
         <Menu
           anchorEl={menuAnchorEl}
           open={Boolean(menuAnchorEl)}
@@ -128,14 +139,13 @@ const NavMenu: React.FC<NavMenuProps> = ({
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           transformOrigin={{ vertical: "bottom", horizontal: "left" }}
         >
-
           <MenuItem
             onClick={() => {
               setMenuAnchorEl(null);
-              if (lastAnchorEl.current && document.contains(lastAnchorEl.current)) {
-                lastAnchorEl.current.focus();
-              }
-              if (onTabClose && menuTabId) onTabClose(menuTabId);
+              // Buscar la tab a eliminar y mostrar el confirm dialog
+              const tab = tabs.find(t => t.id === menuTabId);
+              setTabToDelete(tab || null);
+              setOpenConfirmDelete(true);
             }}
           >
             Eliminar
@@ -149,6 +159,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
             Cambiar nombre
           </MenuItem>
         </Menu>
+        {/* Diálogo para cambiar el nombre de la tab */}
         {openRenameForm && (
           <CustomDialog
             open={openRenameForm}
@@ -156,7 +167,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
             onConfirm={handleDialogAccept}
           >
             <Form
-              ref={formRef}  // <-- aquí asignas el ref
+              ref={formRef}  // Referencia al formulario para submit programático
               title="Cambiar nombre"
               fields={[{ name: "newName", label: "Nuevo nombre", type: "text" }]}
               onSubmit={(data) => {
@@ -172,8 +183,17 @@ const NavMenu: React.FC<NavMenuProps> = ({
             />
           </CustomDialog>
         )}
-
-
+        {/* Diálogo de confirmación para eliminar la tab */}
+        <ConfirmDeleteDialog
+          open={openConfirmDelete}
+          onClose={() => { setOpenConfirmDelete(false); setTabToDelete(null); }}
+          onConfirm={() => {
+            if (onTabClose && tabToDelete) onTabClose(tabToDelete.id);
+            setOpenConfirmDelete(false);
+            setTabToDelete(null);
+          }}
+          itemName={tabToDelete?.title}
+        />
       </Box>
     </List>
   );
