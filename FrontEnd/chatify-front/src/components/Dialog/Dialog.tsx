@@ -1,11 +1,12 @@
-import { Dialog, DialogContent, Box, Button } from '@mui/material';
 import { ReactNode, useState } from 'react';
-import { useTheme } from '@mui/material/styles'; // Añadido
+import CustomDialogDefault from './CustomDialogs/CustomDialogDefault';
+import CustomDialogDarkBackground from './CustomDialogs/CustomDialogDarkBackground';
 
 // Configuración de los botones
 type ButtonConfig = {
   label: string;
   color?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
+  action?: () => void;
 };
 
 // Propiedades del diálogo de confirmación
@@ -15,6 +16,9 @@ type ConfirmDialogProps = {
   onConfirm: () => void;
   children: ReactNode;
   buttons?: ButtonConfig[];
+  dialogStyle?: "default" | "darkBackground";
+  title?: string; // Para modo darkBackground
+  showCloseIcon?: boolean; // Para modo darkBackground
 };
 
 // Componente para mostrar el diálogo de confirmación
@@ -25,9 +29,10 @@ const CustomDialog = (props: ConfirmDialogProps) => {
     onConfirm,
     children,
     buttons,
+    dialogStyle = "default",
+    title,
+    showCloseIcon = false,
   } = props;
-
-  const theme = useTheme(); // Añadido
 
   const defaultButtons: ButtonConfig[] = [
     { label: 'Cancelar', color: 'secondary' },
@@ -35,78 +40,36 @@ const CustomDialog = (props: ConfirmDialogProps) => {
   ];
   //Si el usuarios los especifica usa maximo 2 botones, sino usa los por defecto
   const resolvedButtons = buttons === undefined
-  ? defaultButtons
-  : buttons.slice(0, 2);
+    ? defaultButtons
+    : buttons.slice(0, 2);
 
   const buttonsWithActions = resolvedButtons.map((btn, i) => ({
     ...btn,
     action: i === 0 ? onClose : onConfirm,
   }));
 
+  if (dialogStyle === "darkBackground") {
+    return (
+      <CustomDialogDarkBackground
+        open={open}
+        onClose={onClose}
+        onConfirm={onConfirm}
+        children={children}
+        buttons={buttonsWithActions}
+        title={title}
+        showCloseIcon={showCloseIcon}
+      />
+    );
+  }
+
   return (
-    <Dialog
+    <CustomDialogDefault
       open={open}
       onClose={onClose}
-      hideBackdrop
-      disableEscapeKeyDown
-      slotProps={{
-        paper: {
-        sx: {
-          position: 'absolute',
-          top: '20%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          bgcolor: theme.palette.background.default,
-          borderRadius: 2,
-          boxShadow: 3,
-          color: theme.palette.text.primary,
-          width: 'auto',
-          padding: 0,
-        }
-      }}}
-    >
-      <DialogContent>
-        <Box sx={{ padding: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', overflowX: 'hidden', width: '100%'}}>
-          {children}
-        </Box>
-        <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
-        {buttonsWithActions.map((btn, idx) => (
-            <Button
-              key={idx}
-              onClick={btn.action}
-              color={btn.color}
-              variant={idx === buttonsWithActions.length - 1 ? 'contained' : 'outlined'}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 'bold',
-                borderRadius: '9999px',
-                px: 3,
-                py: 1,
-                '&.MuiButton-contained': {
-                  backgroundColor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  '&:hover': {
-                    backgroundColor: theme.palette.custom.primaryHover
-                  }
-                },
-                '&.MuiButton-outlined': {
-                  borderColor: theme.palette.custom.outlinedBorder,
-                  color: theme.palette.text.primary,
-                  '&:hover': {
-                    borderColor: theme.palette.text.primary
-                  }
-                },
-                '&:focus': { outline: 'none', border: 'none', boxShadow: 'none' },
-                '&:focus-visible': { outline: 'none', border: 'none', boxShadow: 'none' },
-                '&:active': { outline: 'none', border: 'none', boxShadow: 'none' },
-              }}
-            >
-              {btn.label}
-            </Button>
-          ))}
-        </Box>
-      </DialogContent>
-    </Dialog>
+      onConfirm={onConfirm}
+      children={children}
+      buttons={buttonsWithActions}
+    />
   );
 };
 

@@ -42,8 +42,8 @@ const Login: React.FC = () => {
 
   // Campos del formulariobb
   const loginFields = [
-    { name: "email", label: "Correo Electrónico", type: "email" },
-    { name: "password", label: "Contraseña", type: "password" },
+    { name: "email", label: "Correo Electrónico", type: "email", required: true },
+    { name: "password", label: "Contraseña", type: "password", required: true },
   ];
 
   /**
