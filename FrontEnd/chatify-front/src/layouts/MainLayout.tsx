@@ -30,7 +30,7 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showNav, setShowNav] = useState(true);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const computerScreenIsSmall = useMediaQuery("(max-width:1200px)");
 
   const allTabs = [
     { id: "playlists", title: "Playlists" },
@@ -111,7 +111,7 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
 
   const handleOnTabChange = (tab: string) => {
     setSelectedTab(tab);
-    if (isMobile) setShowNav(false);
+    if (computerScreenIsSmall) setShowNav(false);
   };
 
   const renderTabContent = () => {
