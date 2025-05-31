@@ -4,6 +4,8 @@ import SendIcon from '@mui/icons-material/Send';
 import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 import { useTheme } from "@mui/material/styles";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
+import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 
 /**
  * Layout principal del chat.
@@ -42,6 +44,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   useEffect(() => {
     if (!chatId) return;
     fetchChatHistory(chatId, setMessages, setIsLoadingChat);
+    console.log(messages);
   }, [chatId]);
   
   // Hace scroll al final de la lista cuando llegan nuevos mensajes
@@ -71,22 +74,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     if (!input.trim()) return;
     fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot);
     setInput('');
-  };
-
-  // Convierte texto markdown básico a HTML para mostrar en los mensajes
-  const renderTextToHtml = (text: string) => {
-    let htmlText = text.replace(/\n^### (.*)$\n+/gm, '<h3>$1</h3>');
-    htmlText = htmlText.replace(/^### (.*)$\n+/gm, '<h3>$1</h3>');
-    htmlText = htmlText.replace(/\n^## (.*)$\n+/gm, '<h2>$1</h2>');
-    htmlText = htmlText.replace(/^## (.*)$\n+/gm, '<h2>$1</h2>');
-    htmlText = htmlText.replace(/\n^# (.*)$\n+/gm, '<h1>$1</h1>');
-    htmlText = htmlText.replace(/^# (.*)$\n+/gm, '<h1>$1</h1>');
-    htmlText = htmlText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    htmlText = htmlText.replace(/^\s*[-\*]\s+(.*)$/gm, '<ul><li>$1</li></ul>');
-    htmlText = htmlText.replace(/<\/?p>/g, '');
-    htmlText = htmlText.replace(/\n/g, '<br>');
-    return { __html: htmlText };
   };
 
   // Muestra spinner mientras se carga el historial
@@ -136,15 +123,22 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
               backgroundColor: msg.sender === 'user' ? theme.palette.custom.userDialogBg : theme.palette.custom.botDialogBg, //color user : bot
               color: theme.palette.text.primary,
               borderRadius:  msg.sender === 'user' ? '15px 15px 0px 15px' : '15px 15px 15px 0px', //redondeo esquinas user : bot
-              padding: '8px 12px', 
-              wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap'
-            }}
-          >
-            <ListItemText
-              primary={<span dangerouslySetInnerHTML={renderTextToHtml(msg.text)} />} // Usamos dangerouslySetInnerHTML
-              sx={{ whiteSpace: 'pre-wrap', textAlign:msg.sender === 'user' ? 'right' : 'left' }} 
-            />
+                padding: '0px 12px',
+                wordBreak: 'break-word',
+                '& ol, & ul': {
+                paddingLeft: '1.5em',
+                margin: 0,
+                },
+                '& li': {
+                marginBottom: '0.2em',
+                },
+              }}
+              >
+            <ReactMarkdown
+              remarkPlugins={[remarkBreaks]}
+            >
+              {msg.text}
+            </ReactMarkdown>
           </Box>
         </ListItem>
       ))}
