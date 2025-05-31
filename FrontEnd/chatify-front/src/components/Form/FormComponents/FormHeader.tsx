@@ -4,6 +4,18 @@ import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../Logo/Logo";
 
+/**
+ * Cabecera reutilizable para formularios.
+ * @component
+ * @param {string} title - Título que se muestra en la cabecera.
+ * @param {string} [logoUrl] - URL del logo a mostrar (opcional).
+ * @param {boolean} [showHomeButton=false] - Si es true, muestra un botón para volver a /home.
+ * @returns {JSX.Element} Cabecera con título, logo y botón de volver opcional.
+ * @description
+ * Muestra una cabecera centrada con el título del formulario, un logo opcional y un botón para volver a la página principal si se indica.
+ * El botón de volver usa un icono de flecha y estilos personalizados según el tema.
+ */
+
 interface FormHeaderProps {
   title: string;
   logoUrl?: string;
@@ -12,13 +24,7 @@ interface FormHeaderProps {
 
 const FormHeader = ({ title, logoUrl, showHomeButton = false }: FormHeaderProps) => {
   const theme = useTheme();
-  const isLight = theme.palette.mode === "light";
   const navigate = useNavigate();
-
-  const logoSrc =
-    isLight && logoUrl
-      ? logoUrl.replace("Logo.png", "Logo_dark.png")
-      : logoUrl;
 
   return (
     <Box
@@ -31,6 +37,7 @@ const FormHeader = ({ title, logoUrl, showHomeButton = false }: FormHeaderProps)
         gap: showHomeButton ? 2 : 0,
       }}
     >
+      {/* Botón para volver a la página principal, solo si showHomeButton es true */}
       {showHomeButton && (
         <Button
           variant="contained"
@@ -71,6 +78,7 @@ const FormHeader = ({ title, logoUrl, showHomeButton = false }: FormHeaderProps)
           <ArrowBackIcon sx={{ color: theme.palette.text.primary }} />
         </Button>
       )}
+      {/* Logo y título del formulario */}
       <Box
         sx={{
           display: "flex",
@@ -79,7 +87,7 @@ const FormHeader = ({ title, logoUrl, showHomeButton = false }: FormHeaderProps)
           justifyContent: "center",
         }}
       >
-        {logoSrc && <Logo logoUrl={logoSrc} />}
+        {logoUrl && <Logo logoUrl={logoUrl} />}
         <Typography
           variant="h5"
           sx={{ color: theme.palette.text.primary, ml: logoUrl ? 1 : 0 }}

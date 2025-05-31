@@ -1,4 +1,4 @@
-import { Card, CardContent, Box, Typography, Button, IconButton } from "@mui/material";
+import { Card, CardContent, Box, Typography, Button, IconButton, useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
@@ -7,6 +7,21 @@ import { deleteUserPlaylist } from "../../../api/spotifyService";
 import { useState } from "react";
 import ConfirmDeleteDialog from "../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 import CustomDialog from "../../Dialog/Dialog";
+
+/**
+ * Tarjeta que muestra la información de una playlist.
+ * @component
+ * @param {object} playlist - Objeto con los datos de la playlist.
+ * @param {(playlist: any) => void} onEdit - Callback para editar la playlist.
+ * @param {(playlistId: string) => void} onDelete - Callback para eliminar la playlist.
+ * @param {(playlist: any) => void} onShowSongs - Callback para mostrar las canciones de la playlist.
+ * @param {any} theme - Tema de MUI (no se usa directamente aquí, pero puede venir de props).
+ * @returns {JSX.Element} Tarjeta con imagen, nombre, descripción, botones de acción y diálogos.
+ * @description
+ * Muestra la imagen, nombre y descripción de una playlist.
+ * Permite editar, eliminar y ver canciones de la playlist.
+ * Incluye diálogos de confirmación para eliminar y para mostrar la descripción completa.
+ */
 
 const PlaylistCard = ({
   playlist,
@@ -18,12 +33,13 @@ const PlaylistCard = ({
   onEdit: (playlist: any) => void;
   onDelete: (playlistId: string) => void;
   onShowSongs: (playlist: any) => void;
-  theme: any;
 }) => {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [openInfo, setOpenInfo] = useState(false);
+  const theme = useTheme();
 
+  // Maneja la eliminación de la playlist
   const handleDelete = async () => {
     setLoadingDelete(true);
     try {
@@ -51,6 +67,7 @@ const PlaylistCard = ({
         justifyContent: "center",
       }}
     >
+      {/* Botones de editar y eliminar en la esquina superior derecha */}
       <Box
         sx={{
           position: "absolute",
@@ -89,8 +106,8 @@ const PlaylistCard = ({
           sx={{
             minWidth: 0,
             p: 1,
-            color: (theme) => theme.palette.text.primary,
-            "&:hover": { backgroundColor: (theme) => theme.palette.action.hover },
+            color: theme.palette.text.primary,
+            "&:hover": { backgroundColor: theme.palette.action.hover },
             "&:focus": { outline: "none", border: "none", boxShadow: "none" },
             "&:focus-visible": {
               outline: "none",
@@ -120,6 +137,7 @@ const PlaylistCard = ({
           textAlign: "justify",
         }}
       >
+        {/* Imagen de la playlist */}
         {playlist.image && (
           <Box
             sx={{
@@ -144,6 +162,7 @@ const PlaylistCard = ({
             />
           </Box>
         )}
+        {/* Nombre de la playlist y botón de info */}
         <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center", mb: 1 }}>
           <Typography
             variant="h6"
@@ -164,8 +183,8 @@ const PlaylistCard = ({
               ml: 1,
               minWidth: 0,
               p: 1,
-              color: (theme) => theme.palette.text.primary,
-              "&:hover": { backgroundColor: (theme) => theme.palette.action.hover },
+              color: theme.palette.text.primary,
+              "&:hover": { backgroundColor: theme.palette.action.hover },
               "&:focus": { outline: "none", border: "none", boxShadow: "none" },
               "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
               "&:active": { outline: "none", border: "none", boxShadow: "none" },
@@ -176,6 +195,7 @@ const PlaylistCard = ({
             <InfoIcon fontSize="small" />
           </IconButton>
         </Box>
+        {/* Botón para ver canciones si existen */}
         {playlist.tracks && Array.isArray(playlist.tracks) && (
           <AppButton
             size="small"
@@ -186,6 +206,7 @@ const PlaylistCard = ({
           </AppButton>
         )}
       </CardContent>
+      {/* Diálogo de confirmación para eliminar la playlist */}
       <ConfirmDeleteDialog
         open={openConfirm}
         onClose={() => { if (!loadingDelete) setOpenConfirm(false); }}
@@ -193,6 +214,7 @@ const PlaylistCard = ({
         itemName={playlist.name}
         loading={loadingDelete}
       />
+      {/* Diálogo para mostrar la descripción completa */}
       <CustomDialog
         open={openInfo}
         onClose={() => setOpenInfo(false)}

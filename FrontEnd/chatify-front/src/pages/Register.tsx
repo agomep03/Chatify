@@ -7,13 +7,20 @@ import logo from '../assets/Logo.png';
 import { registerUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
 import { isAuthenticated } from "../utils/auth";
+import LoginRegisterLayout from "../layouts/LoginRegisterLayout";
+
+type RegisterProps = {
+  toggleTheme: () => void;
+};
 
 /**
  * Pagina de registro.
  * @returns {JSX.Element} Componente de registro.
  * @description Este componente permite a los usuarios registrarse en la aplicación.
+ * @param {() => void} props.toggleTheme - Función para cambiar el tema de colores de la aplicación.
  */
-const Register: React.FC = () => {
+const Register: React.FC<RegisterProps> = ({ toggleTheme }) => {
+
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
   const theme = useTheme();
@@ -74,16 +81,7 @@ const Register: React.FC = () => {
 
   return (
     // Contenedor principal
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: theme.palette.background.paper,
-      }}
-    >
+    <LoginRegisterLayout toggleTheme={toggleTheme}>
       <Form
         title="Registrarse"
         fields={registerFields}
@@ -102,7 +100,7 @@ const Register: React.FC = () => {
                 color="primary"
                 sx={{
                   "&:hover": {
-                    color: theme => theme.palette.custom.primaryHover,
+                    color: theme.palette.custom.primaryHover,
                   },
                 }}
               >
@@ -111,7 +109,7 @@ const Register: React.FC = () => {
             </Typography>
           </Box>
         </Form>
-    </Box>
+    </LoginRegisterLayout>
   );
 };
 

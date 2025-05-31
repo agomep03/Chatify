@@ -7,6 +7,20 @@ import React, { useState } from "react";
 import { removeTracksFromPlaylist, fetchLyrics } from "../../../../api/spotifyService";
 import LyricsDialog from "./LyricsDialog";
 import ConfirmDeleteDialog from "../../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
+import { getScrollbarStyles } from "../../../../styles/scrollbarStyles";
+
+/**
+ * Diálogo para mostrar y gestionar las canciones de una playlist.
+ * @component
+ * @param {boolean} open - Si el diálogo está abierto.
+ * @param {object} playlist - Objeto con los datos de la playlist (incluye tracks).
+ * @param {() => void} onClose - Callback para cerrar el diálogo.
+ * @returns {JSX.Element} Diálogo con la lista de canciones, opciones para ver letra y eliminar canciones.
+ * @description
+ * Muestra un diálogo con la lista de canciones de la playlist.
+ * Permite ver la letra de cada canción y eliminar canciones de la playlist.
+ * Usa diálogos secundarios para confirmar el borrado y mostrar la letra.
+ */
 
 const SongsDialog = ({
   open,
@@ -31,6 +45,7 @@ const SongsDialog = ({
     setTracks(playlist?.tracks || []);
   }, [playlist]);
 
+  // Elimina una canción de la playlist
   const handleRemoveTrack = async (trackUri: string, idx: number) => {
     setLoadingDelete(true);
     try {
@@ -47,6 +62,7 @@ const SongsDialog = ({
     setOpenConfirm(null);
   };
 
+  // Muestra la letra de una canción
   const handleShowLyrics = async (track: any) => {
     setLyricsOpen(true);
     setLyrics("");
@@ -77,21 +93,13 @@ const SongsDialog = ({
           maxWidth: 500,
           maxHeight: 400,
           overflowY: "auto",
-          "&::-webkit-scrollbar": {
-            width: "8px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: theme.palette.grey[600],
-            borderRadius: "4px",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: theme.palette.grey[800],
-          },
+          ...getScrollbarStyles(theme),
         }}
       >
         <Typography variant="h6" sx={{ mb: 2 }}>
           Canciones de {playlist?.name}
         </Typography>
+        {/* Lista de canciones */}
         {tracks && Array.isArray(tracks) ? (
           tracks.map((track: any, idx: number) => (
             <Box
@@ -118,6 +126,7 @@ const SongsDialog = ({
                     : track.artists}
                 </Typography>
               </Box>
+              {/* Botón para ver la letra */}
               <Button
                 type="button"
                 variant="text"
@@ -150,6 +159,7 @@ const SongsDialog = ({
               >
                 <MusicNoteIcon />
               </Button>
+              {/* Botón para eliminar canción */}
               <Button
                 type="button"
                 variant="text"
@@ -189,6 +199,7 @@ const SongsDialog = ({
           </Typography>
         )}
       </Box>
+      {/* Diálogo para mostrar la letra de la canción */}
       <LyricsDialog
         open={lyricsOpen}
         onClose={() => setLyricsOpen(false)}
@@ -196,6 +207,7 @@ const SongsDialog = ({
         loading={lyricsLoading}
         song={lyricsSong}
       />
+      {/* Diálogo de confirmación para eliminar canción */}
       <ConfirmDeleteDialog
         open={!!openConfirm}
         onClose={() => { if (!loadingDelete) setOpenConfirm(null); }}

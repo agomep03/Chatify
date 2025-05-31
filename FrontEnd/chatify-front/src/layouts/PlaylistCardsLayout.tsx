@@ -12,6 +12,7 @@ import SongsDialog from "../components/PlaylistCards/PlaylistCard/PlaylistCardCo
 import EditPlaylistDialog from "../components/PlaylistCards/PlaylistCard/PlaylistCardComponents/EditPlaylistDialog";
 import CreatePlaylistDialog from "../components/PlaylistCards/CreatePlaylistCard/CreatePlaylistDialog";
 import { useAlert } from "../components/Alert/Alert";
+import { getScrollbarStyles } from "../styles/scrollbarStyles";
 
 /**
  * Componente para mostrar las playlists del usuario en forma de tarjetas.
@@ -217,16 +218,7 @@ const PlaylistCards: React.FC = () => {
         height: "100%",
         overflowY: "auto",
         padding: 2,
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: theme.palette.grey[600],
-          borderRadius: "4px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor: theme.palette.grey[800],
-        },
+        ...getScrollbarStyles(theme),
       }}
     >
       <Box sx={{ textAlign: "center", marginBottom: 4 }}>
@@ -253,7 +245,6 @@ const PlaylistCards: React.FC = () => {
             setSongsPlaylist(playlist);
             setSongsDialogOpen(true);
           }}
-          theme={theme}
         />
       </Box>
       <EditPlaylistDialog

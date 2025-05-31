@@ -1,6 +1,20 @@
 import CustomDialog from "../Dialog";
 import { Typography, CircularProgress, Box } from "@mui/material";
 
+/**
+ * Diálogo de confirmación para borrar un elemento.
+ * @component
+ * @param {boolean} open - Si el diálogo está abierto.
+ * @param {() => void} onClose - Función para cerrar el diálogo.
+ * @param {() => void} onConfirm - Función que se ejecuta al confirmar el borrado.
+ * @param {string} [itemName] - Nombre del elemento a borrar (opcional, para mostrar en el mensaje).
+ * @param {boolean} [loading=false] - Si se está procesando el borrado (muestra un spinner).
+ * @returns {JSX.Element} Diálogo de confirmación con botones Cancelar y Eliminar.
+ * @description
+ * Muestra un diálogo para confirmar el borrado de un elemento.
+ * Si loading es true, muestra un spinner de carga.
+ * Usa el estilo "darkBackground" y permite cerrar con un icono.
+ */
 interface ConfirmDeleteDialogProps {
   open: boolean;
   onClose: () => void;

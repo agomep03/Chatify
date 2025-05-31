@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material';
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#1db954', contrastText: '#ffffff' },
+    primary: { main: '#3be477', contrastText: '#ffffff' },
     background: {
       default: '#e9e9e9',
       paper: '#f4f4f4',
