@@ -1,5 +1,4 @@
 import { ReactNode, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
 import CustomDialogDefault from './CustomDialogs/CustomDialogDefault';
 import CustomDialogDarkBackground from './CustomDialogs/CustomDialogDarkBackground';
 
