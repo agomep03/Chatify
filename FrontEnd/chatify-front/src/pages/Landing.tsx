@@ -6,7 +6,8 @@ import LandingHero from "../components/Landing/LandingHero";
 import LandingInfoCards from "../components/Landing/LandingInfoCards";
 import LandingFooter from "../components/Landing/LandingFooter";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
-import logoImg from "../assets/Logo.png";
+import logoImg_white from "../assets/Logo.png";
+import logoImg_black from "../assets/Logo_dark.png";
 import imageBackgroundLight from "../assets/background_music.jpeg";
 import imageBackgroundDark from "../assets/background_music_dark.jpeg";
 
@@ -42,6 +43,9 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
     theme.palette.mode === "dark"
       ? `url(${imageBackgroundDark})`
       : `url(${imageBackgroundLight})`;
+
+  // Selecciona el logo opuesto al tema actual
+  const logoImg = theme.palette.mode === "light" ? logoImg_black : logoImg_white;
 
   // Si el usuario está logueado, intenta obtener su nombre de usuario
   useEffect(() => {

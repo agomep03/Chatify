@@ -1,10 +1,11 @@
 import React from "react";
-import { useTheme } from "@mui/material/styles";
 
 /**
- * Interfaz para las propiedades del componente Logo.
- * @param {string} logoUrl - URL de la imagen del logo claro.
- * @returns {JSX.Element}
+ * Props para el componente Logo.
+ * @param {string} logoUrl - URL de la imagen del logo.
+ * @returns {JSX.Element} Imagen del logo.
+ * @description
+ * Componente genérico para mostrar el logo de la aplicación.
  */
 interface LogoProps {
   logoUrl: string;
@@ -12,18 +13,12 @@ interface LogoProps {
 
 /**
  * Componente Logo.
- * Cambia automáticamente a la versión oscura si el tema es claro.
+ * Muestra el logo con un ancho fijo y margen derecho.
  */
 const Logo: React.FC<LogoProps> = ({ logoUrl }) => {
-  const theme = useTheme();
-  const isLight = theme.palette.mode === "light";
-  const logoSrc = isLight
-    ? logoUrl.replace(".", "_dark.")
-    : logoUrl;
-
   return (
     <img
-      src={logoSrc}
+      src={logoUrl}
       alt="Logo"
       style={{ width: "50px", marginRight: "8px" }}
     />

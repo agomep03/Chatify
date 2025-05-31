@@ -1,7 +1,8 @@
 import { Box, Container, CircularProgress, Typography } from "@mui/material";
 import Form from "../components/Form/Form";
 import { useEffect, useState } from "react";
-import logo from '../assets/Logo.png';
+import logo_light from '../assets/Logo.png';
+import logo_dark from '../assets/Logo_dark.png';
 import { useAlert } from "../components/Alert/Alert";
 import { fetchUserProfile, updateUserProfile } from "../api/authService";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,9 @@ const Profile: React.FC = () => {
   const { customAlert } = useAlert();
   const navigate = useNavigate();
   const theme = useTheme();
+
+  // Selecciona el logo opuesto al tema actual
+  const logo = theme.palette.mode === "light" ? logo_dark : logo_light;
 
   // Campos del formulario
   const profileFields = [

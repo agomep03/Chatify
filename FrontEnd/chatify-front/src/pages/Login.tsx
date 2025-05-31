@@ -4,7 +4,8 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
 import { useEffect, useState } from "react";
 import { useAlert } from "../components/Alert/Alert";
-import logo from '../assets/Logo.png';
+import logo_light from '../assets/Logo.png';
+import logo_dark from '../assets/Logo_dark.png';
 import { loginUser } from "../api/authService";
 import { useTheme } from "@mui/material/styles";
 import { fetchVerifySpotifyConnection } from "../api/spotifyService";
@@ -25,6 +26,9 @@ const Login: React.FC<LoginProps> = ({ toggleTheme }) => {
   const [loading, setLoading] = useState(false);
   const { customAlert } = useAlert();
   const theme = useTheme();
+
+  // Selecciona el logo opuesto al tema actual
+  const logo = theme.palette.mode === "light" ? logo_dark : logo_light;
 
   // Mostrar alerta si el usuario cambió su correo
   useEffect(() => {
