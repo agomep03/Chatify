@@ -105,7 +105,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         dots={dots}
         listRef={listRef}
         theme={theme}
-        inputRows={inputRows}
       />
       <ChatInput 
         input={input}
@@ -114,8 +113,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         mode={mode}
         setMode={setMode}
         theme={theme}
-        inputRows={inputRows}
-        setInputRows={setInputRows}
       />
     </Box>
   );
