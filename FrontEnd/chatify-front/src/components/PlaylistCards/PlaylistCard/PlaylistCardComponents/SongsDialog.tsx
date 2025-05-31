@@ -19,7 +19,6 @@ const SongsDialog = ({
 }) => {
   const theme = useTheme();
   const [tracks, setTracks] = useState<any[]>(playlist?.tracks || []);
-  const [loading, setLoading] = useState<string | null>(null);
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [lyricsLoading, setLyricsLoading] = useState(false);
   const [lyrics, setLyrics] = useState<string>("");
@@ -179,7 +178,6 @@ const SongsDialog = ({
                   },
                 }}
                 onClick={() => setOpenConfirm({ idx, track })}
-                disabled={loading === track.uri}
               >
                 <DeleteIcon />
               </Button>
