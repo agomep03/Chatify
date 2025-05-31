@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { removeTracksFromPlaylist, fetchLyrics } from "../../../../api/spotifyService";
 import LyricsDialog from "./LyricsDialog";
 import ConfirmDeleteDialog from "../../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
+import { getScrollbarStyles } from "../../../../styles/scrollbarStyles";
 
 const SongsDialog = ({
   open,
@@ -77,16 +78,7 @@ const SongsDialog = ({
           maxWidth: 500,
           maxHeight: 400,
           overflowY: "auto",
-          "&::-webkit-scrollbar": {
-            width: "8px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: theme.palette.grey[600],
-            borderRadius: "4px",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: theme.palette.grey[800],
-          },
+          ...getScrollbarStyles(theme),
         }}
       >
         <Typography variant="h6" sx={{ mb: 2 }}>

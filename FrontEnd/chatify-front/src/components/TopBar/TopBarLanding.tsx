@@ -24,6 +24,7 @@ const TopBarLanding: React.FC<TopBarLandingProps> = ({ toggleTheme }) => {
         position: 'static',
         top: 0,
         left: 0,
+        height: '64px',
         width: '100vw',
         display: 'flex',
         justifyContent: 'flex-end',

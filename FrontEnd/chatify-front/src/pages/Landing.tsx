@@ -99,15 +99,20 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
       {/* Contenido con scroll, empieza justo debajo de la TopBar */}
       <Box
         sx={{
+          flex:1,
           position: "absolute",
-          top: "64px", // Altura exacta del TopBar
+          mt: "60px", // Altura exacta del TopBar
           left: 0,
           width: "100%",
-          height: "calc(100% - 64px)", // Resto de la pantalla
+          height: "100%",
           overflowY: "auto",
           alignItems: "center",
           justifyContent: "center",
           ...getScrollbarStyles(theme),
+          "&::-webkit-scrollbar-track": {
+            background: theme.palette.background.default,
+            borderRadius: "4px",
+          },
         }}
       >
         {/* Sección principal ocupa toda la altura de la ventana */}
@@ -117,6 +122,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             display: "flex",
             alignItems: { xs: "flex-start", md: "center" },
             justifyContent: { xs: "flex-start", md: "center" },
+            backgroundColor: `${theme.palette.background.default}BF`, // 75% opaco (hex alpha)
             px: { xs: 1, md: 2 },
             py: { xs: 2, md: 0 },
             mt: { xs: 2, md: 0 },
@@ -155,7 +161,6 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
                 flexDirection: "column",
                 alignItems: { xs: "center", md: "flex-start" },
                 textAlign: { xs: "center", md: "left" },
-                background: theme.palette.mode === "light" ? "rgba(254, 250, 247, 0.7)" : "none",
                 borderRadius: 2,
                 px: { xs: 1, md: 0 },
                 py: { xs: 1, md: 0 },
@@ -232,7 +237,6 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             </Box>
           </Box>
         </Box>
-        {/* InfoCards solo visibles al hacer scroll */}
         <Box
           sx={{
             display: "flex",
@@ -247,6 +251,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             mx: "auto",
           }}
         >
+          {/* InfoCards solo visibles al hacer scroll */}
           {infoCardsData.map((card, index) => (
             <InfoCard
               key={index}
@@ -255,6 +260,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
               image={card.image}
             />
           ))}
+          
         </Box>
         {/* Footer */}
         <Box
@@ -264,6 +270,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             padding: 3,
             textAlign: "center",
             mt: 4,
+            pb: 10,
           }}
         >
           <Typography variant="body2" sx={{ mb: 1 }}>

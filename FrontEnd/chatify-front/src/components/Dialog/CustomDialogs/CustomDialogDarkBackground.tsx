@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, Box, Button, DialogTitle, IconButton } from '@mui/material';
 import { ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import CloseIcon from '@mui/icons-material/Close';
 
 type ButtonConfig = {
@@ -28,9 +29,22 @@ const CustomDialogDarkBackground = ({
   showCloseIcon = false,
 }: CustomDialogDarkBackgroundProps) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={isMobile ? false : "sm"}
+      fullWidth={isMobile}
+      PaperProps={{
+        sx: {
+          borderRadius: isMobile ? 0 : 2,
+          width: 'auto',
+          m: 0,
+        }
+      }}
+    >
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {title}
         {showCloseIcon && (

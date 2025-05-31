@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, Box, Button } from '@mui/material';
 import { ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 type ButtonConfig = {
   label: string;
@@ -23,6 +24,7 @@ const CustomDialogDefault = ({
   buttons,
 }: CustomDialogDefaultProps) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Dialog
@@ -30,19 +32,23 @@ const CustomDialogDefault = ({
       onClose={onClose}
       hideBackdrop
       disableEscapeKeyDown
+      fullWidth={isMobile}
+      maxWidth={isMobile ? false : "sm"}
       slotProps={{
         paper: {
           sx: {
             position: 'absolute',
             top: '20%',
             left: '50%',
-            transform: 'translateX(-50%)',
+            transform: isMobile ? 'translateX(-50%)' : 'translateX(-50%)',
             bgcolor: theme.palette.background.default,
-            borderRadius: 2,
+            borderRadius: isMobile ? 0 : 2,
             boxShadow: 3,
             color: theme.palette.text.primary,
             width: 'auto',
+            minHeight: 'auto',
             padding: 0,
+            m: 0,
           }
         }
       }}
