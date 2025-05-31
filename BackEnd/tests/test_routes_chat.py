@@ -23,7 +23,7 @@ def test_send_message_authorized(client):
         mock_get_conversation.return_value = type("Conversation", (), {"user_id": 1})()
         mock_handle_message.return_value = {"response": "OK"}
 
-        response = client.post("/chat/1/message", content='"Hola"')
+        response = client.post("/chat/1/message", json={"question": "Hola"})
 
         assert response.status_code == 200
         assert response.json() == {"response": "OK"}
@@ -35,7 +35,7 @@ def test_send_message_unauthorized(client):
     with patch("src.controllers.chat_controller.get_conversation_by_id") as mock_get_conversation:
         mock_get_conversation.return_value = type("Conversation", (), {"user_id": 999})()
 
-        response = client.post("/chat/1/message", content='"Hola"')
+        response = client.post("/chat/1/message", json={"question": "Hola"})
         assert response.status_code == 403
         assert response.json()["detail"] == "Unauthorized"
 
