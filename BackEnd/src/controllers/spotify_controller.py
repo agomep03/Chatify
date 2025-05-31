@@ -5,6 +5,9 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import List, Optional
 import re
+from PIL import Image
+import io
+import sys
 
 
 import requests
@@ -158,7 +161,6 @@ def update_playlist(
     playlist_id: str,
     title: str | None,
     description: str | None,
-    image_base64: str | None,
     user: User,
     db: Session
 ):
@@ -203,32 +205,39 @@ def update_playlist(
         )
         if response.status_code != 200:
             logger.error(f"[UPDATE] Error al actualizar nombre/descr.: {response.status_code}, {response.text}")
-            raise HTTPException(status_code=response.status_code, detail="Error al actualizar título o descripción")
-
-    # Actualizar imagen si se proporciona
-    if image_base64:
-        logger.info(f"[UPDATE] Actualizando imagen")
-        img_headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "image/jpeg"
-        }
-        try:
-            image_data = base64.b64decode(image_base64)
-        except Exception:
-            logger.exception("[UPDATE] Fallo en la decodificación de la imagen base64")
-            raise HTTPException(status_code=400, detail="La imagen no está correctamente codificada en base64")
-
-        response = requests.put(
-            f"https://api.spotify.com/v1/playlists/{playlist_id}/images",
-            headers=img_headers,
-            data=image_data
-        )
-        if response.status_code != 202:
-            logger.error(f"[UPDATE] Error al actualizar imagen: {response.status_code}, {response.text}")
-            raise HTTPException(status_code=response.status_code, detail="Error al actualizar la imagen")
+            raise HTTPException(status_code=response.status_code, detail="Error al actualizar título o descripción")      
 
     logger.info(f"[UPDATE] Playlist {playlist_id} actualizada exitosamente")
     return {"message": "Playlist actualizada correctamente"}
+
+def limpiar_y_reconvertir_jpeg(image_base64: str) -> bytes:
+    """Decodifica base64, reconvierte la imagen a JPEG baseline sin metadatos y devuelve los bytes limpios."""
+    if image_base64.startswith("data:image"):
+        image_base64 = image_base64.split(",")[1]
+
+    decoded = base64.b64decode(image_base64)
+
+    with Image.open(io.BytesIO(decoded)) as img:
+        # Convertir a modo RGB si es necesario
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        output_io = io.BytesIO()
+        img.save(output_io, format="JPEG", quality=85, optimize=True)
+        return output_io.getvalue()
+
+def verificar_imagen_base64(image_base64):
+    try:
+        image_data = base64.b64decode(image_base64)
+        with Image.open(io.BytesIO(image_data)) as img:
+            print("Formato detectado:", img.format)
+            if img.format != "JPEG":
+                raise HTTPException(status_code=400, detail="Spotify solo acepta imágenes en formato JPEG")
+            img.verify()
+            print("Imagen válida.")
+    except Exception as e:
+        print("Error al verificar la imagen:", e)
+        raise HTTPException(status_code=400, detail="La imagen es inválida o está mal formada")
 
 
 # === Playlist Autogenerada por IA ===
