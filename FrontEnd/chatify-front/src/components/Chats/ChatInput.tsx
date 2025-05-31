@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ChatModeToggle from './ChatToggle';
