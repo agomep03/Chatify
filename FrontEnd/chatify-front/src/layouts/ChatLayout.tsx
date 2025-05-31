@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 import { useTheme } from "@mui/material/styles";
-import { getScrollbarStyles } from "../styles/scrollbarStyles";
 import ChatMessagesList from '../components/Chats/ChatMessagesList';
 import ChatInput from '../components/Chats/ChatInput';
 
@@ -36,9 +35,9 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [dots, setDots] = useState('');
   const [mode, setMode] = useState("normal");
+  const [inputRows, setInputRows] = useState(1);
   const theme = useTheme();
-
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Carga el historial del chat cuando cambia el chatId
   useEffect(() => {
@@ -106,7 +105,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         dots={dots}
         listRef={listRef}
         theme={theme}
-        getScrollbarStyles={getScrollbarStyles}
       />
       <ChatInput 
         input={input}
@@ -115,6 +113,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         mode={mode}
         setMode={setMode}
         theme={theme}
+        inputRows={inputRows}
+        setInputRows={setInputRows}
       />
     </Box>
   );

@@ -1,8 +1,27 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import { Theme } from '@mui/material/styles';
 
-export default function ChatModeToggle({ mode, setMode, theme }) {
+/**
+ * Selector de modo de IA para el chat.
+ * @component
+ * @param {string} mode - Modo de IA seleccionado ("normal", "creatividad" o "razonamiento").
+ * @param {(mode: string) => void} setMode - Setter para el modo.
+ * @param {Theme} theme - Tema de MUI.
+ * @returns {JSX.Element} Grupo de botones para seleccionar el modo de IA.
+ * @description
+ * Permite alternar entre los modos "creatividad" y "razonamiento" para los mensajes del chat.
+ * Solo uno puede estar activo a la vez, o ninguno (modo "normal").
+ * El foco se elimina tras pulsar para evitar bordes de enfoque.
+ */
+interface ChatModeToggleProps {
+  mode: string;
+  setMode: (mode: string) => void;
+  theme: Theme;
+}
+
+export default function ChatModeToggle({ mode, setMode, theme }: ChatModeToggleProps) {
   return (
             <ToggleButtonGroup
               value={mode === "normal" ? null : mode}

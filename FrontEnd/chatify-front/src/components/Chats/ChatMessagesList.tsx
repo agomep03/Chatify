@@ -1,8 +1,45 @@
 import { Box, List, ListItem, ListItemText } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import { getScrollbarStyles } from "../../styles/scrollbarStyles";
 
-export default function ChatMessagesList({ messages, isLoadingDot, dots, listRef, theme, getScrollbarStyles }) {
+/**
+ * Lista de mensajes del chat.
+ * @component
+ * @param {Message[]} messages - Array de mensajes a mostrar.
+ * @param {boolean} isLoadingDot - Indica si el bot está "pensando".
+ * @param {string} dots - Animación de puntos para el estado "pensando".
+ * @param {RefObject<HTMLDivElement | null>} listRef - Ref para el scroll automático.
+ * @param {any} theme - Tema de MUI para estilos.
+ * @returns {JSX.Element} Lista de mensajes con estilos diferenciados para usuario y bot.
+ * @description
+ * Muestra el historial de mensajes del chat, renderiza Markdown y aplica estilos personalizados.
+ * El mensaje "Pensando..." aparece cuando el bot está generando respuesta.
+ */
+
+interface Message {
+  id: string | number;
+  sender: 'user' | 'bot';
+  text: string;
+}
+
+interface ChatMessagesListProps {
+  messages: Message[];
+  isLoadingDot: boolean;
+  dots: string;
+  listRef: React.RefObject<HTMLDivElement | null>;
+  theme: any;
+  inputRows: number;
+}
+
+export default function ChatMessagesList({
+  messages,
+  isLoadingDot,
+  dots,
+  listRef,
+  theme,
+  inputRows,
+}: ChatMessagesListProps) {
   return (
       <Box
         ref={listRef}
@@ -10,7 +47,7 @@ export default function ChatMessagesList({ messages, isLoadingDot, dots, listRef
         overflow="hidden"
         mb={2}
         sx={{
-          maxHeight: '80%',
+          maxHeight: `70%`,
           overflowY: 'auto',
           overflowX: 'hidden',
           ...getScrollbarStyles(theme),
