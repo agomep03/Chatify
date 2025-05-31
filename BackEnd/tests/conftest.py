@@ -41,12 +41,14 @@ class FakeUser:
 
 @pytest.fixture(scope="function")
 def db_session():
-    # Crear conexión sin iniciar transacción para crear/dropear correctamente en SQLite
     connection = engine.connect()
 
-    # IMPORTANTE: deshacer cualquier estado previo
+    # Limpieza segura de tablas e índices
     Base.metadata.drop_all(bind=connection)
+    connection.commit()
+
     Base.metadata.create_all(bind=connection)
+    connection.commit()
 
     transaction = connection.begin()
     session = Session(bind=connection)
@@ -57,6 +59,7 @@ def db_session():
         session.close()
         transaction.rollback()
         connection.close()
+
 
 @pytest.fixture
 def app(db_session):
