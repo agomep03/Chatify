@@ -138,7 +138,7 @@ def test_check_spotify_connected_false(client_with_user_without_spotify):
 def test_update_playlist_endpoint(client_with_user, monkeypatch):
     client, user = client_with_user
 
-    def mock_update_playlist(playlist_id, title, description, image_base64, user, db):
+    def mock_update_playlist(playlist_id, title, description, user, db):
         assert playlist_id == "123"
         assert title == "New Title"
         assert description == "New Description"
@@ -155,7 +155,6 @@ def test_update_playlist_endpoint(client_with_user, monkeypatch):
     data = {
         "title": "New Title",
         "description": "New Description",
-        "image_base64": None
     }
     response = client.put("/spotify/playlists/123/update", json=data)
     assert response.status_code == 200
