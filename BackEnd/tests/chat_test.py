@@ -34,8 +34,7 @@ def test_send_message_success(client):
 
         response = client.post(
             f"/chat/{chat_id}/message",
-            data=question,
-            headers={"Content-Type": "application/x-www-form-urlencoded"}
+            json={"question": question},
         )
 
         assert response.status_code == 200
@@ -54,16 +53,14 @@ def test_chat_memory(client):
     # Mandamos mensaje con información
     set_genre_response = client.post(
         f"/chat/{chat_id}/message",
-        data="Mi género de música favorito es el pop",
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        json={"question": "Mi género de música favorito es el pop"},
     )
     assert set_genre_response.status_code == 200
     
     # Mandamos pregunta sobre información que dimos antes
     ask_genre_response = client.post(
         f"/chat/{chat_id}/message",
-        data="¿Cuál es mi género de música favorito?",
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        json={"question": "¿Cuál es mi género de música favorito?"},
     )
     assert ask_genre_response.status_code == 200
     
@@ -80,16 +77,14 @@ def test_cross_user_chat_access(client, client2):
     # Mandamos mensaje desde el cliente que ha creado la conversación
     response = client.post(
         f"/chat/{chat_id}/message",
-        data="Hola",
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        json={"question": "Hola"},
     )
     assert response.status_code == 200
 
     # Mandamos mensaje desde otro cliente
     response = client2.post(
         f"/chat/{chat_id}/message",
-        data="Holi",
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        json={"question": "Holi"},
     )
     assert response.status_code == 403
     assert "Unauthorized" in response.json().get("detail", "")
@@ -101,8 +96,7 @@ def test_send_message_no_conversation(client):
 
     response = client.post(
         f"/chat/{chat_id}/message",
-        data="Adios",
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        json={"question": "Adios"},
     )
 
     assert response.status_code == 403
@@ -173,8 +167,7 @@ def test_history(client):
     user_message = "Rock"
     response = client.post(
         f"/chat/{chat_id}/message",
-        data=user_message,
-        headers={"Content-Type": "text/plain"}
+        json={"question": user_message},
     )
     assert response.status_code == 200
     bot_message = response.json()["answer"]
