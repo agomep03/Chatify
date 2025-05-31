@@ -39,21 +39,25 @@ class FakeUser:
         self.spotify_user_id = spotify_user_id
         self.spotify_token_expires_at = datetime.utcnow() + timedelta(minutes=token_expiry_minutes)
 
-
 @pytest.fixture(scope="function")
 def db_session():
-    # Crear conexión y transacción para pruebas con rollback al final
     connection = engine.connect()
-    transaction = connection.begin()
-    Base.metadata.create_all(bind=connection)  # Crear tablas
 
+    # Limpieza segura de tablas e índices
+    Base.metadata.drop_all(bind=connection)
+    connection.commit()
+
+    Base.metadata.create_all(bind=connection)
+    connection.commit()
+
+    transaction = connection.begin()
     session = Session(bind=connection)
 
     try:
         yield session
     finally:
         session.close()
-        transaction.rollback()  # Deshacer cambios
+        transaction.rollback()
         connection.close()
 
 
