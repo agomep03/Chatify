@@ -12,7 +12,10 @@ class LyricsFetcher:
             logger.error("[LyricsFetcher] No se proporcionó un token de acceso para Genius.")
             raise ValueError("Token de acceso para Genius no proporcionado.")
         
-        self.genius = lyricsgenius.Genius(client_access_token)
+        self.genius = lyricsgenius.Genius(
+            client_access_token,
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
+        )
         self.genius.remove_section_headers = True
         logger.info("[LyricsFetcher] Cliente Genius inicializado correctamente.")
 
