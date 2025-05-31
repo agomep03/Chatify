@@ -29,7 +29,6 @@ interface ChatMessagesListProps {
   dots: string;
   listRef: React.RefObject<HTMLDivElement | null>;
   theme: any;
-  inputRows: number;
 }
 
 export default function ChatMessagesList({

@@ -35,7 +35,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [dots, setDots] = useState('');
   const [mode, setMode] = useState("normal");
-  const [inputRows, setInputRows] = useState(1);
   const theme = useTheme();
   const listRef = useRef<HTMLDivElement>(null);
 
