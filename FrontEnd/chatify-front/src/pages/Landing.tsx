@@ -1,11 +1,10 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import TopBarLanding from "../components/TopBar/TopBarLanding";
-import LogoLarge from "../components/Logo/LogoLarge";
 import { useEffect, useState } from "react";
 import { fetchUserProfile } from "../api/authService";
-import InfoCard from "../layouts/InfoCardLanding";
-import AppButton from "../components/Buttons/AppButton/AppButton";
-import { useNavigate } from "react-router-dom";
+import LandingHero from "../components/Landing/LandingHero";
+import LandingInfoCards from "../components/Landing/LandingInfoCards";
+import LandingFooter from "../components/Landing/LandingFooter";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
 import logoImg from "../assets/Logo.png";
 import logoSpotify from "../assets/Spotify.png";
@@ -26,7 +25,6 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
   const theme = useTheme();
   const loggedIn = isAuthenticated();
   const [username, setUsername] = useState<string | null>(null);
-  const navigate = useNavigate();
 
 
   const backgroundImage =
@@ -128,164 +126,14 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             mt: { xs: 2, md: 0 },
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              maxWidth: 900,
-              gap: { xs: 2, md: 8 },
-              mx: "auto",
-            }}
-          >
-            {/* Logo arriba en móvil, derecha en escritorio */}
-            <Box
-              sx={{
-                order: { xs: 0, md: 1 }, // Primero en móvil, segundo en escritorio
-                mb: { xs: 2, md: 0 },    // Margen abajo solo en móvil
-                display: "flex",
-                justifyContent: "center",
-                width: { xs: "100%", md: "auto" },
-              }}
-            >
-              <LogoLarge logoUrl={logoImg} />
-            </Box>
-            {/* Texto a la izquierda en escritorio, abajo en móvil */}
-            <Box
-              sx={{
-                flex: 1,
-                order: { xs: 1, md: 0 }, // Segundo en móvil, primero en escritorio
-                display: "flex",
-                flexDirection: "column",
-                alignItems: { xs: "center", md: "flex-start" },
-                textAlign: { xs: "center", md: "left" },
-                borderRadius: 2,
-                px: { xs: 1, md: 0 },
-                py: { xs: 1, md: 0 },
-              }}
-            >
-              <Typography
-                variant="h1"
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: { xs: "2.2rem", sm: "2.8rem", md: "5rem", lg: "8rem" },
-                  color: "primary.main",
-                  letterSpacing: 2,
-                  mb: { xs: 1, md: 2 },
-                  textShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                }}
-              >
-                Chatify
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{
-                  mb: { xs: 2, md: 4 },
-                  maxWidth: 500,
-                  color: theme.palette.mode === "light" ? "#222" : "text.secondary",
-                  borderRadius: 2,
-                  px: theme.palette.mode === "light" ? 1 : 0,
-                  py: theme.palette.mode === "light" ? 0.5 : 0,
-                  fontSize: { xs: "1rem", sm: "1.1rem", md: "1.25rem" },
-                }}
-              >
-                {description}
-              </Typography>
-              {/* Botones de acción */}
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  mt: 2,
-                  flexDirection: { xs: "column", sm: "row" },
-                  width: { xs: "100%", sm: "auto" },
-                  alignItems: "center",
-                }}
-              >
-                {!loggedIn ? (
-                  <>
-                    <AppButton
-                      variant="contained"
-                      color="primary"
-                      onClick={() => navigate("/login")}
-                      sx={{ width: { xs: "100%", sm: "auto" } }}
-                    >
-                      Iniciar sesión
-                    </AppButton>
-                    <AppButton
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => navigate("/register")}
-                      sx={{ width: { xs: "100%", sm: "auto" } }}
-                    >
-                      Registrarse
-                    </AppButton>
-                  </>
-                ) : (
-                  <AppButton
-                    variant="contained"
-                    color="primary"
-                    onClick={() => navigate("/home")}
-                    sx={{ width: { xs: "100%", sm: "auto" } }}
-                  >
-                    Ir a mi cuenta
-                  </AppButton>
-                )}
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            gap: { xs: 2, md: 4 },
-            px: { xs: 1, md: 2 },
-            py: { xs: 1, md: 4 },
-            width: { xs: "90%", md: "90%" },
-            maxWidth: 900,
-            mx: "auto",
-          }}
-        >
-          {/* InfoCards solo visibles al hacer scroll */}
-          {infoCardsData.map((card, index) => (
-            <InfoCard
-              key={index}
-              title={card.title}
-              description={card.description}
-              image={card.image}
+          <LandingHero
+            logoImg={logoImg}
+            description={description}
+            loggedIn={loggedIn}
             />
-          ))}
-          
         </Box>
-        {/* Footer */}
-        <Box
-          sx={{
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "#ffffff",
-            padding: 3,
-            textAlign: "center",
-            mt: 4,
-            pb: 10,
-          }}
-        >
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            © {new Date().getFullYear()} Chatify. Todos los derechos reservados.
-          </Typography>
-          <Typography variant="body2">
-            ¿Dudas o problemas? Escríbenos a:{" "}
-            <a
-              href="mailto:chatify25@gmail.com"
-              style={{ color: "#ffffff", textDecoration: "underline" }}
-            >
-              chatify25@gmail.com
-            </a>
-          </Typography>
-        </Box>
+        <LandingInfoCards infoCardsData={infoCardsData} />
+        <LandingFooter />
       </Box>
     </Box>
   );
