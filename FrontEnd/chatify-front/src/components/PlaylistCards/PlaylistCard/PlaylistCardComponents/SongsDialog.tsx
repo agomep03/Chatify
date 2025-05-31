@@ -1,12 +1,12 @@
-import CustomDialog from "../Dialog/Dialog";
+import CustomDialog from "../../../Dialog/Dialog";
 import { Box, Typography, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import React, { useState } from "react";
-import { removeTracksFromPlaylist, fetchLyrics } from "../../api/spotifyService";
+import { removeTracksFromPlaylist, fetchLyrics } from "../../../../api/spotifyService";
 import LyricsDialog from "./LyricsDialog";
-import ConfirmDeleteDialog from "../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
+import ConfirmDeleteDialog from "../../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 
 const SongsDialog = ({
   open,

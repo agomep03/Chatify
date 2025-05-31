@@ -2,7 +2,7 @@ import { Card, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useTheme } from "@mui/material/styles";
 
-const AutoPlaylistCard = ({ onClick }: { onClick: () => void }) => {
+const CreatePlaylistCard = ({ onClick }: { onClick: () => void }) => {
   const theme = useTheme();
   return (
     <Card
@@ -28,10 +28,10 @@ const AutoPlaylistCard = ({ onClick }: { onClick: () => void }) => {
     >
       <AddIcon sx={{ fontSize: 80 }} />
       <Typography variant="h6" sx={{ mt: 2 }}>
-        Crear Playlist Automática
+        Crear Playlist
       </Typography>
     </Card>
   );
 };
 
-export default AutoPlaylistCard;
+export default CreatePlaylistCard;

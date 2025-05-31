@@ -1,9 +1,9 @@
 import { useState, forwardRef } from "react";
 import { Box, Container } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import FormHeader from "./FormHeader";
-import FormFields from "./FormFields";
-import FormLoadingOverlay from "./FormLoadingOverlay";
+import FormHeader from "./FormComponents/FormHeader";
+import FormFields from "./FormComponents/FormFields";
+import FormLoadingOverlay from "./FormComponents/FormLoadingOverlay";
 import AppButton from "../Buttons/AppButton/AppButton"; // Importa el nuevo botón
 
 /**

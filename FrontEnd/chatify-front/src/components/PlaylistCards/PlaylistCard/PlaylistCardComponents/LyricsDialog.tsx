@@ -1,5 +1,5 @@
 import { Typography, CircularProgress, Box } from "@mui/material";
-import CustomDialogDarkBackground from "../Dialog/CustomDialogs/CustomDialogDarkBackground";
+import CustomDialogDarkBackground from "../../../Dialog/CustomDialogs/CustomDialogDarkBackground";
 
 const LyricsDialog = ({
   open,

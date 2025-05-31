@@ -1,10 +1,12 @@
-import { Card, CardContent, Box, Typography, Button } from "@mui/material";
+import { Card, CardContent, Box, Typography, Button, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AppButton from "../Buttons/AppButton/AppButton";
-import { deleteUserPlaylist } from "../../api/spotifyService";
+import InfoIcon from "@mui/icons-material/Info";
+import AppButton from "../../Buttons/AppButton/AppButton";
+import { deleteUserPlaylist } from "../../../api/spotifyService";
 import { useState } from "react";
-import ConfirmDeleteDialog from "../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
+import ConfirmDeleteDialog from "../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
+import CustomDialog from "../../Dialog/Dialog";
 
 const PlaylistCard = ({
   playlist,
@@ -20,6 +22,7 @@ const PlaylistCard = ({
 }) => {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [openInfo, setOpenInfo] = useState(false);
 
   const handleDelete = async () => {
     setLoadingDelete(true);
@@ -141,20 +144,38 @@ const PlaylistCard = ({
             />
           </Box>
         )}
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            mb: 1,
-            width: "100%",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {playlist.name}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center", mb: 1 }}>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              textAlign: "center",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: 200,
+            }}
+          >
+            {playlist.name}
+          </Typography>
+          <IconButton
+            size="small"
+            sx={{
+              ml: 1,
+              minWidth: 0,
+              p: 1,
+              color: (theme) => theme.palette.text.primary,
+              "&:hover": { backgroundColor: (theme) => theme.palette.action.hover },
+              "&:focus": { outline: "none", border: "none", boxShadow: "none" },
+              "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
+              "&:active": { outline: "none", border: "none", boxShadow: "none" },
+            }}
+            onClick={() => setOpenInfo(true)}
+            aria-label="Mostrar descripción"
+          >
+            <InfoIcon fontSize="small" />
+          </IconButton>
+        </Box>
         {playlist.tracks && Array.isArray(playlist.tracks) && (
           <AppButton
             size="small"
@@ -172,6 +193,19 @@ const PlaylistCard = ({
         itemName={playlist.name}
         loading={loadingDelete}
       />
+      <CustomDialog
+        open={openInfo}
+        onClose={() => setOpenInfo(false)}
+        onConfirm={() => setOpenInfo(false)}
+        dialogStyle="darkBackground"
+        title={`Descripción de "${playlist.name}"`}
+        showCloseIcon={true}
+        buttons={[]}
+      >
+        <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
+          {playlist.description || "Sin descripción"}
+        </Typography>
+      </CustomDialog>
     </Card>
   );
 };

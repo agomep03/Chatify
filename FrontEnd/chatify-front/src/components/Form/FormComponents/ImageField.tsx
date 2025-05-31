@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
-import AppButton from "../Buttons/AppButton/AppButton";
+import AppButton from "../../Buttons/AppButton/AppButton";
 
 interface ImageFieldProps {
   name: string;

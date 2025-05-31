@@ -7,10 +7,10 @@ import {
   autoGeneratePlaylist,
 } from "../api/spotifyService";
 import PlaylistList from "../components/PlaylistCards/PlaylistList";
-import AutoPlaylistCard from "../components/PlaylistCards/AutoPlaylistCard";
-import SongsDialog from "../components/PlaylistCards/SongsDialog";
-import EditPlaylistDialog from "../components/PlaylistCards/EditPlaylistDialog";
-import AutoPlaylistDialog from "../components/PlaylistCards/AutoPlaylistDialog";
+import CreatePlaylistCard from "../components/PlaylistCards/CreatePlaylistCard/CreatePlaylistCard";
+import SongsDialog from "../components/PlaylistCards/PlaylistCard/PlaylistCardComponents/SongsDialog";
+import EditPlaylistDialog from "../components/PlaylistCards/PlaylistCard/PlaylistCardComponents/EditPlaylistDialog";
+import CreatePlaylistDialog from "../components/PlaylistCards/CreatePlaylistCard/CreatePlaylistDialog";
 import { useAlert } from "../components/Alert/Alert";
 
 /**
@@ -242,7 +242,7 @@ const PlaylistCards: React.FC = () => {
           gap: 2,
         }}
       >
-        <AutoPlaylistCard onClick={handleOpenAutoDialog} />
+        <CreatePlaylistCard onClick={handleOpenAutoDialog} />
         <PlaylistList
           playlists={playlists}
           onEdit={handleEditClick}
@@ -263,7 +263,7 @@ const PlaylistCards: React.FC = () => {
         onSubmit={handleEditSubmit}
         loading={editLoading}
       />
-      <AutoPlaylistDialog
+      <CreatePlaylistDialog
         open={autoDialogOpen}
         prompt={autoPrompt}
         loading={autoLoading}
