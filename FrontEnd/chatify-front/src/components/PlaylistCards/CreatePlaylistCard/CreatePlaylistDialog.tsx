@@ -1,9 +1,9 @@
 import { useRef } from "react";
-import CustomDialog from "../Dialog/Dialog";
+import CustomDialog from "../../Dialog/Dialog";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-const AutoPlaylistDialog = ({
+const CreatePlaylistDialog = ({
   open,
   prompt,
   loading,
@@ -101,4 +101,4 @@ const AutoPlaylistDialog = ({
   );
 };
 
-export default AutoPlaylistDialog;
+export default CreatePlaylistDialog;
