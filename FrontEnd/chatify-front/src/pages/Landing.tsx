@@ -100,7 +100,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
       <Box
         sx={{
           position: "absolute",
-          top: "64px", // Altura exacta de tu TopBar
+          top: "64px", // Altura exacta del TopBar
           left: 0,
           width: "100%",
           height: "calc(100% - 64px)", // Resto de la pantalla
@@ -115,9 +115,11 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
           sx={{
             minHeight: "100vh",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            px: 2,
+            alignItems: { xs: "flex-start", md: "center" },
+            justifyContent: { xs: "flex-start", md: "center" },
+            px: { xs: 1, md: 2 },
+            py: { xs: 2, md: 0 },
+            mt: { xs: 2, md: 0 },
           }}
         >
           <Box
@@ -128,29 +130,45 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
               justifyContent: "center",
               width: "100%",
               maxWidth: 900,
-              gap: { xs: 4, md: 8 },
+              gap: { xs: 2, md: 8 },
               mx: "auto",
             }}
           >
-            {/* Texto a la izquierda */}
+            {/* Logo arriba en móvil, derecha en escritorio */}
+            <Box
+              sx={{
+                order: { xs: 0, md: 1 }, // Primero en móvil, segundo en escritorio
+                mb: { xs: 2, md: 0 },    // Margen abajo solo en móvil
+                display: "flex",
+                justifyContent: "center",
+                width: { xs: "100%", md: "auto" },
+              }}
+            >
+              <LogoLarge logoUrl={logoImg} />
+            </Box>
+            {/* Texto a la izquierda en escritorio, abajo en móvil */}
             <Box
               sx={{
                 flex: 1,
+                order: { xs: 1, md: 0 }, // Segundo en móvil, primero en escritorio
                 display: "flex",
                 flexDirection: "column",
                 alignItems: { xs: "center", md: "flex-start" },
                 textAlign: { xs: "center", md: "left" },
                 background: theme.palette.mode === "light" ? "rgba(254, 250, 247, 0.7)" : "none",
+                borderRadius: 2,
+                px: { xs: 1, md: 0 },
+                py: { xs: 1, md: 0 },
               }}
             >
               <Typography
                 variant="h1"
                 sx={{
                   fontWeight: "bold",
-                  fontSize: { xs: "3rem", md: "7rem", lg: "8rem" },
+                  fontSize: { xs: "2.2rem", sm: "2.8rem", md: "5rem", lg: "8rem" },
                   color: "primary.main",
                   letterSpacing: 2,
-                  mb: 2,
+                  mb: { xs: 1, md: 2 },
                   textShadow: "0 2px 8px rgba(0,0,0,0.08)",
                 }}
               >
@@ -159,24 +177,35 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
               <Typography
                 variant="h5"
                 sx={{
-                  mb: 4,
+                  mb: { xs: 2, md: 4 },
                   maxWidth: 500,
                   color: theme.palette.mode === "light" ? "#222" : "text.secondary",
                   borderRadius: 2,
                   px: theme.palette.mode === "light" ? 1 : 0,
                   py: theme.palette.mode === "light" ? 0.5 : 0,
+                  fontSize: { xs: "1rem", sm: "1.1rem", md: "1.25rem" },
                 }}
               >
                 {description}
               </Typography>
               {/* Botones de acción */}
-              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  mt: 2,
+                  flexDirection: { xs: "column", sm: "row" },
+                  width: { xs: "100%", sm: "auto" },
+                  alignItems: "center",
+                }}
+              >
                 {!loggedIn ? (
                   <>
                     <AppButton
                       variant="contained"
                       color="primary"
                       onClick={() => navigate("/login")}
+                      sx={{ width: { xs: "100%", sm: "auto" } }}
                     >
                       Iniciar sesión
                     </AppButton>
@@ -184,6 +213,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
                       variant="outlined"
                       color="primary"
                       onClick={() => navigate("/register")}
+                      sx={{ width: { xs: "100%", sm: "auto" } }}
                     >
                       Registrarse
                     </AppButton>
@@ -193,14 +223,13 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
                     variant="contained"
                     color="primary"
                     onClick={() => navigate("/home")}
+                    sx={{ width: { xs: "100%", sm: "auto" } }}
                   >
                     Ir a mi cuenta
                   </AppButton>
                 )}
               </Box>
             </Box>
-            {/* Logo a la derecha */}
-            <LogoLarge logoUrl={logoImg} />
           </Box>
         </Box>
         {/* InfoCards solo visibles al hacer scroll */}
@@ -209,11 +238,12 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
-            alignItems: "stretch",
-            gap: 4,
-            px: 2,
-            py: 4,
-            width: "90%",
+            alignItems: "center",
+            gap: { xs: 2, md: 4 },
+            px: { xs: 1, md: 2 },
+            py: { xs: 1, md: 4 },
+            width: { xs: "90%", md: "90%" },
+            maxWidth: 900,
             mx: "auto",
           }}
         >
@@ -226,6 +256,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             />
           ))}
         </Box>
+        {/* Footer */}
         <Box
           sx={{
             backgroundColor: "rgba(0, 0, 0, 0.5)",

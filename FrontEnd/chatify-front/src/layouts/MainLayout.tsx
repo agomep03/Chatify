@@ -12,6 +12,7 @@ import {
 } from "../api/chatService";
 import PlaylistCards from "./PlaylistCardsLayout";
 import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface Chat {
   id: string;
@@ -27,11 +28,13 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
   const [selectedTab, setSelectedTab] = useState<string>("playlists");
   const { customAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
+  const [showNav, setShowNav] = useState(true);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const allTabs = [
     { id: "playlists", title: "Playlists" },
-    { id: "add", title: "Añadir conversación" },
+    { id: "add", title: "Nueva conversación" },
     ...chats,
   ];
 
@@ -106,6 +109,11 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     }
   }, [selectedTab]);
 
+  const handleOnTabChange = (tab: string) => {
+    setSelectedTab(tab);
+    if (isMobile) setShowNav(false);
+  };
+
   const renderTabContent = () => {
     if (selectedTab === "playlists") {
       return <PlaylistCards />;
@@ -134,23 +142,29 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
         flexDirection: "column",
       }}
     >
-      <TopBar toggleTheme={toggleTheme}/>
+      <TopBar toggleTheme={toggleTheme} onToggleNav={() => setShowNav(prev => !prev)}/>
       <Box
         sx={{ display: "flex", flex: 1, width: "100%", overflowX: "hidden" }}
       >
         <Box
           sx={{
-            width: 280,
+            width: showNav ? 280 : 0,
             flexShrink: 0,
             backgroundColor: theme.palette.background.default,
             height: "100%",
+            '@media (max-width:600px)': {
+              position: 'absolute',
+              zIndex: 10,
+              height: '100%',
+              boxShadow: showNav ? 4 : 0,
+            },
           }}
         >
           <NavMenu
             tabs={allTabs}
             closableTabs={closableTabs}
             selectedTab={selectedTab}
-            onTabChange={setSelectedTab}
+            onTabChange={handleOnTabChange}
             onTabClose={handleTabClose}
             onTabRename={handleTabRename}
           />

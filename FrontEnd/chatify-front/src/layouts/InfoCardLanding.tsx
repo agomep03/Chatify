@@ -4,34 +4,43 @@ import Logo from "../components/Logo/LogoLarge";
 type InfoCardProps = {
   title: string;
   description: string;
-  image: string; // URL de la imagen
+  image: string;
 };
 
 const InfoCard: React.FC<InfoCardProps> = ({ title, description, image }) => (
   <Box
     sx={{
       width: "100%",
-      mx: "auto",
       display: "flex",
       flexDirection: { xs: "column", md: "row" },
       alignItems: "center",
-      gap: 3,
+      gap: { xs: 2, md: 3 },
       bgcolor: "background.paper",
       borderRadius: 5,
       boxShadow: 4,
-      p: { xs: 2, md: 4 },
-      my: 3,
+      p: { xs: 1.5, md: 4 },
+      my: 2,
+      mx: 0,
     }}
   >
-    <Box sx={{width:100}}>
-      <Logo logoUrl={image} />
+    <Box sx={{ width: { xs: 60, sm: 80, md: 100 }, mb: { xs: 1, md: 0 } }}>
+      <Logo logoUrl={image} width="100%" />
     </Box>
-
     <Box sx={{ flex: 1 }}>
-      <Typography variant="h3" fontWeight="bold" mb={1} color="text.primary">
+      <Typography
+        variant="h6"
+        fontWeight="bold"
+        mb={0.5}
+        color="text.primary"
+        sx={{ fontSize: { xs: "1.1rem", md: "1.5rem" } }}
+      >
         {title}
       </Typography>
-      <Typography variant="h6" color="text.secondary">
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ fontSize: { xs: "0.95rem", md: "1.1rem" } }}
+      >
         {description}
       </Typography>
     </Box>

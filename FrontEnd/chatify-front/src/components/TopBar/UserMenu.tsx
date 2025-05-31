@@ -18,7 +18,7 @@ const UserMenu: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     closeUserMenu();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleProfile = () => {
