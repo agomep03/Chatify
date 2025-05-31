@@ -44,7 +44,7 @@ export default function ChatInput({
         <TextField
           fullWidth
           value={input}
-          onInput={(e) => setInput((e.target as HTMLTextAreaElement).value)}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Escribe un mensaje..."
           multiline
           minRows={1}

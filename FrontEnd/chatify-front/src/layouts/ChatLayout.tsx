@@ -105,6 +105,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         dots={dots}
         listRef={listRef}
         theme={theme}
+        inputRows={inputRows}
       />
       <ChatInput 
         input={input}

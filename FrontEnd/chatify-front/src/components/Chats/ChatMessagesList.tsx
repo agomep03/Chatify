@@ -40,6 +40,9 @@ export default function ChatMessagesList({
   theme,
   inputRows,
 }: ChatMessagesListProps) {
+  // Calcula el alto extra del input (aprox 28px por línea, ajusta si lo necesitas)
+  const inputHeight = 28 * inputRows + 32; // 32px extra para paddings/márgenes
+
   return (
       <Box
         ref={listRef}
@@ -47,7 +50,7 @@ export default function ChatMessagesList({
         overflow="hidden"
         mb={2}
         sx={{
-          maxHeight: `70%`,
+          maxHeight: `calc(80vh - ${inputHeight}px)`, // 80vh menos el alto del input
           overflowY: 'auto',
           overflowX: 'hidden',
           ...getScrollbarStyles(theme),
