@@ -45,7 +45,9 @@ def db_session():
     # Crear conexión y transacción para pruebas con rollback al final
     connection = engine.connect()
     transaction = connection.begin()
-    Base.metadata.create_all(bind=connection)  # Crear tablas
+
+    Base.metadata.drop_all(bind=connection)
+    Base.metadata.create_all(bind=connection)  
 
     session = Session(bind=connection)
 
@@ -55,6 +57,7 @@ def db_session():
         session.close()
         transaction.rollback()  # Deshacer cambios
         connection.close()
+
 
 
 @pytest.fixture
