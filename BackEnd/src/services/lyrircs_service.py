@@ -14,7 +14,7 @@ class LyricsFetcher:
         
         self.genius = lyricsgenius.Genius(
             client_access_token,
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
+            headers={"User-Agent": "Mozilla/5.0"}
         )
         self.genius.remove_section_headers = True
         logger.info("[LyricsFetcher] Cliente Genius inicializado correctamente.")
