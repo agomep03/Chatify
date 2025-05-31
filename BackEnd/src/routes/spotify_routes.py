@@ -13,10 +13,6 @@ from src.services.lyrircs_service import LyricsFetcher
 
 router = APIRouter()
 
-class UpdatePlaylistRequest(BaseModel):
-    title: Optional[str] = None
-    image_base64: Optional[str] = None
-
 class TrackUri(BaseModel):
     uri: str
 
@@ -27,7 +23,6 @@ class RemoveTracksRequest(BaseModel):
 class UpdatePlaylistRequest(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    image_base64: Optional[str] = None
 
 @router.get("/playlists")
 def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -50,7 +45,6 @@ def update_playlist_endpoint(
         playlist_id=playlist_id,
         title=data.title,
         description=data.description,
-        image_base64=data.image_base64,
         user=user,
         db=db
     )
@@ -79,7 +73,7 @@ def get_lyrics(
 ):
     lyrics_fetcher = LyricsFetcher()
     lyrics = lyrics_fetcher.search_song_lyrics(artist, song)
-    return {"artist": artist, "song": song, "lyrics": lyrics}
+    return {"artist": artist, "song": song, "lyrics": lyrics or "Letra no encontrada"}
 
 @router.delete("/playlists/{playlist_id}/unfollow")
 def unfollow_playlist(

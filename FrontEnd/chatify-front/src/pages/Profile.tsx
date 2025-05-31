@@ -22,9 +22,8 @@ const Profile: React.FC = () => {
 
   // Campos del formulario
   const profileFields = [
-    { name: "username", label: "Nombre Completo", type: "text" },
-    { name: "email", label: "Correo Electrónico", type: "email" },
-    // Puedes agregar más campos si el backend lo soporta
+    { name: "username", label: "Nombre Completo", type: "text", required: true },
+    { name: "email", label: "Correo Electrónico", type: "email", required: true },
   ];
 
   useEffect(() => {

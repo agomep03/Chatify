@@ -14,6 +14,7 @@ import Form from '../Form/Form';
 import CustomDialog from '../Dialog/Dialog';
 import ScrollableText from './ScrollableText';
 import { useTheme } from "@mui/material/styles";
+import ConfirmDeleteDialog from '../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog';
 import { getScrollbarStyles } from "../../styles/scrollbarStyles";
 
 interface Tab {
@@ -42,6 +43,8 @@ const NavMenu: React.FC<NavMenuProps> = ({
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuTabId, setMenuTabId] = useState<string | null>(null);
   const [openRenameForm, setOpenRenameForm] = useState(false);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const [tabToDelete, setTabToDelete] = useState<Tab | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const lastAnchorEl = useRef<HTMLElement | null>(null);
   const theme = useTheme();
@@ -123,10 +126,10 @@ const NavMenu: React.FC<NavMenuProps> = ({
           <MenuItem
             onClick={() => {
               setMenuAnchorEl(null);
-              if (lastAnchorEl.current && document.contains(lastAnchorEl.current)) {
-                lastAnchorEl.current.focus();
-              }
-              if (onTabClose && menuTabId) onTabClose(menuTabId);
+              // Buscar la tab a eliminar y mostrar el confirm dialog
+              const tab = tabs.find(t => t.id === menuTabId);
+              setTabToDelete(tab || null);
+              setOpenConfirmDelete(true);
             }}
           >
             Eliminar
@@ -163,8 +166,16 @@ const NavMenu: React.FC<NavMenuProps> = ({
             />
           </CustomDialog>
         )}
-
-
+        <ConfirmDeleteDialog
+          open={openConfirmDelete}
+          onClose={() => { setOpenConfirmDelete(false); setTabToDelete(null); }}
+          onConfirm={() => {
+            if (onTabClose && tabToDelete) onTabClose(tabToDelete.id);
+            setOpenConfirmDelete(false);
+            setTabToDelete(null);
+          }}
+          itemName={tabToDelete?.title}
+        />
       </Box>
     </List>
   );
