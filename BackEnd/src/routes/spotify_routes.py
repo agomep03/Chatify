@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
@@ -9,7 +9,6 @@ from src.controllers.spotify_controller import get_all_user_playlists, update_pl
 from src.controllers.auth_controller import get_current_user, get_db
 from src.models.auth_model import User
 from src.services.lyrircs_service import LyricsFetcher
-
 
 router = APIRouter()
 
@@ -30,6 +29,8 @@ def playlists(user: User = Depends(get_current_user), db: Session = Depends(get_
 
 @router.get("/auth/spotify/connected")
 def check_spotify_connected(user: User = Depends(get_current_user)):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     if user.spotify_user_id and user.spotify_access_token:
         return {"connected": True}
     return {"connected": False}
