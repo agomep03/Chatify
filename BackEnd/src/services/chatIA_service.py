@@ -30,9 +30,13 @@ class Agent:
         else:
             return "Eres un asistente experto en música. Responde en español."
 
-    async def chat(self, message_user: str, messages: list = [], mode: str = "normal") -> str:
-        context = self.get_context(mode)
-        messages = [{"role": "system", "content": context}] + messages.copy() + [{"role": "user", "content": message_user}]
+    async def chat(self, message_user: str, messages: list = [], mode: str = "normal", extra_context: str = "") -> str:
+        base_context = self.get_context(mode)
+        
+        if extra_context:
+            base_context += "\n\nInformación adicional del usuario:\n" + extra_context
+
+        messages = [{"role": "system", "content": base_context}] + messages.copy() + [{"role": "user", "content": message_user}]
 
         payload = {
             "model": self.model,
@@ -54,7 +58,7 @@ class Agent:
         data = response.json()
 
         try:
-            content = data["choices"][0]["message"]["content"]
+            return data["choices"][0]["message"]["content"]
         except (KeyError, IndexError):
             raise Exception("Openrouter no devuelve la respuesta en formato correcto.")
 

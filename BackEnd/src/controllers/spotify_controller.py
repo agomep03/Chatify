@@ -7,6 +7,7 @@ from typing import List, Optional
 import re
 import io
 import sys
+from typing import Optional
 
 from typing import Optional
 import requests
@@ -158,8 +159,8 @@ def get_all_user_playlists(user: User, db: Session):
 
 def update_playlist(
     playlist_id: str,
-    title: str | None,
-    description: str | None,
+    title: Optional[str],
+    description: Optional[str],
     user: User,
     db: Session
 ):
@@ -339,3 +340,45 @@ def unfollow_playlist_logic(playlist_id: str, user: User):
         raise HTTPException(status_code=403, detail="No tienes permiso para eliminar esta playlist.")
     else:
         raise HTTPException(status_code=response.status_code, detail=response.json())
+
+def get_user_full_top_info(user: User, db: Session):
+    access_token = get_valid_spotify_token(user, db)
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    def get_top_items(endpoint: str, time_range: str):
+        url = f"https://api.spotify.com/v1/me/top/{endpoint}?limit=5&time_range={time_range}"
+        resp = requests.get(url, headers=headers)
+        if resp.status_code != 200:
+            raise HTTPException(status_code=resp.status_code, detail=f"No se pudo obtener top {endpoint} ({time_range})")
+        return resp.json().get("items", [])
+
+    periods = {
+        "semanal": "short_term",
+        "seis_meses": "medium_term",
+        "todo_el_tiempo": "long_term"
+    }
+
+    result = {
+        "top_artists": {},
+        "top_tracks": {},
+        "top_genres": {}
+    }
+
+    for label, time_range in periods.items():
+        # Top artistas
+        artists = get_top_items("artists", time_range)
+        result["top_artists"][label] = [a["name"] for a in artists]
+
+        # Top géneros
+        genres_count = {}
+        for artist in artists:
+            for genre in artist.get("genres", []):
+                genres_count[genre] = genres_count.get(genre, 0) + 1
+        top_genres = sorted(genres_count, key=genres_count.get, reverse=True)[:3]
+        result["top_genres"][label] = top_genres
+
+        # Top canciones
+        tracks = get_top_items("tracks", time_range)
+        result["top_tracks"][label] = [f"{t['name']} - {t['artists'][0]['name']}" for t in tracks]
+
+    return result

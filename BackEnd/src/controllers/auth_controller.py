@@ -199,7 +199,7 @@ def get_spotify_login_url(email: str = None):
         scope=(
             "user-library-read user-read-private user-read-email "
             "playlist-modify-public playlist-modify-private ugc-image-upload "
-            "playlist-read-private"
+            "playlist-read-private user-top-read"
         ),
         show_dialog=True
     )
