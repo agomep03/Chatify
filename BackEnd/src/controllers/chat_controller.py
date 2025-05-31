@@ -44,7 +44,15 @@ async def handle_message(chat_id: int, question: str, db: Session, mode: str = "
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    history = [{"role": msg.role, "content": msg.content} for msg in conversation.messages]
+    history = [
+        {"role": msg.role, "content": msg.content}
+        for msg in db.query(Message)
+            .filter(Message.conversation_id == chat_id)
+            .order_by(Message.created_at.desc())
+            .limit(5)
+            .all()
+    ][::-1]
+    
     try:
         answer = await agent.chat(question, history, mode=mode)
     except Exception as e:
