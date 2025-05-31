@@ -7,60 +7,43 @@ import LandingInfoCards from "../components/Landing/LandingInfoCards";
 import LandingFooter from "../components/Landing/LandingFooter";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
 import logoImg from "../assets/Logo.png";
-import logoSpotify from "../assets/Spotify.png";
-import logoPlaylist from "../assets/Playlist.png";
-import logoIA from "../assets/IA.png";
-import logoChat from "../assets/Bot.png";
-import logoLyrics from "../assets/Lyrics.png";
 import imageBackgroundLight from "../assets/background_music.jpeg";
 import imageBackgroundDark from "../assets/background_music_dark.jpeg";
 
+// Props que recibe el componente Landing
 type LandingProps = {
   toggleTheme: () => void;
 };
 
+// Función para saber si el usuario está autenticado (token en localStorage)
 const isAuthenticated = () => !!localStorage.getItem("token");
+
+/**
+ * Página principal de la landing de Chatify.
+ * @component
+ * @param {() => void} props.toggleTheme - Función para cambiar el tema de colores de la aplicación.
+ * @returns {JSX.Element} Landing page con hero, tarjetas informativas y footer.
+ * @description
+ * Muestra la página de bienvenida de la app con:
+ * - Barra superior (TopBarLanding) con cambio de tema y acceso/login.
+ * - Hero con logo, título, descripción y botones principales.
+ * - Tarjetas informativas sobre las funcionalidades de la app.
+ * - Footer con información de derechos y contacto.
+ * El diseño es responsivo y se adapta a móvil y escritorio.
+ */
 
 const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
   const theme = useTheme();
   const loggedIn = isAuthenticated();
   const [username, setUsername] = useState<string | null>(null);
 
-
+  // Selecciona la imagen de fondo según el tema
   const backgroundImage =
     theme.palette.mode === "dark"
       ? `url(${imageBackgroundDark})`
       : `url(${imageBackgroundLight})`;
 
-    
-  const infoCardsData = [
-    {
-      title: "Conecta tu cuenta de Spotify",
-      description: "Inicia sesión y vincula tu cuenta de Spotify para desbloquear todas las funcionalidades de Chatify.",
-      image: logoSpotify,
-    },
-    {
-      title: "Explora tus playlists",
-      description: "Accede rápidamente a tus playlists de Spotify. Administra tus listas, consulta sus detalles y descubre nueva música sin salir de la app.",
-      image: logoPlaylist,
-    },
-    {
-      title: "Crea con inteligencia artificial",
-      description: "Escribe una idea, un estado de ánimo o un tema, y deja que nuestra IA genere una playlist hecha a medida para ti. Rápido, fácil e inteligente.",
-      image: logoIA,
-    },
-    {
-      title: "Habla sobre música",
-      description: "Conversa con nuestra IA sobre géneros, artistas, recomendaciones y mucho más. Una experiencia interactiva para amantes de la música.",
-      image: logoChat,
-    },
-    {
-      title: "Ver letras de canciones",
-      description: "Accede a la letra de las canciones de tus playlists. Perfecto para cantar, entender mejor la música o simplemente disfrutarla más.",
-      image: logoLyrics,
-    },
-  ];
-
+  // Si el usuario está logueado, intenta obtener su nombre de usuario
   useEffect(() => {
     if (loggedIn) {
       fetchUserProfile()
@@ -74,6 +57,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
     }
   }, [loggedIn]);
 
+  // Descripción personalizada según si el usuario está logueado
   const description = loggedIn
     ? `¡Hola de nuevo${username ? ` ${username}` : ""}! Continúa explorando tus playlists, descubriendo letras y conversando sobre música con IA. ¡La experiencia sigue!`
     : "¿Estás listo para transformar tu experiencia musical? Crea playlists con IA, descubre letras y conversa sobre música.";
@@ -93,11 +77,12 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
         backgroundSize: "cover",
       }}
     >
+      {/* Barra superior con cambio de tema y login/registro */}
       <TopBarLanding toggleTheme={toggleTheme} />
-      {/* Contenido con scroll, empieza justo debajo de la TopBar */}
+      {/* Contenido principal con scroll, empieza debajo de la TopBar */}
       <Box
         sx={{
-          flex:1,
+          flex: 1,
           position: "absolute",
           mt: "60px", // Altura exacta del TopBar
           left: 0,
@@ -113,7 +98,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
           },
         }}
       >
-        {/* Sección principal ocupa toda la altura de la ventana */}
+        {/* Hero principal: logo, título, descripción y botones */}
         <Box
           sx={{
             minHeight: "100vh",
@@ -130,9 +115,11 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
             logoImg={logoImg}
             description={description}
             loggedIn={loggedIn}
-            />
+          />
         </Box>
-        <LandingInfoCards infoCardsData={infoCardsData} />
+        {/* Tarjetas informativas */}
+        <LandingInfoCards />
+        {/* Footer */}
         <LandingFooter />
       </Box>
     </Box>

@@ -3,6 +3,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import CustomDialog from '../components/Dialog/Dialog';
 
+/**
+ * Página de error genérica.
+ * @component
+ * @returns {JSX.Element} Diálogo modal mostrando el motivo del error y redirige al login al cerrar.
+ * @description
+ * Muestra un diálogo con el mensaje de error recibido por query param (?reason=...).
+ * Al cerrar el diálogo, redirige automáticamente a la página de login.
+ */
 
 const PageError: React.FC = () => {
   const location = useLocation();
@@ -22,6 +30,8 @@ const PageError: React.FC = () => {
 
     if (reason) {
       setReason(reason);
+    }else{
+      setReason("No se ha especificado el error");
     }
 
     setOpen(true);
@@ -58,6 +68,5 @@ const PageError: React.FC = () => {
     </Box>
   );
 };
-
 
 export default PageError;

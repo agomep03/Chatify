@@ -3,6 +3,21 @@ import { ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+/**
+ * Diálogo personalizado por defecto para confirmaciones o acciones generales.
+ * @component
+ * @param {boolean} open - Si el diálogo está abierto.
+ * @param {() => void} onClose - Función para cerrar el diálogo.
+ * @param {() => void} onConfirm - Función que se ejecuta al confirmar la acción principal.
+ * @param {ReactNode} children - Contenido del diálogo.
+ * @param {Array} buttons - Configuración de los botones a mostrar (label, color, action).
+ * @returns {JSX.Element} Diálogo estilizado con botones personalizados.
+ * @description
+ * Este componente muestra un diálogo centrado con fondo claro y botones de acción.
+ * Es responsivo: ocupa todo el ancho en móvil y tiene bordes redondeados en escritorio.
+ * Permite mostrar cualquier contenido como children y botones personalizados.
+ */
+
 type ButtonConfig = {
   label: string;
   color?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
@@ -54,9 +69,11 @@ const CustomDialogDefault = ({
       }}
     >
       <DialogContent>
+        {/* Contenido principal del diálogo */}
         <Box sx={{ padding: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', overflowX: 'hidden', width: '100%'}}>
           {children}
         </Box>
+        {/* Botones de acción */}
         <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
           {buttons.map((btn, idx) => (
             <Button

@@ -3,6 +3,19 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useState } from 'react';
 
+/**
+ * Botón para alternar entre modo claro y oscuro en la aplicación.
+ * @component
+ * @param {() => void} toggleTheme - Función para alternar el tema de la app.
+ * @param {object} [sx] - Estilos adicionales para sobrescribir los estilos por defecto.
+ * @returns {JSX.Element} Botón con icono de sol/luna y tooltip explicativo.
+ * @description
+ * Este componente muestra un botón con un icono que permite cambiar entre modo claro y oscuro.
+ * El icono y el tooltip cambian según el tema actual.
+ * El tooltip se controla manualmente para evitar que quede abierto tras hacer click.
+ * Permite sobrescribir estilos mediante la prop sx.
+ */
+
 type ThemeButtonProps = {
   toggleTheme: () => void;
   sx?: object;

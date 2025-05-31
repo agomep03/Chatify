@@ -245,7 +245,6 @@ const PlaylistCards: React.FC = () => {
             setSongsPlaylist(playlist);
             setSongsDialogOpen(true);
           }}
-          theme={theme}
         />
       </Box>
       <EditPlaylistDialog

@@ -5,6 +5,18 @@ import { fetchSendMessage, fetchChatHistory } from "../api/chatService";
 import { useTheme } from "@mui/material/styles";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
 
+/**
+ * Layout principal del chat.
+ * @component
+ * @param {string} chatId - ID de la conversación a mostrar.
+ * @returns {JSX.Element} Vista de chat con historial, input y mensajes.
+ * @description
+ * Muestra el historial de mensajes de un chat, permite enviar mensajes y muestra el estado de carga.
+ * Los mensajes se renderizan con estilos diferentes para usuario y bot.
+ * El input soporta multilinea y envío con Enter o botón.
+ * El historial se actualiza automáticamente al cambiar el chatId.
+ */
+
 type Message = {
   id: number;
   text: string;
@@ -26,13 +38,13 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
   const listRef = useRef<HTMLUListElement>(null);
 
+  // Carga el historial del chat cuando cambia el chatId
   useEffect(() => {
     if (!chatId) return;
     fetchChatHistory(chatId, setMessages, setIsLoadingChat);
   }, [chatId]);
   
-  
-
+  // Hace scroll al final de la lista cuando llegan nuevos mensajes
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTo({
@@ -42,25 +54,26 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     }
   }, [messages]); 
 
+  // Maneja la animación de puntos "Pensando..."
   useEffect(() => {
     if (!isLoadingDot) {
       setDots('...');
       return;
     }
-  
     const interval = setInterval(() => {
       setDots(prev => (prev.length < 3 ? prev + '.' : ''));
     }, 500);
-  
     return () => clearInterval(interval);
   }, [isLoadingDot]);
 
+  // Envía el mensaje del usuario
   const handleSend = () => {
     if (!input.trim()) return;
     fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot);
     setInput('');
   };
 
+  // Convierte texto markdown básico a HTML para mostrar en los mensajes
   const renderTextToHtml = (text: string) => {
     let htmlText = text.replace(/\n^### (.*)$\n+/gm, '<h3>$1</h3>');
     htmlText = htmlText.replace(/^### (.*)$\n+/gm, '<h3>$1</h3>');
@@ -76,6 +89,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     return { __html: htmlText };
   };
 
+  // Muestra spinner mientras se carga el historial
   if (isLoadingChat) {
     return (
       <Box
@@ -90,7 +104,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     );
   }
   
-  
   return (
     <Box
       display="flex"
@@ -100,6 +113,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       overflow="hidden"
       p={2}
     >
+      {/* Lista de mensajes */}
       <Box
         ref={listRef}
         flexGrow={1}
@@ -134,6 +148,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
           </Box>
         </ListItem>
       ))}
+      {/* Mensaje de "bot escribiendo" */}
       {isLoadingDot && (
       <ListItem sx={{ justifyContent: 'flex-start' }}>
         <Box
@@ -150,6 +165,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     )}
         </List>
       </Box>
+      {/* Input para escribir y enviar mensajes */}
       <Box display="flex" overflow="hidden">
         <TextField
           fullWidth

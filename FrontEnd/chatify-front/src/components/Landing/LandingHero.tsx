@@ -9,6 +9,18 @@ interface LandingHeroProps {
   loggedIn: boolean;
 }
 
+/**
+ * Componente principal del hero de la landing page.
+ * @component
+ * @param {string} logoImg - URL de la imagen del logo principal.
+ * @param {string} description - Descripción corta de la app.
+ * @param {boolean} loggedIn - Indica si el usuario está autenticado.
+ * @returns {JSX.Element} Sección hero con logo, título, descripción y botones de acción.
+ * @description
+ * Muestra el logo, el nombre de la app, una breve descripción y los botones principales.
+ * En móvil, el logo aparece arriba y los botones se apilan; en escritorio, el logo está a la derecha y los botones en línea.
+ * Si el usuario está autenticado, muestra un botón para ir a su cuenta; si no, muestra botones para iniciar sesión y registrarse.
+ */
 const LandingHero = ({ logoImg, description, loggedIn }: LandingHeroProps) => {
   const navigate = useNavigate();
 
@@ -25,6 +37,7 @@ const LandingHero = ({ logoImg, description, loggedIn }: LandingHeroProps) => {
         mx: "auto",
       }}
     >
+      {/* Logo principal, arriba en móvil y a la derecha en escritorio */}
       <Box
         sx={{
           order: { xs: 0, md: 1 },
@@ -36,6 +49,7 @@ const LandingHero = ({ logoImg, description, loggedIn }: LandingHeroProps) => {
       >
         <LogoLarge logoUrl={logoImg} />
       </Box>
+      {/* Texto y botones de acción */}
       <Box
         sx={{
           flex: 1,
@@ -49,6 +63,7 @@ const LandingHero = ({ logoImg, description, loggedIn }: LandingHeroProps) => {
           py: { xs: 1, md: 0 },
         }}
       >
+        {/* Título principal */}
         <Typography
           variant="h1"
           sx={{
@@ -62,6 +77,7 @@ const LandingHero = ({ logoImg, description, loggedIn }: LandingHeroProps) => {
         >
           Chatify
         </Typography>
+        {/* Descripción corta */}
         <Typography
           variant="h5"
           sx={{
@@ -76,6 +92,7 @@ const LandingHero = ({ logoImg, description, loggedIn }: LandingHeroProps) => {
         >
           {description}
         </Typography>
+        {/* Botones de acción: login, registro o ir a cuenta */}
         <Box
           sx={{
             display: "flex",

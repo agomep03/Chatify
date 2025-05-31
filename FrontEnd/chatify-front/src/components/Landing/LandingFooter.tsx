@@ -1,5 +1,13 @@
 import { Box, Typography } from "@mui/material";
 
+/**
+ * Footer de la landing page.
+ * @component
+ * @returns {JSX.Element} Pie de página con información de derechos y contacto.
+ * @description
+ * Muestra un footer fijo al final de la landing con el año actual, derechos reservados y un correo de contacto.
+ * El diseño es responsivo y el fondo es semitransparente para destacar sobre el contenido.
+ */
 const LandingFooter = () => (
   <Box
     sx={{

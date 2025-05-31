@@ -1,6 +1,18 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
+/**
+ * Overlay de carga para formularios.
+ * @component
+ * @param {boolean} [loading=false] - Si es true, muestra el overlay de carga.
+ * @param {boolean} [noBackground=false] - Si es true, el overlay es transparente; si es false, usa el fondo del tema.
+ * @returns {JSX.Element|null} Overlay con spinner de carga, o null si loading es false.
+ * @description
+ * Muestra un overlay con un spinner centrado sobre el formulario mientras loading es true.
+ * Puede usarse con fondo opaco o transparente según la prop noBackground.
+ * Cubre todo el formulario y evita la interacción mientras se muestra.
+ */
+
 interface FormLoadingOverlayProps {
   loading?: boolean;
   noBackground?: boolean;

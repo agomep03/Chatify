@@ -4,6 +4,22 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CloseIcon from '@mui/icons-material/Close';
 
+/**
+ * Diálogo personalizado con fondo oscuro para confirmaciones o acciones importantes.
+ * @component
+ * @param {boolean} open - Si el diálogo está abierto.
+ * @param {() => void} onClose - Función para cerrar el diálogo.
+ * @param {() => void} onConfirm - Función que se ejecuta al confirmar la acción principal.
+ * @param {ReactNode} children - Contenido del diálogo.
+ * @param {Array} buttons - Configuración de los botones a mostrar (label, color, action).
+ * @param {string} [title] - Título del diálogo.
+ * @param {boolean} [showCloseIcon=false] - Si se muestra el icono de cerrar en la esquina.
+ * @returns {JSX.Element} Diálogo estilizado con fondo oscuro y botones personalizados.
+ * @description
+ * Este componente muestra un diálogo centrado con fondo oscuro y botones de acción.
+ * Es responsivo: ocupa todo el ancho en móvil y tiene bordes redondeados en escritorio.
+ * Permite mostrar un título, un icono de cerrar y cualquier contenido como children.
+ */
 type ButtonConfig = {
   label: string;
   color?: 'primary' | 'secondary' | 'error' | 'success' | 'info' | 'warning';
@@ -45,6 +61,7 @@ const CustomDialogDarkBackground = ({
         }
       }}
     >
+      {/* Título y botón de cerrar */}
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {title}
         {showCloseIcon && (
@@ -64,6 +81,7 @@ const CustomDialogDarkBackground = ({
           </IconButton>
         )}
       </DialogTitle>
+      {/* Contenido principal y botones */}
       <DialogContent dividers>
         {children}
         <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{ flexWrap: 'nowrap', overflowX: 'hidden' }}>
