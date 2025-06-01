@@ -2,6 +2,9 @@ import os
 import httpx  # Cliente HTTP asincrónico
 from dotenv import load_dotenv
 
+# Configuración del logger
+logger = logging.getLogger(__name__)
+
 # Cargar claves del entorno
 load_dotenv()
 API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -27,6 +30,7 @@ class Agent:
         self.top_p = top_p
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
+        logger.info(f"[Agent INIT] Modelo: {self.model}, max_tokens={self.max_tokens}, temperature={self.temperature}")
 
     def get_context(self, mode: str) -> str:
         """
@@ -38,6 +42,7 @@ class Agent:
         Returns:
             str: Instrucción del sistema para el modelo.
         """
+        logger.debug(f"[Agent CONTEXT] Modo recibido: {mode}")
         if mode == "creatividad":
             return (
                 "Eres un asistente musical extremadamente creativo. "
@@ -67,10 +72,12 @@ class Agent:
         Raises:
             Exception: Si la respuesta no contiene el formato esperado.
         """
+        logger.info(f"[Agent CHAT] Iniciando generación. Modo: {mode}, Mensaje usuario: {message_user[:50]}...")
         base_context = self.get_context(mode)
 
         if extra_context:
             base_context += f"\n\nInformación adicional del usuario:\n{extra_context}"
+            logger.debug(f"[Agent CHAT] Contexto adicional añadido: {extra_context[:50]}...")
 
         conversation = [{"role": "system", "content": base_context}] + messages.copy() + [{"role": "user", "content": message_user}]
 
@@ -84,18 +91,29 @@ class Agent:
             "frequency_penalty": self.frequency_penalty
         }
 
-        async with httpx.AsyncClient(timeout=60) as client:
-            response = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {API_KEY}"},
-                json=payload
-            )
-
-        data = await response.json()
+        logger.debug(f"[Agent CHAT] Payload enviado a OpenRouter: {str(payload)[:100]}...")
 
         try:
-            return data["choices"][0]["message"]["content"]
-        except (KeyError, IndexError):
-            raise Exception("OpenRouter no devuelve la respuesta en el formato esperado.")
+            async with httpx.AsyncClient(timeout=60) as client:
+                response = await client.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {API_KEY}"},
+                    json=payload
+                )
 
-        return content
+            data = await response.json()
+            logger.info("[Agent CHAT] Respuesta recibida de OpenRouter")
+
+            content = data["choices"][0]["message"]["content"]
+            logger.debug(f"[Agent CHAT] Contenido generado: {content[:100]}...")
+            return content
+
+        except (KeyError, IndexError) as e:
+            logger.error(f"[Agent ERROR] Formato inesperado en respuesta de OpenRouter: {e}")
+            raise Exception("OpenRouter no devuelve la respuesta en el formato esperado.")
+        except httpx.RequestError as e:
+            logger.error(f"[Agent ERROR] Error de conexión con OpenRouter: {e}")
+            raise Exception("Error de red al comunicarse con OpenRouter.")
+        except Exception as e:
+            logger.error(f"[Agent ERROR] Error general en generación de respuesta: {e}")
+            raise
