@@ -39,7 +39,7 @@ jobs:
       - name: Run tests with coverage report
         working-directory: BackEnd
         run: |
-          pytest --cov=app --cov-report=xml tests/
+          pytest --cov=src --cov-report=xml tests/
 
   sonarqube:
     runs-on: ubuntu-latest
