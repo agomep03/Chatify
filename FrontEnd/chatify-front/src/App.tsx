@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import PageError from "./pages/Error";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import Landing from "./pages/Landing";
+import MusicSummary from "./pages/MusicSummary";
 
 type AppProps = {
   toggleTheme: () => void;
@@ -28,6 +29,7 @@ const App: React.FC<AppProps> = ({ toggleTheme }) => {
         <Route element={<PrivateRoute />}>
           <Route path="/home"  element={<Home toggleTheme={toggleTheme} />}  />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/musicsummary" element={<MusicSummary toggleTheme={toggleTheme}/>} />
         </Route>
       </Routes>
     </Router>
