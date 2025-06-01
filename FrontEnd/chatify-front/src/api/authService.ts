@@ -22,7 +22,7 @@ export const loginUser = async (
     let errorMsg = "Inicio de sesión fallido";
     try {
       const errorData = await response.json();
-      errorMsg = errorData?.detail?.error || errorData?.error || errorMsg;
+      errorMsg = errorData?.detail?.error ?? errorData?.error ?? errorMsg;
     } catch {
       const errorText = await response.text();
       if (errorText) errorMsg = errorText;
@@ -31,7 +31,7 @@ export const loginUser = async (
   }
 
   const data = await response.json();
-  const token = data.token || data.access_token;
+  const token = data.token ?? data.access_token;
   const redirect_url = data.redirect_url;
 
   if (!token || !redirect_url) {
@@ -105,8 +105,8 @@ export const updateUserProfile = async (data: Record<string, string>) => {
   if (!response.ok) {
     const errorData = await response.json();
     const errorMsg =
-      errorData?.detail?.error ||
-      errorData?.error ||
+      errorData?.detail?.error ??
+      errorData?.error ??
       "No se pudo actualizar el perfil";
     throw new Error(errorMsg);
   }

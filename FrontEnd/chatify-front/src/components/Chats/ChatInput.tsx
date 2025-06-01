@@ -18,12 +18,12 @@ import { Theme } from '@mui/material/styles';
  * y muestra el input con estilos personalizados. El envío se puede hacer con Enter o con el botón.
  */
 interface ChatInputBarProps {
-  input: string;
-  setInput: (value: string) => void;
-  handleSend: () => void;
-  mode: string;
-  setMode: (mode: string) => void;
-  theme: Theme & { palette: any };
+  readonly input: string;
+  readonly setInput: (value: string) => void;
+  readonly handleSend: () => void;
+  readonly mode: string;
+  readonly setMode: (mode: string) => void;
+  readonly theme: Theme & { palette: any };
 }
 
 export default function ChatInput({

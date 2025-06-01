@@ -87,7 +87,7 @@ const SongsDialog = ({
           window.open(typedResult.url, "_blank");
           setLyricsOpen(false);
         } else if (typedResult.Type === "Captcha") {
-          setCaptchaUrl(typedResult.url || null);
+          setCaptchaUrl(typedResult.url ?? null);
           setCaptchaDialog(true);
           setLyricsOpen(false);
         } else if (typedResult.Type === "Error") {
@@ -220,7 +220,6 @@ const SongsDialog = ({
       <CustomDialogDarkBackground
         open={notFoundDialog}
         onClose={() => setNotFoundDialog(false)}
-        onConfirm={() => setNotFoundDialog(false)}
         buttons={[
           { label: "Cerrar", color: "primary", action: () => setNotFoundDialog(false) }
         ]}
