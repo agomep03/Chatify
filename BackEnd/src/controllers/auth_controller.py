@@ -57,6 +57,10 @@ def register_user(username: str, email: str, password: str, db: Session):
     """Registra un nuevo usuario."""
     validate_email_address(email)
 
+    if db.query(User).filter(User.username == username).first():
+        logger.warning(f"Username ya registrado: {username}")
+        raise HTTPException(status_code=400, detail={"success": False, "error": "Username already registered"})
+
     if db.query(User).filter(User.email == email).first():
         logger.warning(f"Email ya registrado: {email}")
         raise HTTPException(status_code=400, detail={"success": False, "error": "Email already registered"})
