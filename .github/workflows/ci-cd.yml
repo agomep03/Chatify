@@ -42,10 +42,13 @@ jobs:
           pytest --cov=src --cov-report=xml:BackEnd/coverage.xml --cov-report=term-missing tests/
 
       - name: Verify coverage report
-        run: test -f BackEnd/coverage.xml || echo "Coverage report not found" && exit 1
+        run: test -f BackEnd/coverage.xml || (echo "Coverage report not found" && exit 1)
+
+      - name: Debug Coverage Directory
+        run: ls -lh BackEnd/
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.0
         with:
           name: coverage-report
           path: BackEnd/coverage.xml
