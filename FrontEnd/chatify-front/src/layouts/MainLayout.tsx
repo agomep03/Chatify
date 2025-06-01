@@ -158,7 +158,7 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
 
     const chat = chats.find((chat) => String(chat.id) === String(selectedTab));
     if (chat) {
-      return <Chat chatId={chat.id} />;
+      return <Chat chatId={chat.id} fetchChats={fetchChats} />;
     }
     return <div>Tab no encontrada</div>;
   };

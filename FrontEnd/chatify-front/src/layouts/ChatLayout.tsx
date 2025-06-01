@@ -26,9 +26,10 @@ type Message = {
 
 type ChatProps = {
   chatId: string; 
+  fetchChats: () => Promise<void>;
 };
 
-const Chat: React.FC<ChatProps> = ({ chatId }) => {
+const Chat: React.FC<ChatProps> = ({ chatId, fetchChats }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoadingDot, setIsLoadingDot] = useState(false);
@@ -42,7 +43,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   useEffect(() => {
     if (!chatId) return;
     fetchChatHistory(chatId, setMessages, setIsLoadingChat);
-    console.log(messages);
   }, [chatId]);
   
   // Hace scroll al final de la lista cuando llegan nuevos mensajes
@@ -68,10 +68,13 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   }, [isLoadingDot]);
 
   // Envía el mensaje del usuario
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot, mode);
+    const data = await fetchSendMessage(chatId, input, (msg) => setMessages(prev => [...prev, msg]), setIsLoadingDot, mode);
     setInput('');
+    if (data && data.title_changed){
+      await fetchChats();
+    }
   };
 
   // Muestra spinner mientras se carga el historial

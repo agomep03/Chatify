@@ -44,6 +44,7 @@ export const fetchSendMessage = async (
       sender: 'bot',
     };
     onAddMessage(botMessage);
+    return data;
   } catch {
     const errorMessage: Message = {
       id: Date.now() + 1,
@@ -51,6 +52,7 @@ export const fetchSendMessage = async (
       sender: 'bot',
     };
     onAddMessage(errorMessage);
+    return null;
   } finally {
     setLoading(false);
   }
