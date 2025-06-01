@@ -1,9 +1,11 @@
 import pytest
-from fastapi.testclient import TestClient
 from fastapi import status, HTTPException
+from fastapi.testclient import TestClient
 from unittest.mock import patch, ANY
+from urllib.parse import unquote
 
 
+# --- Test: Registro de usuario (válido) ---
 @pytest.mark.parametrize(
     "payload",
     [
@@ -11,7 +13,7 @@ from unittest.mock import patch, ANY
         {"username": "user2", "email": "user2@test.com", "password": "pass456"},
     ],
 )
-def test_register(client, payload):
+def test_register(client: TestClient, payload):
     with patch("src.routes.auth_routes.register_user") as mock_register:
         mock_register.return_value = {"msg": "User registered"}
         response = client.post("/auth/register", json=payload)
@@ -22,7 +24,8 @@ def test_register(client, payload):
         )
 
 
-def test_login(client):
+# --- Test: Login exitoso ---
+def test_login(client: TestClient):
     with patch("src.routes.auth_routes.login_user") as mock_login:
         mock_login.return_value = {"access_token": "token", "token_type": "bearer"}
         response = client.post(
@@ -34,7 +37,8 @@ def test_login(client):
         mock_login.assert_called_once()
 
 
-def test_get_profile(client):
+# --- Test: Obtener perfil del usuario ---
+def test_get_profile(client: TestClient):
     with patch("src.routes.auth_routes.get_user_info") as mock_get_user_info:
         mock_get_user_info.return_value = {"username": "user1", "email": "user1@test.com"}
         response = client.get("/auth/me")
@@ -43,7 +47,8 @@ def test_get_profile(client):
         mock_get_user_info.assert_called_once()
 
 
-def test_update_profile(client):
+# --- Test: Actualizar información de usuario ---
+def test_update_profile(client: TestClient):
     data = {"username": "newuser", "email": "newemail@test.com"}
     with patch("src.routes.auth_routes.update_user_info") as mock_update_user:
         mock_update_user.return_value = {"msg": "User updated"}
@@ -53,14 +58,12 @@ def test_update_profile(client):
         mock_update_user.assert_called_once()
 
 
+# --- Test: Callback Spotify exitoso ---
 @pytest.mark.asyncio
-async def test_spotify_callback_success(monkeypatch, client):
+async def test_spotify_callback_success(monkeypatch, client: TestClient):
     import src.routes.auth_routes as auth_routes
 
-    def mock_login_spotify(request, db):
-        return {"success": True}
-
-    monkeypatch.setattr(auth_routes, "login_spotify", mock_login_spotify)
+    monkeypatch.setattr(auth_routes, "login_spotify", lambda request, db: {"success": True})
     monkeypatch.setattr(auth_routes, "FRONTEND_URL", "http://localhost:3000")
 
     response = client.get("/auth/callback?code=fakecode&state=user@example.com", follow_redirects=False)
@@ -69,9 +72,9 @@ async def test_spotify_callback_success(monkeypatch, client):
     assert response.headers["location"] == "http://localhost:3000/home"
 
 
-def test_spotify_callback_http_exception(monkeypatch, client):
+# --- Test: Callback Spotify con HTTPException ---
+def test_spotify_callback_http_exception(monkeypatch, client: TestClient):
     import src.routes.auth_routes as auth_routes
-    from fastapi import HTTPException
 
     def mock_login_spotify(request, db):
         raise HTTPException(status_code=400, detail="Bad request")
@@ -85,9 +88,9 @@ def test_spotify_callback_http_exception(monkeypatch, client):
     assert response.headers["location"] == "http://localhost:3000/error?reason=Bad%20request"
 
 
-
+# --- Test: Callback Spotify con excepción genérica ---
 @pytest.mark.asyncio
-async def test_spotify_callback_generic_exception(monkeypatch, client):
+async def test_spotify_callback_generic_exception(monkeypatch, client: TestClient):
     import src.routes.auth_routes as auth_routes
 
     def mock_login_spotify(request, db):
@@ -101,7 +104,9 @@ async def test_spotify_callback_generic_exception(monkeypatch, client):
     assert response.status_code == 307
     assert response.headers["location"] == "http://localhost:3000/error?reason=Error%20interno"
 
-def test_spotify_callback_login_spotify_fails(monkeypatch, client):
+
+# --- Test: Callback Spotify devuelve success=False ---
+def test_spotify_callback_login_spotify_fails(monkeypatch, client: TestClient):
     import src.routes.auth_routes as auth_routes
 
     def mock_login_spotify(request, db):
@@ -113,10 +118,5 @@ def test_spotify_callback_login_spotify_fails(monkeypatch, client):
     response = client.get("/auth/callback?code=fakecode&state=user@example.com", follow_redirects=False)
 
     assert response.status_code == 307
-    assert "location" in response.headers
-    # Importante hacer URL decode para comparar bien:
-    from urllib.parse import unquote
     location = unquote(response.headers["location"])
     assert location == "http://localhost:3000/error?reason=Token inválido"
-
-
