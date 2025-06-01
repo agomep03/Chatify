@@ -45,7 +45,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
 
   const periodLabels: Record<string, string> = {
     semanal: "Tus vibes semanales",
-    seis_meses: "Lo que te marcó en los últimos seis meses",
+    seis_meses: "Lo que te marcó tu semestre",
     todo_el_tiempo: "Tus clásicos de siempre",
   };
 
@@ -108,6 +108,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
+              alignItems: "stretch",
               gap: 2,
             }}
           >
@@ -116,10 +117,10 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
                 key={period}
                 elevation={2}
                 sx={{
-                  width: "calc(30vw - 16px)",
+                  flex: 1,
+                  minWidth: 260,
+                  maxWidth: 400,
                   minHeight: 320,
-                  position: "relative",
-                  margin: 1,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -145,7 +146,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
                     Artistas más escuchados:
                   </Typography>
                   {(MusicSummary.top_artists?.[period] || []).length > 0 ? (
-                    <Box component="ul" sx={{ pl: 2, mb: 0, mt: 0 }}>
+                    <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
                       {MusicSummary.top_artists[period].map((artist: string, i: number) => (
                         <li key={i}>
                           <Typography variant="body2" color="text.secondary">
@@ -165,7 +166,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
                     Canciones más escuchadas:
                   </Typography>
                   {(MusicSummary.top_tracks?.[period] || []).length > 0 ? (
-                    <Box component="ul" sx={{ pl: 2, mb: 0, mt: 0 }}>
+                    <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
                       {MusicSummary.top_tracks[period].map((track: string, i: number) => (
                         <li key={i}>
                           <Typography variant="body2" color="text.secondary">
@@ -185,7 +186,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
                     Géneros favoritos:
                   </Typography>
                   {(MusicSummary.top_genres?.[period] || []).length > 0 ? (
-                    <Box component="ul" sx={{ pl: 2, mb: 0, mt: 0 }}>
+                    <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
                       {MusicSummary.top_genres[period].map((genre: string, i: number) => (
                         <li key={i}>
                           <Typography variant="body2" color="text.secondary">

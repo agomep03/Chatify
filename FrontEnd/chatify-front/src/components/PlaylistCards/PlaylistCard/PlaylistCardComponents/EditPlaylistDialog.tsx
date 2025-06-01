@@ -73,12 +73,10 @@ const EditPlaylistDialog = ({
         fields={[
           { name: "name", label: "Nombre", type: "text", required: true },
           { name: "description", label: "Descripción", type: "text", required: true },
-          { name: "image", label: "Imagen", type: "file", required: true },
         ]}
         initialValues={{
           name: playlist.name,
           description: playlist.description,
-          image: playlist.image || "",
         }}
         onSubmit={onSubmit}
         buttonText=""

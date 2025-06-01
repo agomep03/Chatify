@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import CustomDialog from "../../Dialog/Dialog";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress, TextField } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { getScrollbarStyles } from "../../../styles/scrollbarStyles";
 
 /**
  * Diálogo para crear una nueva playlist a partir de un prompt.
@@ -68,32 +69,35 @@ const CreatePlaylistDialog = ({
         </Typography>
         {/* Textarea para el prompt, deshabilitado si está cargando */}
         {!loading && (
-          <textarea
-            ref={textareaRef}
+          <TextField
+            inputRef={textareaRef}
             value={prompt}
             onChange={(e) => onPromptChange(e.target.value)}
-            rows={5}
-            style={{
-              width: "100%",
-              minHeight: "100px",
-              maxHeight: "180px",
-              resize: "none",
-              padding: "12px",
-              borderRadius: "0px",
-              border: "none",
-              outline: "none",
-              fontSize: "1rem",
-              color: theme.palette.text.primary,
-              background: theme.palette.background.paper,
-              fontFamily: "inherit",
-              boxSizing: "border-box",
-              overflowY: "auto",
-              overflowX: "hidden",
-              boxShadow: "none", // <-- agrega esto para quitar la línea negra
-            }}
+            multiline
+            minRows={1}
+            maxRows={8}
+            fullWidth
             disabled={loading}
             placeholder="Ejemplo: Playlist para una tarde de lluvia y café"
-            onFocus={e => e.currentTarget.style.boxShadow = "none"} // <-- asegura que no aparezca al enfocar
+            variant="outlined"
+            InputProps={{
+              sx: {
+                fontSize: "1rem",
+                color: theme.palette.text.primary,
+                background: theme.palette.background.paper,
+                fontFamily: "inherit",
+                borderRadius: 2,
+                boxShadow: "none",
+                "& fieldset": { border: "none" },
+                "& .MuiInputBase-input": {
+                  padding: "16px",
+                },
+                "& textarea": {
+                  resize: "none",
+                  ...getScrollbarStyles(theme),
+                },
+              },
+            }}
           />
         )}
         {/* Mensaje de error */}
