@@ -43,13 +43,12 @@ const ScrollableText = ({
     <Box
       ref={containerRef}
       sx={{
-        width: "100%",
         overflow: "hidden",
         whiteSpace: "nowrap",
         position: "relative",
         display: "flex",
-        alignItems: "center",
         // Centra solo si se pide y NO hay overflow
+        alignItems: center && !shouldScroll ? "center" : "flex-start",
         justifyContent: center && !shouldScroll ? "center" : "flex-start",
         // Scroll solo si hay overflow
         ...(shouldScroll
@@ -74,7 +73,6 @@ const ScrollableText = ({
           fontWeight: selected ? "bold" : "normal",
           paddingRight: "0em",
           alignItems: "center",
-          // backgroundColor:'red', // quita esto si no quieres fondo rojo
         }}
       >
         {text}
