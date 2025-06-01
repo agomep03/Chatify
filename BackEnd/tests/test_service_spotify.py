@@ -154,7 +154,7 @@ def test_unexpected_exception(mock_user):
     mock_db = MagicMock()
     mock_db.query.side_effect = Exception("Something broke")
 
-    with patch("src.services.spotify_service.requests.post") as mock_post:
+    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post:
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {
             "access_token": "token123",
@@ -162,7 +162,7 @@ def test_unexpected_exception(mock_user):
             "expires_in": 3600
         }
 
-        with patch("src.services.spotify_service.requests.get") as mock_get:
+        with patch("BackEnd.src.services.spotify_service.requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = {"id": "spotify_user_123"}
 
