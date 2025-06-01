@@ -73,8 +73,8 @@ def get_lyrics(
     song: str = Query(..., description="Título de la canción")
 ):
     lyrics_fetcher = LyricsFetcher()
-    lyrics = lyrics_fetcher.search_song_url(artist, song)
-    return {"artist": artist, "song": song, "lyrics": lyrics or "Letra no encontrada"}
+    url = lyrics_fetcher.search_song_url(artist, song)
+    return {"url": url or "Canción no encontrada"}
 
 @router.delete("/playlists/{playlist_id}/unfollow")
 def unfollow_playlist(
