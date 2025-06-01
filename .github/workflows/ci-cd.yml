@@ -39,7 +39,8 @@ jobs:
       - name: Run tests with coverage report
         working-directory: BackEnd
         run: |
-          pytest --cov=src --cov-report=xml:BackEnd/coverage.xml --cov-report=term-missing tests/
+          pytest --cov=src --cov-report=xml --cov-report=term-missing tests/
+          mv coverage.xml BackEnd/coverage.xml
 
       - name: Verify coverage report
         run: test -f BackEnd/coverage.xml || (echo "Coverage report not found" && exit 1)
