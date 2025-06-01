@@ -12,7 +12,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Form from '../Form/Form';
 import CustomDialog from '../Dialog/Dialog';
-import ScrollableText from './ScrollableText';
+import ScrollableText from '../ScrollableText/ScrollableText';
 import { useTheme } from "@mui/material/styles";
 import ConfirmDeleteDialog from '../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog';
 import { getScrollbarStyles } from "../../styles/scrollbarStyles";

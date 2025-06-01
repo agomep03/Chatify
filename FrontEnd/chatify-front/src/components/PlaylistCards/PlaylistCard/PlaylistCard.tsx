@@ -7,6 +7,7 @@ import { deleteUserPlaylist } from "../../../api/spotifyService";
 import { useState } from "react";
 import ConfirmDeleteDialog from "../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 import CustomDialog from "../../Dialog/Dialog";
+import ScrollableText from "../../ScrollableText/ScrollableText";
 
 /**
  * Tarjeta que muestra la información de una playlist.
@@ -162,38 +163,55 @@ const PlaylistCard = ({
             />
           </Box>
         )}
-        {/* Nombre de la playlist y botón de info */}
-        <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center", mb: 1 }}>
-          <Typography
-            variant="h6"
-            component="div"
+        {/* Fila: título centrado y botón info a la derecha */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            mb: 1,
+            height: 32, // ajusta según el alto de tu texto/botón
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* Texto centrado */}
+          <Box
             sx={{
-              textAlign: "center",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              width: "100%",
               maxWidth: 200,
+              mx: "auto",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              pointerEvents: "auto",
             }}
           >
-            {playlist.name}
-          </Typography>
-          <IconButton
+            <ScrollableText text={playlist.name} selected={false} center />
+          </Box>
+          {/* Botón info a la derecha */}
+            <IconButton
             size="small"
             sx={{
-              ml: 1,
+              position: "absolute",
+              right: 0,
+              top: "0%",
+              transform: "translateY(-50%)",
               minWidth: 0,
-              p: 1,
+              p: "2px",
               color: theme.palette.text.primary,
+              "& svg": { fontSize: 16 },
               "&:hover": { backgroundColor: theme.palette.action.hover },
               "&:focus": { outline: "none", border: "none", boxShadow: "none" },
               "&:focus-visible": { outline: "none", border: "none", boxShadow: "none" },
               "&:active": { outline: "none", border: "none", boxShadow: "none" },
+              zIndex: 1,
             }}
             onClick={() => setOpenInfo(true)}
             aria-label="Mostrar descripción"
-          >
-            <InfoIcon fontSize="small" />
-          </IconButton>
+            >
+            <InfoIcon fontSize="inherit" />
+            </IconButton>
         </Box>
         {/* Botón para ver canciones si existen */}
         {playlist.tracks && Array.isArray(playlist.tracks) && (
