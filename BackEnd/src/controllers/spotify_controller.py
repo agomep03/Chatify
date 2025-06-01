@@ -1,15 +1,11 @@
 import base64
 import logging
 import os
+import re
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import List, Optional
-import re
-import io
-import sys
-from typing import Optional
 
-from typing import Optional
 import requests
 from fastapi import HTTPException
 from sqlalchemy.orm import Session

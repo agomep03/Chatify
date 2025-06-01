@@ -1,5 +1,3 @@
-# src/controllers/auth_controller.py
-
 # --- Librerías estándar ---
 import os
 import logging
@@ -54,7 +52,18 @@ def validate_email_address(email: str):
 # --- Registro y Login ---
 
 def register_user(username: str, email: str, password: str, db: Session):
-    """Registra un nuevo usuario."""
+    """
+    Registra un nuevo usuario.
+
+    Args:
+        username (str): Nombre de usuario.
+        email (str): Correo electrónico.
+        password (str): Contraseña sin encriptar.
+        db (Session): Sesión activa de SQLAlchemy.
+
+    Returns:
+        dict: Token de acceso y URL para iniciar sesión en Spotify.
+    """
     validate_email_address(email)
 
     if db.query(User).filter(User.username == username).first():
@@ -83,7 +92,17 @@ def register_user(username: str, email: str, password: str, db: Session):
     }
 
 def login_user(email: str, password: str, db: Session):
-    """Autentica un usuario y retorna token y redirección a Spotify."""
+    """
+    Autentica un usuario existente.
+
+    Args:
+        email (str): Correo electrónico registrado.
+        password (str): Contraseña sin encriptar.
+        db (Session): Sesión activa de SQLAlchemy.
+
+    Returns:
+        dict: Token JWT y URL de login de Spotify.
+    """
     user = db.query(User).filter(User.email == email).first()
 
     if not user or not verify_password(password, user.hashed_password):
