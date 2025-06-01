@@ -229,3 +229,23 @@ def test_unfollow_playlist(client_with_user, monkeypatch):
     response = client.delete("/spotify/playlists/playlist123/unfollow")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"unfollowed": True}
+
+def test_get_lyrics(client_with_user, monkeypatch):
+    client, _ = client_with_user
+
+    class DummyLyricsFetcher:
+        def search_song_url(self, artist, song):
+            assert artist == "Artist"
+            assert song == "Song"
+            return "https://dummy.lyrics.url"
+
+    monkeypatch.setattr(
+        "src.routes.spotify_routes.LyricsFetcher",
+        DummyLyricsFetcher
+    )
+
+    response = client.get("/spotify/lyrics?artist=Artist&song=Song")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "url": "https://dummy.lyrics.url"
+    }

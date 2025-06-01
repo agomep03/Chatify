@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 from BackEnd.src.services.chatIA_service import Agent
 
 
@@ -13,8 +13,8 @@ async def test_chat_success():
         ]
     }
 
-    mock_response = AsyncMock()
-    mock_response.json = AsyncMock(return_value=fake_response_data)
+    mock_response = MagicMock()
+    mock_response.json.return_value = fake_response_data
 
     mock_client = AsyncMock()
     mock_client.post.return_value = mock_response
@@ -38,8 +38,8 @@ async def test_chat_with_extra_context():
         ]
     }
 
-    mock_response = AsyncMock()
-    mock_response.json = AsyncMock(return_value=fake_response_data)
+    mock_response = MagicMock()
+    mock_response.json.return_value = fake_response_data
 
     mock_client = AsyncMock()
     mock_client.post.return_value = mock_response
@@ -60,8 +60,8 @@ async def test_chat_invalid_response_raises():
         "unexpected": "data"
     }
 
-    mock_response = AsyncMock()
-    mock_response.json = AsyncMock(return_value=fake_invalid_response)
+    mock_response = MagicMock()
+    mock_response.json.return_value = fake_invalid_response
 
     mock_client = AsyncMock()
     mock_client.post.return_value = mock_response
