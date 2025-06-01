@@ -222,11 +222,27 @@ async def generate_playlist_auto(prompt: str, user: User, db: Session):
         "Eres un asistente experto en música. Devuélveme un título para una playlist, una descripción clara para la playlist y una lista de 20 canciones relacionadas con el siguiente tema. "
         "Formato:\nTítulo: <aquí el título>\nDescripcion: <aqui la descripcion>\nCanciones:\nCada canción en una línea, 'Título - Artista'. Sin otra explicación."
     )
+
+    top_info = get_user_full_top_info(user, db)
+
+    def format_top_info(title: str, data: dict) -> str:
+        return (
+            f"{title} esta semana: {', '.join(data['semanal'])}.\n"
+            f"{title} en los últimos 6 meses: {', '.join(data['seis_meses'])}.\n"
+            f"{title} en todo el tiempo: {', '.join(data['todo_el_tiempo'])}."
+        )
+
+    extra_context = (
+        format_top_info("Top artistas", top_info["top_artists"]) + "\n\n" +
+        format_top_info("Top canciones", top_info["top_tracks"]) + "\n\n" +
+        format_top_info("Top géneros", top_info["top_genres"])
+    )
+
     user_message = f"{system_message}\nTema: {prompt}"
 
     agent = Agent()
     try:
-        response_text = await agent.chat(user_message)
+        response_text = await agent.chat(user_message, extra_context=extra_context)
         logger.info(f"[IA] Respuesta del modelo: {len(response_text)} caracteres")
     except Exception as e:
         logger.error(f"[IA] Error del modelo: {e}")
