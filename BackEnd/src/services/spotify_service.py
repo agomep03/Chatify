@@ -1,13 +1,15 @@
-from fastapi import Request, HTTPException
-from sqlalchemy.orm import Session
-from src.models.auth_model import User
 import os
-import requests
 import base64
 import logging
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
+
+import requests
+from fastapi import Request, HTTPException
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from dotenv import load_dotenv
+
+from src.models.auth_model import User
 
 load_dotenv()
 
@@ -18,7 +20,18 @@ REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def login_spotify(request: Request, db: Session):
+
+def login_spotify(request: Request, db: Session) -> dict:
+    """
+    Realiza la autenticación de un usuario con Spotify y guarda los tokens en la base de datos.
+
+    Args:
+        request (Request): Objeto de solicitud de FastAPI con los parámetros 'code' y 'state' (email).
+        db (Session): Sesión de SQLAlchemy para consultar y actualizar la base de datos.
+
+    Returns:
+        dict: Mensaje de éxito o detalle del error en la autenticación.
+    """
     code = request.query_params.get("code")
     email = request.query_params.get("state")
 
@@ -27,62 +40,40 @@ def login_spotify(request: Request, db: Session):
         raise HTTPException(status_code=400, detail="Faltan parámetros de autorización (code o email)")
 
     try:
-        token_url = "https://accounts.spotify.com/api/token"
-        headers = {
-            "Authorization": f"Basic {base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()}",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        data = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": REDIRECT_URI
-        }
-
-        response = requests.post(token_url, headers=headers, data=data)
-
-        if response.status_code != 200:
-            logger.error(f"Error al obtener el token de Spotify: {response.status_code}, {response.text}")
-            raise HTTPException(status_code=502, detail="Error al obtener el token de acceso de Spotify")
-
-        token_info = response.json()
+        # Intercambio del código por un token de acceso
+        token_info = _exchange_code_for_token(code)
         access_token = token_info.get("access_token")
         refresh_token = token_info.get("refresh_token")
         expires_in = token_info.get("expires_in")
 
         if not access_token:
-            logger.error("Spotify no devolvió un token de acceso")
+            logger.error("Spotify no devolvió un token de acceso válido")
             raise HTTPException(status_code=502, detail="Spotify no devolvió un token válido")
 
-        user_info_response = requests.get(
-            "https://api.spotify.com/v1/me",
-            headers={"Authorization": f"Bearer {access_token}"}
-        )
-
-        if user_info_response.status_code != 200:
-            logger.error(f"No se pudo obtener la información del usuario de Spotify: {user_info_response.status_code}")
-            raise HTTPException(status_code=502, detail="No se pudo obtener la información del usuario de Spotify")
-
-        user_info = user_info_response.json()
+        # Obtener información del usuario desde Spotify
+        user_info = _get_spotify_user_info(access_token)
         spotify_user_id = user_info.get("id")
 
         if not spotify_user_id:
-            logger.error("Spotify no devolvió un ID de usuario")
+            logger.error("Spotify no devolvió un ID de usuario válido")
             raise HTTPException(status_code=502, detail="Spotify no devolvió un ID de usuario válido")
 
+        # Verificación de email si viene en la respuesta de Spotify
         spotify_email = user_info.get("email")
         if spotify_email and spotify_email.lower() != email.lower():
-            logger.warning(f"El email de Spotify '{spotify_email}' no coincide con el de la app '{email}'")
+            logger.warning(f"El email de Spotify '{spotify_email}' no coincide con el email de la app '{email}'")
             raise HTTPException(
                 status_code=403,
                 detail="El email de la cuenta de Spotify no coincide con el usuario autenticado."
             )
 
+        # Buscar el usuario en la base de datos
         user = db.query(User).filter(User.email == email).first()
         if not user:
             logger.warning(f"No se encontró usuario con email: {email}")
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-        # Validar que el ID de Spotify no esté ya asociado a otro usuario
+        # Verificar si el ID de Spotify ya está vinculado a otro usuario
         existing_user = db.query(User).filter(User.spotify_user_id == spotify_user_id).first()
         if existing_user and existing_user.email != user.email:
             logger.warning(f"El ID de Spotify '{spotify_user_id}' ya está vinculado a otra cuenta: {existing_user.email}")
@@ -91,13 +82,14 @@ def login_spotify(request: Request, db: Session):
                 detail="Este usuario de Spotify ya está vinculado a otra cuenta en el sistema."
             )
 
+        # Guardar los datos en el usuario
         user.spotify_user_id = spotify_user_id
         user.spotify_access_token = access_token
         user.spotify_refresh_token = refresh_token
         user.spotify_token_expires_at = datetime.utcnow() + timedelta(seconds=int(expires_in))
 
         db.commit()
-        logger.info(f"Usuario {user.email} conectado correctamente con Spotify")
+        logger.info(f"Usuario '{user.email}' conectado correctamente con Spotify")
 
         return {
             "success": True,
@@ -106,20 +98,71 @@ def login_spotify(request: Request, db: Session):
 
     except IntegrityError as e:
         db.rollback()
-        if e.orig and hasattr(e.orig, "args") and "duplicate key value violates unique constraint" in e.orig.args[0]:
+        if "duplicate key value violates unique constraint" in str(e.orig):
             logger.warning(f"El ID de Spotify '{spotify_user_id}' ya está vinculado a otra cuenta.")
             raise HTTPException(
                 status_code=409,
                 detail="El ID de Spotify ya está vinculado a otra cuenta."
             )
         else:
-            logger.error(f"Error de integridad: {str(e)}")
+            logger.error(f"Error de integridad: {e}")
             raise HTTPException(status_code=400, detail="Error al guardar la información de Spotify")
 
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise  # Re-lanzar errores ya formateados
 
     except Exception as e:
         db.rollback()
-        logger.exception(f"Error inesperado en login_spotify: {str(e)}")
+        logger.exception(f"Error inesperado en login_spotify: {e}")
         raise HTTPException(status_code=500, detail="Error interno del servidor al conectar con Spotify")
+
+
+def _exchange_code_for_token(code: str) -> dict:
+    """
+    Intercambia un código de autorización por un token de acceso de Spotify.
+
+    Args:
+        code (str): Código de autorización recibido desde Spotify.
+
+    Returns:
+        dict: Diccionario con access_token, refresh_token, expires_in, etc.
+    """
+    token_url = "https://accounts.spotify.com/api/token"
+    headers = {
+        "Authorization": f"Basic {base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": REDIRECT_URI
+    }
+
+    response = requests.post(token_url, headers=headers, data=data)
+    if response.status_code != 200:
+        logger.error(f"Error al obtener el token de Spotify: {response.status_code} - {response.text}")
+        raise HTTPException(status_code=502, detail="Error al obtener el token de acceso de Spotify")
+
+    return response.json()
+
+
+def _get_spotify_user_info(access_token: str) -> dict:
+    """
+    Obtiene la información del usuario autenticado desde la API de Spotify.
+
+    Args:
+        access_token (str): Token de acceso válido.
+
+    Returns:
+        dict: Diccionario con la información del usuario Spotify.
+    """
+    response = requests.get(
+        "https://api.spotify.com/v1/me",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+
+    if response.status_code != 200:
+        logger.error(f"No se pudo obtener la información del usuario de Spotify: {response.status_code}")
+        raise HTTPException(status_code=502, detail="No se pudo obtener la información del usuario de Spotify")
+
+    return response.json()
