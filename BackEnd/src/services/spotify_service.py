@@ -1,5 +1,4 @@
 from fastapi import Request, HTTPException
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from src.models.auth_model import User
 import os
@@ -70,10 +69,27 @@ def login_spotify(request: Request, db: Session):
             logger.error("Spotify no devolvió un ID de usuario")
             raise HTTPException(status_code=502, detail="Spotify no devolvió un ID de usuario válido")
 
+        spotify_email = user_info.get("email")
+        if spotify_email and spotify_email.lower() != email.lower():
+            logger.warning(f"El email de Spotify '{spotify_email}' no coincide con el de la app '{email}'")
+            raise HTTPException(
+                status_code=403,
+                detail="El email de la cuenta de Spotify no coincide con el usuario autenticado."
+            )
+
         user = db.query(User).filter(User.email == email).first()
         if not user:
             logger.warning(f"No se encontró usuario con email: {email}")
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        # Validar que el ID de Spotify no esté ya asociado a otro usuario
+        existing_user = db.query(User).filter(User.spotify_user_id == spotify_user_id).first()
+        if existing_user and existing_user.email != user.email:
+            logger.warning(f"El ID de Spotify '{spotify_user_id}' ya está vinculado a otra cuenta: {existing_user.email}")
+            raise HTTPException(
+                status_code=409,
+                detail="Este usuario de Spotify ya está vinculado a otra cuenta en el sistema."
+            )
 
         user.spotify_user_id = spotify_user_id
         user.spotify_access_token = access_token
@@ -90,15 +106,18 @@ def login_spotify(request: Request, db: Session):
 
     except IntegrityError as e:
         db.rollback()
-        if "duplicate key value violates unique constraint" in str(e.orig):
+        if e.orig and hasattr(e.orig, "args") and "duplicate key value violates unique constraint" in e.orig.args[0]:
             logger.warning(f"El ID de Spotify '{spotify_user_id}' ya está vinculado a otra cuenta.")
             raise HTTPException(
                 status_code=409,
-                detail=f"El ID de Spotify ya está vinculado a otra cuenta."
+                detail="El ID de Spotify ya está vinculado a otra cuenta."
             )
         else:
             logger.error(f"Error de integridad: {str(e)}")
             raise HTTPException(status_code=400, detail="Error al guardar la información de Spotify")
+
+    except HTTPException as e:
+        raise e
 
     except Exception as e:
         db.rollback()
