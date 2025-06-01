@@ -51,7 +51,7 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
   useEffect(() => {
     if (loggedIn) {
       fetchUserProfile()
-        .then(profile => setUsername(profile?.username || null))
+        .then(profile => setUsername(profile?.username ?? null))
         .catch(() => {
           // Si hay un error al obtener el perfil, se asume que se ha expirado la sesión
           setUsername(null);
@@ -62,9 +62,12 @@ const Landing: React.FC<LandingProps> = ({ toggleTheme }) => {
   }, [loggedIn]);
 
   // Descripción personalizada según si el usuario está logueado
-  const description = loggedIn
-    ? `¡Hola de nuevo${username ? ` ${username}` : ""}! Continúa explorando tus playlists, descubriendo letras y conversando sobre música con IA. ¡La experiencia sigue!`
-    : "¿Estás listo para transformar tu experiencia musical? Crea playlists con IA, descubre letras y conversa sobre música.";
+  let description: string;
+  if (loggedIn) {
+    description = `¡Hola de nuevo${username ? ` ${username}` : ""}! Continúa explorando tus playlists, descubriendo letras y conversando sobre música con IA. ¡La experiencia sigue!`;
+  } else {
+    description = "¿Estás listo para transformar tu experiencia musical? Crea playlists con IA, descubre letras y conversa sobre música.";
+  }
 
   return (
     <Box

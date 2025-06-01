@@ -38,7 +38,7 @@ const PlaylistCards: React.FC = () => {
 
   // Estado para mostrar el dialog de canciones
   const [songsDialogOpen, setSongsDialogOpen] = useState(false);
-  const [songsPlaylist, setSongsPlaylist] = useState<any | null>(null);
+  const [songsPlaylist, setSongsPlaylist] = useState<Playlist | null>(null);
 
   // Define a type for the playlist and the response
   type Playlist = {
@@ -173,7 +173,6 @@ const PlaylistCards: React.FC = () => {
       handleCloseAutoDialog();
     } catch (e: any) {
       customAlert("error", "Error al generar la playlist.");
-      // setAutoError("Error al generar la playlist."); // Ya no se usa
     } finally {
       setAutoLoading(false);
     }

@@ -76,7 +76,7 @@ const Register: React.FC<RegisterProps> = ({ toggleTheme }) => {
       ) {
         customAlert("error", error.response.data.detail.error);
       } else {
-        customAlert("error", `Error: ${error.message || "Registro fallido"}`);
+        customAlert("error", `Error: ${error.message ?? "Registro fallido"}`);
       }
     } finally {
       setLoading(false);
