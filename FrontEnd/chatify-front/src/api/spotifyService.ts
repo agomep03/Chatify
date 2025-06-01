@@ -143,7 +143,7 @@ export const fetchLyrics = async (artist: string, song: string): Promise<string>
   if (handleUnauthorized(res)) throw new Error("Sesión expirada");
   if (!res.ok) throw new Error("Error al obtener la letra de la canción.");
   const data = await res.json();
-  return data.lyrics;
+  return data;
 };
 
 // Obtiene información de los gustos de un usuario
