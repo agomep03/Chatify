@@ -5,6 +5,7 @@ import AppButton from "../Buttons/AppButton/AppButton";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { JSX } from "react";
 
 /**
  * Barra superior para la página de inicio (landing).
@@ -28,6 +29,69 @@ const TopBarLanding: React.FC<TopBarLandingProps> = ({ toggleTheme }) => {
   const loggedIn = isAuthenticated();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  let authButtons: JSX.Element;
+  if (loggedIn) {
+    if (isMobile) {
+      authButtons = (
+        <Tooltip title="Ir a mi cuenta">
+          <IconButton color="primary" onClick={() => navigate("/home")}>
+            <LoginIcon />
+          </IconButton>
+        </Tooltip>
+      );
+    } else {
+      authButtons = (
+        <AppButton
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/home")}
+        >
+          Ir a mi cuenta
+        </AppButton>
+      );
+    }
+  } else {
+    if (isMobile) {
+      authButtons = (
+        <>
+          <Tooltip title="Iniciar sesión">
+            <IconButton color="primary" onClick={() => navigate("/login")}>
+              <LoginIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Registrarse">
+            <IconButton color="primary" onClick={() => navigate("/register")}>
+              <PersonAddAltIcon />
+            </IconButton>
+          </Tooltip>
+        </>
+      );
+    } else {
+      authButtons = (
+        <>
+          <AppButton
+            size="small"
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/login")}
+            sx={{ marginRight: 1.5 }}
+          >
+            Iniciar sesión
+          </AppButton>
+          <AppButton
+            size="small"
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate("/register")}
+          >
+            Registrarse
+          </AppButton>
+        </>
+      );
+    }
+  }
 
   return (
     <Box
@@ -55,63 +119,7 @@ const TopBarLanding: React.FC<TopBarLandingProps> = ({ toggleTheme }) => {
       />
       {/* Botones de login, registro o acceso a cuenta según autenticación y tamaño de pantalla */}
       <Box sx={{ marginRight: 5, display: "flex", alignItems: "center", gap: 1 }}>
-        {loggedIn ? (
-          isMobile ? (
-            // Si está autenticado y es móvil, muestra icono para ir a la cuenta
-            <Tooltip title="Ir a mi cuenta">
-              <IconButton color="primary" onClick={() => navigate("/home")}>
-                <LoginIcon />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            // Si está autenticado y es escritorio, muestra botón para ir a la cuenta
-            <AppButton
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={() => navigate("/home")}
-            >
-              Ir a mi cuenta
-            </AppButton>
-          )
-        ) : (
-          isMobile ? (
-            // Si no está autenticado y es móvil, muestra iconos para login y registro
-            <>
-              <Tooltip title="Iniciar sesión">
-                <IconButton color="primary" onClick={() => navigate("/login")}>
-                  <LoginIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Registrarse">
-                <IconButton color="primary" onClick={() => navigate("/register")}>
-                  <PersonAddAltIcon />
-                </IconButton>
-              </Tooltip>
-            </>
-          ) : (
-            // Si no está autenticado y es escritorio, muestra botones para login y registro
-            <>
-              <AppButton
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => navigate("/login")}
-                sx={{ marginRight: 1.5 }}
-              >
-                Iniciar sesión
-              </AppButton>
-              <AppButton
-                size="small"
-                variant="outlined"
-                color="primary"
-                onClick={() => navigate("/register")}
-              >
-                Registrarse
-              </AppButton>
-            </>
-          )
-        )}
+        {authButtons}
       </Box>
     </Box>
   );

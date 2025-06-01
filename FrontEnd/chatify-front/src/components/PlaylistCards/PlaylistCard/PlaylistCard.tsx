@@ -8,6 +8,7 @@ import { useState } from "react";
 import ConfirmDeleteDialog from "../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 import CustomDialog from "../../Dialog/Dialog";
 import ScrollableText from "../../ScrollableText/ScrollableText";
+import { useAlert } from "../../Alert/Alert";
 
 /**
  * Tarjeta que muestra la información de una playlist.
@@ -39,6 +40,7 @@ const PlaylistCard = ({
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [openInfo, setOpenInfo] = useState(false);
   const theme = useTheme();
+  const { customAlert } = useAlert();
 
   // Maneja la eliminación de la playlist
   const handleDelete = async () => {
@@ -47,7 +49,7 @@ const PlaylistCard = ({
       await deleteUserPlaylist(playlist.id);
       onDelete(playlist.id);
     } catch (e) {
-      // Manejo de error opcional
+      customAlert("error", "No se pudo eliminar la playlist. Intenta de nuevo.");
     }
     setLoadingDelete(false);
     setOpenConfirm(false);
@@ -243,7 +245,7 @@ const PlaylistCard = ({
         buttons={[]}
       >
         <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
-          {playlist.description || "Sin descripción"}
+          {playlist.description ?? "Sin descripción"}
         </Typography>
       </CustomDialog>
     </Card>
