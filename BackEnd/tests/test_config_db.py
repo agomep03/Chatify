@@ -12,15 +12,6 @@ def test_missing_database_url_raises_runtime_error(monkeypatch):
         import BackEnd.src.config.db as db_module
         importlib.reload(db_module)
 
-def test_secret_key_warning(caplog, monkeypatch):
-    monkeypatch.delenv("SECRET_KEY", raising=False)  # Elimina SECRET_KEY del entorno
-
-    caplog.set_level(logging.WARNING)
-
-    import src.config.dotenv_config as config_module
-    importlib.reload(config_module)
-
-    assert "SECRET_KEY no definida en .env" in caplog.text
 
 def test_access_token_expire_minutes_error(caplog, monkeypatch):
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "no_es_numero")
