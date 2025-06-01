@@ -8,6 +8,7 @@ from fastapi import status
 
 import pytest
 from fastapi import status
+from unittest.mock import patch
 
 @pytest.mark.asyncio
 async def test_auto_generate_playlist(client_with_user, monkeypatch):
@@ -230,21 +231,15 @@ def test_unfollow_playlist(client_with_user, monkeypatch):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"unfollowed": True}
 
-def test_get_lyrics(client_with_user, monkeypatch):
+def test_get_lyrics(client_with_user):
     client, _ = client_with_user
 
-    class DummyLyricsFetcher:
-        def search_song_url(self, artist, song):
-            assert artist == "Artist"
-            assert song == "Song"
-            return "https://dummy.lyrics.url"
+    with patch("src.routes.spotify_routes.LyricsFetcher") as MockFetcher:
+        instance = MockFetcher.return_value
+        instance.search_song_url.return_value = "https://dummy.lyrics.url"
 
-    monkeypatch.setattr(
-        "src.routes.spotify_routes.LyricsFetcher",
-        DummyLyricsFetcher
-    )
+        response = client.get("/spotify/lyrics?artist=Artist&song=Song")
 
-    response = client.get("/spotify/lyrics?artist=Artist&song=Song")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "url": "https://dummy.lyrics.url"
