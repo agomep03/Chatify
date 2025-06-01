@@ -43,7 +43,7 @@ const UserMenu: React.FC = () => {
   // Navega a la página de perfil
   const handleStats = () => {
     closeUserMenu();
-    navigate('/stats');
+    navigate('/musicsummary');
   };
 
   return (
@@ -77,7 +77,7 @@ const UserMenu: React.FC = () => {
          }}
         >
          <MenuItem onClick={handleProfile}>Perfil</MenuItem>
-         <MenuItem onClick={handleStats}>Mis estadísticas</MenuItem>
+         <MenuItem onClick={handleStats}>Resumen musical</MenuItem>
          <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>
         </Menu>
     </>

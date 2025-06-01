@@ -8,28 +8,38 @@ import { getScrollbarStyles } from "../styles/scrollbarStyles";
 import { useNavigate } from "react-router-dom";
 
 /**
- * Página de estadísticas de usuario (top artistas, canciones y géneros).
+ * Página de resumen musical del usuario.
+ * @component
+ * @param {() => void} toggleTheme - Función para alternar entre modo claro y oscuro.
+ * @returns {JSX.Element} Página de resumen musical del usuario.
+ * @description
+ * Obtiene y muestra los artistas, canciones y géneros más escuchados del usuario en diferentes periodos de tiempo.
  */
-const Stats: React.FC<{ toggleTheme: () => void }> = ({ toggleTheme }) => {
-  const [stats, setStats] = useState<any>(null);
+
+type MusicSummaryProps = {
+  toggleTheme: () => void;
+};
+
+const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
+  const [MusicSummary, setMusicSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { customAlert } = useAlert();
   const theme = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchMusicSummary = async () => {
       setLoading(true);
       try {
         const data = await fetchUserTopInfo();
-        setStats(data);
+        setMusicSummary(data);
       } catch (error) {
         customAlert("error", "Error al obtener estadísticas de Spotify.");
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchMusicSummary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -92,7 +102,7 @@ const Stats: React.FC<{ toggleTheme: () => void }> = ({ toggleTheme }) => {
           >
             <CircularProgress sx={{ color: theme.palette.text.primary }} />
           </Box>
-        ) : stats ? (
+        ) : MusicSummary ? (
           <Box
             sx={{
               display: "flex",
@@ -131,9 +141,9 @@ const Stats: React.FC<{ toggleTheme: () => void }> = ({ toggleTheme }) => {
                   <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0 }}>
                     Artistas más escuchados:
                   </Typography>
-                  {(stats.top_artists?.[period] || []).length > 0 ? (
+                  {(MusicSummary.top_artists?.[period] || []).length > 0 ? (
                     <Box component="ul" sx={{ pl: 2, mb: 0, mt: 0 }}>
-                      {stats.top_artists[period].map((artist: string, i: number) => (
+                      {MusicSummary.top_artists[period].map((artist: string, i: number) => (
                         <li key={i}>
                           <Typography variant="body2" color="text.secondary">
                             {artist}
@@ -151,9 +161,9 @@ const Stats: React.FC<{ toggleTheme: () => void }> = ({ toggleTheme }) => {
                   <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0, mt: 2 }}>
                     Canciones más escuchadas:
                   </Typography>
-                  {(stats.top_tracks?.[period] || []).length > 0 ? (
+                  {(MusicSummary.top_tracks?.[period] || []).length > 0 ? (
                     <Box component="ul" sx={{ pl: 2, mb: 0, mt: 0 }}>
-                      {stats.top_tracks[period].map((track: string, i: number) => (
+                      {MusicSummary.top_tracks[period].map((track: string, i: number) => (
                         <li key={i}>
                           <Typography variant="body2" color="text.secondary">
                             {track}
@@ -171,9 +181,9 @@ const Stats: React.FC<{ toggleTheme: () => void }> = ({ toggleTheme }) => {
                   <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0, mt: 2 }}>
                     Géneros favoritos:
                   </Typography>
-                  {(stats.top_genres?.[period] || []).length > 0 ? (
+                  {(MusicSummary.top_genres?.[period] || []).length > 0 ? (
                     <Box component="ul" sx={{ pl: 2, mb: 0, mt: 0 }}>
-                      {stats.top_genres[period].map((genre: string, i: number) => (
+                      {MusicSummary.top_genres[period].map((genre: string, i: number) => (
                         <li key={i}>
                           <Typography variant="body2" color="text.secondary">
                             {genre}
@@ -200,4 +210,4 @@ const Stats: React.FC<{ toggleTheme: () => void }> = ({ toggleTheme }) => {
   );
 };
 
-export default Stats;
+export default MusicSummary;
