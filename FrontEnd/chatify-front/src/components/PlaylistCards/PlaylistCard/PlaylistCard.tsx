@@ -7,6 +7,7 @@ import { deleteUserPlaylist } from "../../../api/spotifyService";
 import { useState } from "react";
 import ConfirmDeleteDialog from "../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 import CustomDialog from "../../Dialog/Dialog";
+import ScrollableText from "../../ScrollableText/ScrollableText";
 
 /**
  * Tarjeta que muestra la información de una playlist.
@@ -164,19 +165,10 @@ const PlaylistCard = ({
         )}
         {/* Nombre de la playlist y botón de info */}
         <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center", mb: 1 }}>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              textAlign: "center",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              maxWidth: 200,
-            }}
-          >
-            {playlist.name}
-          </Typography>
+          {/* Usa ScrollableText para el nombre de la playlist */}
+          <Box sx={{ maxWidth: 170, flex: 1, alignElements: "center", display: "flex"}}>
+            <ScrollableText text={playlist.name} selected={false} center={true}/>
+          </Box>
           <IconButton
             size="small"
             sx={{
