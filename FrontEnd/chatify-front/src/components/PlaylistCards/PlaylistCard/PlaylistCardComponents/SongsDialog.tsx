@@ -220,6 +220,7 @@ const SongsDialog = ({
       <CustomDialogDarkBackground
         open={notFoundDialog}
         onClose={() => setNotFoundDialog(false)}
+        onConfirm={() => setNotFoundDialog(false)}
         buttons={[
           { label: "Cerrar", color: "primary", action: () => setNotFoundDialog(false) }
         ]}
