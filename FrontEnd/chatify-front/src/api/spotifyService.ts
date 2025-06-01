@@ -145,3 +145,16 @@ export const fetchLyrics = async (artist: string, song: string): Promise<string>
   const data = await res.json();
   return data.lyrics;
 };
+
+// Obtiene información de los gustos de un usuario
+export const fetchUserTopInfo = async (): Promise<any> => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${config.apiBaseUrl}/spotify/user/top-info`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (handleUnauthorized(res)) throw new Error("Sesión expirada");
+  if (!res.ok) throw new Error("Error al obtener top info de usuario.");
+  return await res.json();
+};
