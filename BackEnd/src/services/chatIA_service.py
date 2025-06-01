@@ -55,7 +55,7 @@ class Agent:
                 json=payload
             )
 
-        data = response.json()
+        data = await response.json()
 
         try:
             return data["choices"][0]["message"]["content"]

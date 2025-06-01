@@ -133,6 +133,13 @@ const MainLayout: React.FC<MainLayoitProps> = ({ toggleTheme }) => {
     }
   }, [selectedTab]);
 
+  // Si la pantalla no es pequeña, muestra el menú lateral por defecto
+  useEffect(() => {
+    if (!computerScreenIsSmall) {
+      setShowNav(true);
+    }
+  }, [computerScreenIsSmall]);
+
   /**
    * Cambia la tab seleccionada y oculta el menú lateral en pantallas pequeñas.
    */

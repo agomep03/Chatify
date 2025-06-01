@@ -114,7 +114,7 @@ const PlaylistCards: React.FC = () => {
                 ...pl,
                 name: formData.name,
                 description: formData.description,
-                image: formData.image,
+                image: formData.image || pl.image,
               }
             : pl
         )

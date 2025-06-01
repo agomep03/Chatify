@@ -37,7 +37,6 @@ const EditPlaylistDialog = ({
   const requiredFields = [
     { name: "name", label: "Nombre" },
     { name: "description", label: "Descripción" },
-    { name: "image", label: "Imagen" },
   ];
 
   const handleDialogAccept = () => {
