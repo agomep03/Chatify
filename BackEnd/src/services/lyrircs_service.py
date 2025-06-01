@@ -1,6 +1,6 @@
 import os
 import logging
-import lyricsgenius
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -11,21 +11,24 @@ class LyricsFetcher:
         if not client_access_token:
             logger.error("[LyricsFetcher] No se proporcionó un token de acceso para Genius.")
             raise ValueError("Token de acceso para Genius no proporcionado.")
-        
-        self.genius = lyricsgenius.Genius(client_access_token)
-        self.genius.remove_section_headers = True
-        logger.info("[LyricsFetcher] Cliente Genius inicializado correctamente.")
+        self.client_access_token = client_access_token
 
-    def search_song_url(self, artist_name, song_title):
-        logger.info(f"[LyricsFetcher] Buscando URL para: '{song_title}' por {artist_name}")
-        try:
-            song = self.genius.search_song(song_title, artist_name)
-            if song:
-                logger.info(f"[LyricsFetcher] Canción encontrada: {song.title} de {song.artist}")
-                return song.url
+    def get_song_url(self, message):
+        headers = {'Authorization': f'Bearer {self.client_access_token}'}
+        url = "https://api.genius.com/search"
+        params = {'q': message}
+
+        response = requests.get(url, headers=headers, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            hits = data['response']['hits']
+            if hits:
+                song_path = hits[0]['result']['path']
+                song_url = f"https://genius.com{song_path}"
+                return song_url
             else:
-                logger.warning(f"[LyricsFetcher] No se encontró la canción '{song_title}' de '{artist_name}'.")
                 return "No se encontró la canción."
-        except Exception as e:
-            logger.exception(f"[LyricsFetcher] Error al buscar la canción '{song_title}' de '{artist_name}': {e}")
-            return f"Error al buscar la canción: {e}"
+        else:
+            logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
+            return f"Error en la solicitud: {response.status_code} - {response.text}"
