@@ -33,7 +33,6 @@ __pycache__
 .git
 
 # Other
-.github
 *.dockerignore
 .env
 .coverage
