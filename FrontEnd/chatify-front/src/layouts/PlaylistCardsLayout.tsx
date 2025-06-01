@@ -38,21 +38,27 @@ const PlaylistCards: React.FC = () => {
 
   // Estado para mostrar el dialog de canciones
   const [songsDialogOpen, setSongsDialogOpen] = useState(false);
-  const [songsPlaylist, setSongsPlaylist] = useState<any | null>(null);
+  const [songsPlaylist, setSongsPlaylist] = useState<Playlist | null>(null);
 
   // Define a type for the playlist and the response
   type Playlist = {
     id: string;
     name: string;
     description?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 
-  type PlaylistsResponse =
-    | {
-        playlists?: Playlist[];
-      }
-    | Playlist[];
+  type PlaylistsResponse = { playlists?: Playlist[] } | Playlist[];
+
+  function extractPlaylists(data: PlaylistsResponse): Playlist[] {
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.playlists)) {
+      return data.playlists;
+    }
+    return [];
+  }
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -60,14 +66,7 @@ const PlaylistCards: React.FC = () => {
       setError(null);
       try {
         const data: PlaylistsResponse = await fetchUserPlaylists();
-        // Ajuste: extraer el array de la propiedad 'playlists' si existe, o usar data si ya es array
-        setPlaylists(
-          Array.isArray(data)
-            ? data
-            : data && Array.isArray((data as any).playlists)
-            ? (data as any).playlists
-            : []
-        );
+        setPlaylists(extractPlaylists(data));
       } catch (e: any) {
         if (e.message === "Sesión expirada") {
           setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");
@@ -155,7 +154,7 @@ const PlaylistCards: React.FC = () => {
   // Handler para enviar el prompt y crear la playlist automáticamente
   const handleAutoGenerate = async () => {
     if (!autoPrompt.trim()) {
-      setAutoError("El prompt no puede estar vacío.");
+      customAlert("error", "El prompt no puede estar vacío.");
       return;
     }
     setAutoLoading(true);
@@ -174,7 +173,6 @@ const PlaylistCards: React.FC = () => {
       handleCloseAutoDialog();
     } catch (e: any) {
       customAlert("error", "Error al generar la playlist.");
-      // setAutoError("Error al generar la playlist."); // Ya no se usa
     } finally {
       setAutoLoading(false);
     }

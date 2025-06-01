@@ -16,9 +16,9 @@ import { Theme } from '@mui/material/styles';
  * El foco se elimina tras pulsar para evitar bordes de enfoque.
  */
 interface ChatModeToggleProps {
-  mode: string;
-  setMode: (mode: string) => void;
-  theme: Theme;
+  readonly mode: string;
+  readonly setMode: (mode: string) => void;
+  readonly theme: Theme;
 }
 
 // Estilos comunes para los ToggleButton
@@ -80,10 +80,8 @@ export default function ChatModeToggle({ mode, setMode, theme }: ChatModeToggleP
       value={mode === "normal" ? null : mode}
       exclusive
       onChange={(event: React.MouseEvent<HTMLElement>, newMode: string | null) => {
-        setMode(newMode || "normal");
-        if (event && event.currentTarget) {
-          (event.currentTarget as HTMLElement).blur();
-        }
+        setMode(newMode ?? "normal");
+        event?.currentTarget?.blur();
       }}
       sx={{ mb: 1, maxWidth: 300, ml: 1, mt: 1 }}
     >

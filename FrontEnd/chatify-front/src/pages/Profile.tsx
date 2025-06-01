@@ -39,8 +39,8 @@ const Profile: React.FC = () => {
       try {
         const data = await fetchUserProfile();
         setFormData({
-          username: data.username || "",
-          email: data.email || "",
+          username: data.username ?? "",
+          email: data.email ?? "",
         });
       } catch (error) {
         // Mostrar alerta si viene de forcedLogoutMsg (token expirado/no autorizado)
@@ -83,7 +83,7 @@ const Profile: React.FC = () => {
       }
       customAlert("success", "Perfil actualizado correctamente.");
     } catch (error: any) {
-      customAlert("error", error.message || "Error al actualizar el perfil.");
+      customAlert("error", error.message ?? "Error al actualizar el perfil.");
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +113,7 @@ const Profile: React.FC = () => {
             <CircularProgress sx={{ color: theme.palette.text.primary }} />
           </Box>
         ) : (
-          <>
+          
             <Form
               title="Editar Perfil"
               fields={profileFields}
@@ -130,7 +130,7 @@ const Profile: React.FC = () => {
                 </Typography>
               </Box>
             </Form>
-          </>
+          
         )}
       </Container>
     </Box>

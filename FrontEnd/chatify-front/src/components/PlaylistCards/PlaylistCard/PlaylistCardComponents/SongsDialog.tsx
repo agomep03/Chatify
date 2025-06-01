@@ -10,6 +10,7 @@ import ConfirmDeleteDialog from "../../../Dialog/ConfirmDeleteDialog/ConfirmDele
 import { getScrollbarStyles } from "../../../../styles/scrollbarStyles";
 import CustomDialogDarkBackground from "../../../Dialog/CustomDialogs/CustomDialogDarkBackground";
 import CustomDialogDefault from "../../../Dialog/CustomDialogs/CustomDialogDefault";
+import { useAlert } from "../../../Alert/Alert";
 
 /**
  * Diálogo para mostrar y gestionar las canciones de una playlist.
@@ -34,7 +35,8 @@ const SongsDialog = ({
   onClose: () => void;
 }) => {
   const theme = useTheme();
-  const [tracks, setTracks] = useState<any[]>(playlist?.tracks || []);
+  const { customAlert } = useAlert();
+  const [tracks, setTracks] = useState<any[]>(playlist?.tracks ?? []);
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [lyricsLoading, setLyricsLoading] = useState(false);
   const [lyrics, setLyrics] = useState<string>("");
@@ -47,7 +49,7 @@ const SongsDialog = ({
 
   // Actualiza tracks si cambia la playlist
   React.useEffect(() => {
-    setTracks(playlist?.tracks || []);
+    setTracks(playlist?.tracks ?? []);
   }, [playlist]);
 
   // Elimina una canción de la playlist
@@ -61,7 +63,7 @@ const SongsDialog = ({
       );
       setTracks((prev) => prev.filter((_, i) => i !== idx));
     } catch (e) {
-      // Manejo de error opcional
+      customAlert("error", "No se pudo eliminar la canción. Intenta de nuevo.");
     }
     setLoadingDelete(false);
     setOpenConfirm(null);
@@ -87,7 +89,7 @@ const SongsDialog = ({
           window.open(typedResult.url, "_blank");
           setLyricsOpen(false);
         } else if (typedResult.Type === "Captcha") {
-          setCaptchaUrl(typedResult.url || null);
+          setCaptchaUrl(typedResult.url ?? null);
           setCaptchaDialog(true);
           setLyricsOpen(false);
         } else if (typedResult.Type === "Error") {
@@ -148,7 +150,7 @@ const SongsDialog = ({
           {tracks && Array.isArray(tracks) ? (
             tracks.map((track: any, idx: number) => (
               <Box
-                key={track.uri || idx}
+                key={track.uri ?? idx}
                 sx={{
                   mb: 2,
                   display: "flex",
@@ -220,7 +222,6 @@ const SongsDialog = ({
       <CustomDialogDarkBackground
         open={notFoundDialog}
         onClose={() => setNotFoundDialog(false)}
-        onConfirm={() => setNotFoundDialog(false)}
         buttons={[
           { label: "Cerrar", color: "primary", action: () => setNotFoundDialog(false) }
         ]}
@@ -234,10 +235,6 @@ const SongsDialog = ({
       <CustomDialogDefault
         open={captchaDialog}
         onClose={() => setCaptchaDialog(false)}
-        onConfirm={() => {
-          if (captchaUrl) window.open(captchaUrl, "_blank");
-          setCaptchaDialog(false);
-        }}
         buttons={[
           {
             label: "Cancelar",

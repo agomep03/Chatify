@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 import { Snackbar, Alert } from '@mui/material';
 import { useTheme } from "@mui/material/styles";
 
@@ -48,8 +48,11 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   // Cierra la alerta
   const handleClose = () => setOpen(false);
 
+  // Memoiza el objeto para evitar renders innecesarios
+  const contextValue = useMemo(() => ({ customAlert }), []);
+
   return (
-    <AlertContext.Provider value={{ customAlert }}>
+    <AlertContext.Provider value={contextValue}>
       {children}
       {/* Snackbar que muestra la alerta en la esquina superior derecha */}
       <Snackbar open={open} autoHideDuration={5000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>

@@ -40,7 +40,7 @@ export const fetchSendMessage = async (
     const data = await res.json();
     const botMessage: Message = {
       id: Date.now() + 1,
-      text: data.answer || 'Sin respuesta',
+      text: data.answer ?? 'Sin respuesta',
       sender: 'bot',
     };
     onAddMessage(botMessage);
