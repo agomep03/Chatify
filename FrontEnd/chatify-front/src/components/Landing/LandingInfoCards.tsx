@@ -10,6 +10,8 @@ import logoChat_white from "../../assets/Bot.png";
 import logoChat_black from "../../assets/Bot_dark.png";
 import logoLyrics_white from "../../assets/Lyrics.png";
 import logoLyrics_black from "../../assets/Lyrics_dark.png";
+import stadistics_white from "../../assets/Stats.png";
+import stadistics_black from "../../assets/Stats_dark.png";
 
 // Datos de las tarjetas informativas que se mostrarán en la landing page.
 // Cada objeto representa una funcionalidad principal de la aplicación.
@@ -39,6 +41,11 @@ const getInfoCardsData = (isLight: boolean) => [
         description: "Accede a la letra de las canciones de tus playlists. Perfecto para cantar, entender mejor la música o simplemente disfrutarla más.",
         image: isLight ? logoLyrics_black : logoLyrics_white,
     },
+    {
+        title: "Tu Música en Retrospsectiva",
+        description: "Descubre cómo ha evolucionado tu música a lo largo del tiempo. Explora los artistas, canciones y géneros que más has escuchado esta semana, en los últimos 6 meses y desde siempre.",
+        image: isLight ? stadistics_black : stadistics_white,
+    }
 ];
 
 /**
