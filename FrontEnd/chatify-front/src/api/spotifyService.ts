@@ -25,7 +25,6 @@ export const fetchVerifySpotifyConnection = async (): Promise<boolean> => {
     });
     if (handleUnauthorized(res)) return false;
     const data = await res.json();
-    console.log(data);
     return data.connected; //Devuelve true si está bien conectado y false si no lo está
   };
 

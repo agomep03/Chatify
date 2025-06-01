@@ -55,7 +55,7 @@ const CustomDialogDefault = ({
             position: 'absolute',
             top: '20%',
             left: '50%',
-            transform: isMobile ? 'translateX(-50%)' : 'translateX(-50%)',
+            transform: 'translateX(-50%)',
             bgcolor: theme.palette.background.default,
             borderRadius: isMobile ? 0 : 2,
             boxShadow: 3,
