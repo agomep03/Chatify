@@ -230,3 +230,15 @@ def test_unfollow_playlist(client_with_user, monkeypatch):
     response = client.delete("/spotify/playlists/playlist123/unfollow")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"unfollowed": True}
+
+def test_get_lyrics(client_with_user):
+    client, _ = client_with_user
+
+    with patch("src.routes.spotify_routes.LyricsFetcher") as MockFetcher:
+        instance = MockFetcher.return_value
+        instance.search_song_url.return_value = "https://dummy.lyrics.url"
+
+        response = client.get("/spotify/lyrics?artist=Artist&song=Song")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == "https://dummy.lyrics.url"
