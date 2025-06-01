@@ -8,6 +8,8 @@ import { removeTracksFromPlaylist, fetchLyrics } from "../../../../api/spotifySe
 import LyricsDialog from "./LyricsDialog";
 import ConfirmDeleteDialog from "../../../Dialog/ConfirmDeleteDialog/ConfirmDeleteDialog";
 import { getScrollbarStyles } from "../../../../styles/scrollbarStyles";
+import CustomDialogDarkBackground from "../../../Dialog/CustomDialogs/CustomDialogDarkBackground";
+import CustomDialogDefault from "../../../Dialog/CustomDialogs/CustomDialogDefault";
 
 /**
  * Diálogo para mostrar y gestionar las canciones de una playlist.
@@ -39,6 +41,9 @@ const SongsDialog = ({
   const [lyricsSong, setLyricsSong] = useState<{ artist: string; name: string } | null>(null);
   const [openConfirm, setOpenConfirm] = useState<{ idx: number; track: any } | null>(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [notFoundDialog, setNotFoundDialog] = useState(false);
+  const [captchaDialog, setCaptchaDialog] = useState(false);
+  const [captchaUrl, setCaptchaUrl] = useState<string | null>(null);
 
   // Actualiza tracks si cambia la playlist
   React.useEffect(() => {
@@ -70,152 +75,214 @@ const SongsDialog = ({
     setLyricsLoading(true);
     try {
       const artist = Array.isArray(track.artists) ? track.artists[0] : track.artists;
-      const l = await fetchLyrics(artist, track.name);
-      setLyrics(l);
+      const result = await fetchLyrics(artist, track.name);
+
+      if (typeof result === "object" && result.Type) {
+        if (result.Type === "Redirect" && result.url) {
+          window.open(result.url, "_blank");
+          setLyricsOpen(false);
+        } else if (result.Type === "Captcha") {
+          setCaptchaUrl(result.url || null);
+          setCaptchaDialog(true);
+          setLyricsOpen(false);
+        } else if (result.Type === "Error") {
+          setNotFoundDialog(true);
+          setLyricsOpen(false);
+        }
+      } else if (typeof result === "string" && result.startsWith("http")) {
+        window.open(result, "_blank");
+        setLyricsOpen(false);
+      } else {
+        setNotFoundDialog(true);
+        setLyricsOpen(false);
+      }
     } catch (e) {
-      setLyrics("No se pudo obtener la letra.");
+      setNotFoundDialog(true);
+      setLyricsOpen(false);
     }
     setLyricsLoading(false);
   };
 
   return (
-    <CustomDialog
-      open={open}
-      onClose={onClose}
-      onConfirm={onClose}
-      buttons={[{ label: "Cerrar", color: "primary" }]}
-    >
-      <Box
-        sx={{
-          m: 1,
-          p: 3,
-          width: "100%",
-          maxWidth: 500,
-          maxHeight: 400,
-          overflowY: "auto",
-          ...getScrollbarStyles(theme),
-        }}
+    <>
+      <CustomDialog
+        open={open}
+        onClose={onClose}
+        onConfirm={onClose}
+        buttons={[{ label: "Cerrar", color: "primary" }]}
       >
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Canciones de {playlist?.name}
-        </Typography>
-        {/* Lista de canciones */}
-        {tracks && Array.isArray(tracks) ? (
-          tracks.map((track: any, idx: number) => (
-            <Box
-              key={track.uri || idx}
-              sx={{
-                mb: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 1,
-              }}
-            >
-              <Box sx={{ flex: 1 }}>
-                <Typography
-                  variant="body1"
-                  color="text.primary"
-                  sx={{ fontWeight: 500 }}
-                >
-                  {track.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {Array.isArray(track.artists)
-                    ? track.artists.join(", ")
-                    : track.artists}
-                </Typography>
-              </Box>
-              {/* Botón para ver la letra */}
-              <Button
-                type="button"
-                variant="text"
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  p: 1,
-                  color: (theme) => theme.palette.text.primary,
-                  "&:hover": {
-                    backgroundColor: (theme) => theme.palette.action.hover,
-                  },
-                  "&:focus": {
-                    outline: "none",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:focus-visible": {
-                    outline: "none",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:active": {
-                    outline: "none",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                }}
-                onClick={() => handleShowLyrics(track)}
-                disabled={lyricsLoading}
-              >
-                <MusicNoteIcon />
-              </Button>
-              {/* Botón para eliminar canción */}
-              <Button
-                type="button"
-                variant="text"
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  p: 1,
-                  color: (theme) => theme.palette.text.primary,
-                  "&:hover": {
-                    backgroundColor: (theme) => theme.palette.action.hover,
-                  },
-                  "&:focus": {
-                    outline: "none",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:focus-visible": {
-                    outline: "none",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                  "&:active": {
-                    outline: "none",
-                    border: "none",
-                    boxShadow: "none",
-                  },
-                }}
-                onClick={() => setOpenConfirm({ idx, track })}
-              >
-                <DeleteIcon />
-              </Button>
-            </Box>
-          ))
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            No hay canciones en esta playlist.
+        <Box
+          sx={{
+            m: 1,
+            p: 3,
+            width: "100%",
+            maxWidth: 500,
+            maxHeight: 400,
+            overflowY: "auto",
+            ...getScrollbarStyles(theme),
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Canciones de {playlist?.name}
           </Typography>
-        )}
-      </Box>
-      {/* Diálogo para mostrar la letra de la canción */}
-      <LyricsDialog
-        open={lyricsOpen}
-        onClose={() => setLyricsOpen(false)}
-        lyrics={lyrics}
-        loading={lyricsLoading}
-        song={lyricsSong}
-      />
-      {/* Diálogo de confirmación para eliminar canción */}
-      <ConfirmDeleteDialog
-        open={!!openConfirm}
-        onClose={() => { if (!loadingDelete) setOpenConfirm(null); }}
-        onConfirm={() => openConfirm && handleRemoveTrack(openConfirm.track.uri, openConfirm.idx)}
-        itemName={openConfirm?.track?.name}
-        loading={loadingDelete}
-      />
-    </CustomDialog>
+          {/* Lista de canciones */}
+          {tracks && Array.isArray(tracks) ? (
+            tracks.map((track: any, idx: number) => (
+              <Box
+                key={track.uri || idx}
+                sx={{
+                  mb: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    variant="body1"
+                    color="text.primary"
+                    sx={{ fontWeight: 500 }}
+                  >
+                    {track.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {Array.isArray(track.artists)
+                      ? track.artists.join(", ")
+                      : track.artists}
+                  </Typography>
+                </Box>
+                {/* Botón para ver la letra */}
+                <Button
+                  type="button"
+                  variant="text"
+                  size="small"
+                  sx={{
+                    minWidth: 0,
+                    p: 1,
+                    color: (theme) => theme.palette.text.primary,
+                    "&:hover": {
+                      backgroundColor: (theme) => theme.palette.action.hover,
+                    },
+                    "&:focus": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:focus-visible": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:active": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                  }}
+                  onClick={() => handleShowLyrics(track)}
+                  disabled={lyricsLoading}
+                >
+                  <MusicNoteIcon />
+                </Button>
+                {/* Botón para eliminar canción */}
+                <Button
+                  type="button"
+                  variant="text"
+                  size="small"
+                  sx={{
+                    minWidth: 0,
+                    p: 1,
+                    color: (theme) => theme.palette.text.primary,
+                    "&:hover": {
+                      backgroundColor: (theme) => theme.palette.action.hover,
+                    },
+                    "&:focus": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:focus-visible": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                    "&:active": {
+                      outline: "none",
+                      border: "none",
+                      boxShadow: "none",
+                    },
+                  }}
+                  onClick={() => setOpenConfirm({ idx, track })}
+                >
+                  <DeleteIcon />
+                </Button>
+              </Box>
+            ))
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No hay canciones en esta playlist.
+            </Typography>
+          )}
+        </Box>
+        {/* Diálogo para mostrar la letra de la canción */}
+        <LyricsDialog
+          open={lyricsOpen}
+          onClose={() => setLyricsOpen(false)}
+          lyrics={lyrics}
+          loading={lyricsLoading}
+          song={lyricsSong}
+        />
+        {/* Diálogo de confirmación para eliminar canción */}
+        <ConfirmDeleteDialog
+          open={!!openConfirm}
+          onClose={() => { if (!loadingDelete) setOpenConfirm(null); }}
+          onConfirm={() => openConfirm && handleRemoveTrack(openConfirm.track.uri, openConfirm.idx)}
+          itemName={openConfirm?.track?.name}
+          loading={loadingDelete}
+        />
+      </CustomDialog>
+      <CustomDialogDarkBackground
+        open={notFoundDialog}
+        onClose={() => setNotFoundDialog(false)}
+        onConfirm={() => setNotFoundDialog(false)}
+        buttons={[{ label: "Cerrar", color: "primary" }]}
+        title="Letra no encontrada"
+      >
+        <Typography variant="body1" sx={{ p: 2 }}>
+          No se encontró la letra de la canción en Genius.
+        </Typography>
+      </CustomDialogDarkBackground>
+
+      <CustomDialogDefault
+        open={captchaDialog}
+        onClose={() => setCaptchaDialog(false)}
+        onConfirm={() => {
+          if (captchaUrl) window.open(captchaUrl, "_blank");
+          setCaptchaDialog(false);
+        }}
+        buttons={[
+          {
+            label: "Cancelar",
+            color: "secondary",
+            action: () => setCaptchaDialog(false),
+          },
+          {
+            label: "Aceptar",
+            color: "primary",
+            action: () => {
+              if (captchaUrl) window.open(captchaUrl, "_blank");
+              setCaptchaDialog(false);
+            },
+          },
+        ]}
+      >
+        <Typography variant="body1" sx={{ p: 2 }}>
+          DuckDuckGo requiere resolver un captcha manualmente para continuar buscando letras.
+          Pulsa "Aceptar" para abrir el captcha en una nueva pestaña o "Cancelar" para cerrar.
+        </Typography>
+      </CustomDialogDefault>
+    </>
   );
 };
 
