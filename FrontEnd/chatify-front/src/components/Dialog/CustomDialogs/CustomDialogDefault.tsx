@@ -9,7 +9,6 @@ import { getDialogButtonStyles } from '../styles/buttonStyles';
  * @component
  * @param {boolean} open - Si el diálogo está abierto.
  * @param {() => void} onClose - Función para cerrar el diálogo.
- * @param {() => void} onConfirm - Función que se ejecuta al confirmar la acción principal.
  * @param {ReactNode} children - Contenido del diálogo.
  * @param {Array} buttons - Configuración de los botones a mostrar (label, color, action).
  * @returns {JSX.Element} Diálogo estilizado con botones personalizados.
@@ -28,7 +27,6 @@ type ButtonConfig = {
 type CustomDialogDefaultProps = {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
   children: ReactNode;
   buttons: ButtonConfig[];
 };

@@ -233,10 +233,6 @@ const SongsDialog = ({
       <CustomDialogDefault
         open={captchaDialog}
         onClose={() => setCaptchaDialog(false)}
-        onConfirm={() => {
-          if (captchaUrl) window.open(captchaUrl, "_blank");
-          setCaptchaDialog(false);
-        }}
         buttons={[
           {
             label: "Cancelar",
