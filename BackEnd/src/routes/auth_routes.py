@@ -41,7 +41,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     Returns:
         dict: Resultado del registro.
     """
-    logger.info(f"Registrando nuevo usuario: {data.username}")
+    logger.info(f"[POST /register] Registrando nuevo usuario: {data.username}")
     return register_user(data.username, data.email, data.password, db)
 
 
@@ -57,7 +57,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     Returns:
         dict: Token JWT y usuario.
     """
-    logger.info(f"Intento de login para el email: {form_data.username}")
+    logger.info(f"[POST /login] Intento de login para el email: {form_data.username}")
     return login_user(form_data.username, form_data.password, db)
 
 
@@ -72,7 +72,7 @@ def get_profile(user: User = Depends(get_current_user)):
     Returns:
         dict: Información del usuario.
     """
-    logger.info(f"Obteniendo perfil del usuario ID: {user.id}")
+    logger.info(f"[GET /me] Obteniendo perfil del usuario ID: {user.id}")
     return get_user_info(user)
 
 
@@ -93,7 +93,7 @@ def update_profile(
     Returns:
         dict: Resultado de la actualización.
     """
-    logger.info(f"Actualizando perfil del usuario ID: {user.id}")
+    logger.info(f"[PUT /me] Actualizando perfil del usuario ID: {user.id} con datos: {data}")
     return update_user_info(data, user, db)
 
 
@@ -109,19 +109,19 @@ async def spotify_callback(request: Request, db: Session = Depends(get_db)):
     Returns:
         RedirectResponse: Redirección al frontend según resultado.
     """
-    logger.info("Procesando callback de Spotify")
+    logger.info("[GET /callback] Procesando callback de Spotify")
     try:
         result = login_spotify(request, db)
         if not result.get("success", False):
             reason = quote(result.get("message", "Error desconocido"))
-            logger.warning(f"Fallo en callback de Spotify: {reason}")
+            logger.warning(f"[GET /callback] Fallo en autenticación Spotify: {reason}")
             return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={reason}")
-        logger.info("Autenticación Spotify exitosa, redirigiendo al home")
+        logger.info("[GET /callback] Autenticación Spotify exitosa")
         return RedirectResponse(url=f"{FRONTEND_URL}/home")
     except HTTPException as e:
         reason = quote(str(e.detail))
-        logger.error(f"Error HTTP en callback de Spotify: {reason}")
+        logger.error(f"[GET /callback] Error HTTP en autenticación Spotify: {reason}")
         return RedirectResponse(url=f"{FRONTEND_URL}/error?reason={reason}")
     except Exception as e:
-        logger.exception("Error inesperado en callback de Spotify")
+        logger.exception("[GET /callback] Error inesperado en autenticación Spotify")
         return RedirectResponse(url=f"{FRONTEND_URL}/error?reason=Error%20interno")

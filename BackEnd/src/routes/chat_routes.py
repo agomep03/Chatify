@@ -29,6 +29,7 @@ async def start_chat(
         dict: Detalles de la conversación creada.
     """
     user_id = str(current_user.id)
+    logger.info(f"[POST /chat/start] Iniciando nueva conversación para user_id={current_user.id}")
     return await start_conversation(user_id, db)
 
 @router.post("/{chat_id}/message")
@@ -50,9 +51,11 @@ async def send_message(
     Returns:
         dict: Respuesta del chatbot.
     """
+    logger.info(f"[POST /chat/{chat_id}/message] Usuario ID {current_user.id} envía mensaje")
     conversation = get_conversation_by_id(chat_id, db)
 
     if not conversation or conversation.user_id != current_user.id:
+        logger.warning(f"[POST /chat/{chat_id}/message] Acceso denegado para user_id={current_user.id}")
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     return await handle_message(chat_id, body.question, current_user, db, mode=body.mode)
@@ -72,9 +75,11 @@ def delete_chat_route(
     Returns:
         dict: Resultado de la operación.
     """
+    logger.info(f"[DELETE /chat/{chat_id}] Usuario ID {current_user.id} solicita eliminar chat")
     conversation = get_conversation_by_id(chat_id, db)
 
     if not conversation or conversation.user_id != current_user.id:
+        logger.warning(f"[DELETE /chat/{chat_id}] Acceso denegado para user_id={current_user.id}")
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     return delete_chat(chat_id, db)
@@ -94,9 +99,11 @@ def get_history_route(
     Returns:
         list: Lista de mensajes.
     """
+    logger.info(f"[GET /chat/{chat_id}/history] Obteniendo historial para user_id={current_user.id}")
     conversation = get_conversation_by_id(chat_id, db)
 
     if not conversation or conversation.user_id != current_user.id:
+        logger.warning(f"[GET /chat/{chat_id}/history] Acceso denegado para user_id={current_user.id}")
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     return get_history(chat_id, db)
@@ -113,6 +120,7 @@ def get_conversations_route(
         list: Lista de conversaciones.
     """
     user_id = str(current_user.id)
+    logger.info(f"[GET /chat/user] Obteniendo todas las conversaciones para user_id={current_user.id}")
     return get_conversations(user_id, db)
 
 @router.put("/{chat_id}/rename")
@@ -132,9 +140,11 @@ def rename_conversation_route(
     Returns:
         dict: Detalles de la conversación actualizada.
     """
+    logger.info(f"[PUT /chat/{chat_id}/rename] Renombrando conversación a '{new_title}' para user_id={current_user.id}")
     conversation = get_conversation_by_id(chat_id, db)
 
     if not conversation or conversation.user_id != current_user.id:
+        logger.warning(f"[PUT /chat/{chat_id}/rename] Acceso denegado para user_id={current_user.id}")
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     return rename_conversation(chat_id, new_title, db)

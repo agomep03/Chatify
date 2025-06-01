@@ -15,6 +15,9 @@ from src.models.auth_model import User
 from src.schemas.spotify_schemas import TrackUri, RemoveTracksRequest, UpdatePlaylistRequest
 from src.services.lyrircs_service import LyricsFetcher
 
+# Configuración del logger
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 @router.get("/playlists")
@@ -28,6 +31,7 @@ def get_user_playlists(
     Returns:
         list: Playlists del usuario.
     """
+    logger.info(f"[GET /spotify/playlists] Usuario {user.id} solicita sus playlists")
     return get_all_user_playlists(user, db)
 
 @router.get("/auth/spotify/connected")
@@ -41,9 +45,12 @@ def check_spotify_connected(
         dict: {'connected': True/False}
     """
     if not user:
+        logger.warning("[GET /spotify/auth/spotify/connected] Usuario no autenticado")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
-    return {"connected": bool(user.spotify_user_id and user.spotify_access_token)}
+    conectado = bool(user.spotify_user_id and user.spotify_access_token)
+    logger.info(f"[GET /spotify/auth/spotify/connected] Usuario {user.id} conectado={conectado}")
+    return {"connected": conectado}
 
 @router.put("/playlists/{playlist_id}/update")
 def update_playlist_route(
@@ -61,6 +68,7 @@ def update_playlist_route(
     Returns:
         dict: Resultado de la operación.
     """
+    logger.info(f"[PUT /spotify/playlists/{playlist_id}/update] Usuario {user.id} actualiza playlist: título='{data.title}'")
     return update_playlist(
         playlist_id=playlist_id,
         title=data.title,
@@ -84,7 +92,9 @@ async def auto_generate_playlist_route(
     Returns:
         dict: URL de la playlist generada.
     """
+    logger.info(f"[POST /spotify/playlists/auto-generate] Usuario {user.id} genera playlist con prompt: '{prompt}'")
     playlist_url = await generate_playlist_auto(prompt, user, db)
+    logger.info(f"[POST /spotify/playlists/auto-generate] Playlist generada para usuario {user.id}: {playlist_url}")
     return {"playlist_url": playlist_url}
 
 @router.delete("/playlists/{playlist_id}/tracks")
@@ -103,6 +113,7 @@ def remove_tracks_route(
     Returns:
         dict: Resultado de la operación.
     """
+    logger.info(f"[DELETE /spotify/playlists/{playlist_id}/tracks] Usuario {user.id} elimina pistas de playlist")
     return remove_tracks_from_playlist(playlist_id, data, user)
 
 @router.delete("/playlists/{playlist_id}/unfollow")
@@ -119,6 +130,7 @@ def unfollow_playlist_route(
     Returns:
         dict: Resultado de la operación.
     """
+    logger.info(f"[DELETE /spotify/playlists/{playlist_id}/unfollow] Usuario {user.id} deja de seguir playlist")
     return unfollow_playlist_logic(playlist_id, user)
 
 @router.get("/lyrics")
@@ -136,6 +148,7 @@ def get_lyrics_route(
     Returns:
         str: URL de la letra.
     """
+    logger.info(f"[GET /spotify/lyrics] Búsqueda de letra para: artista='{artist}', canción='{song}'")
     lyrics_fetcher = LyricsFetcher()
     return lyrics_fetcher.search_song_url(artist, song)
 
@@ -151,4 +164,5 @@ def get_user_top_info_route(
     Returns:
         dict: Información agrupada por período.
     """
+    logger.info(f"[GET /spotify/user/top-info] Usuario {user.id} solicita top info de Spotify")
     return get_user_full_top_info(user, db)
