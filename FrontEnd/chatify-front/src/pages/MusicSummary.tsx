@@ -6,6 +6,7 @@ import { useAlert } from "../components/Alert/Alert";
 import TopBarHome from "../components/TopBar/TopBarHome";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
 import { useNavigate } from "react-router-dom";
+import { noFocusButtonSx } from "../components/styles/buttonFocusStyles";
 
 /**
  * Página de resumen musical del usuario.
@@ -82,6 +83,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
               mr: 1,
               backgroundColor: "transparent",
               "&:hover": { backgroundColor: "action.hover" },
+              ...noFocusButtonSx,
             }}
             size="large"
           >

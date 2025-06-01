@@ -154,7 +154,7 @@ const PlaylistCards: React.FC = () => {
   // Handler para enviar el prompt y crear la playlist automáticamente
   const handleAutoGenerate = async () => {
     if (!autoPrompt.trim()) {
-      setAutoError("El prompt no puede estar vacío.");
+      customAlert("error", "El prompt no puede estar vacío.");
       return;
     }
     setAutoLoading(true);
