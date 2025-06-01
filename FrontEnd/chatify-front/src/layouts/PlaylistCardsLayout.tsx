@@ -45,14 +45,20 @@ const PlaylistCards: React.FC = () => {
     id: string;
     name: string;
     description?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 
-  type PlaylistsResponse =
-    | {
-        playlists?: Playlist[];
-      }
-    | Playlist[];
+  type PlaylistsResponse = { playlists?: Playlist[] } | Playlist[];
+
+  function extractPlaylists(data: PlaylistsResponse): Playlist[] {
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.playlists)) {
+      return data.playlists;
+    }
+    return [];
+  }
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -60,14 +66,7 @@ const PlaylistCards: React.FC = () => {
       setError(null);
       try {
         const data: PlaylistsResponse = await fetchUserPlaylists();
-        // Ajuste: extraer el array de la propiedad 'playlists' si existe, o usar data si ya es array
-        setPlaylists(
-          Array.isArray(data)
-            ? data
-            : data && Array.isArray((data as any).playlists)
-            ? (data as any).playlists
-            : []
-        );
+        setPlaylists(extractPlaylists(data));
       } catch (e: any) {
         if (e.message === "Sesión expirada") {
           setError("Sesión expirada. Por favor, vuelve a iniciar sesión.");

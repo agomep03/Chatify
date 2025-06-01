@@ -55,7 +55,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
   onTabClose,
   onTabRename,
 }) => {
-  const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
+  const [_, setHoveredTabId] = useState<string | null>(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuTabId, setMenuTabId] = useState<string | null>(null);
   const [openRenameForm, setOpenRenameForm] = useState(false);

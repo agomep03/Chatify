@@ -47,12 +47,10 @@ const Chat: React.FC<ChatProps> = ({ chatId, fetchChats }) => {
   
   // Hace scroll al final de la lista cuando llegan nuevos mensajes
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTo({
-        top: listRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
+    listRef.current?.scrollTo({
+      top: listRef.current?.scrollHeight ?? 0,
+      behavior: 'smooth'
+    });
   }, [messages]); 
 
   // Maneja la animación de puntos "Pensando..."
