@@ -52,6 +52,7 @@ def refresh_spotify_token(user: User, db: Session) -> str:
 
     try:
         response = requests.post(token_url, headers=headers, data=data)
+
         if response.status_code != 200:
             logger.error(f"[TOKEN] Error al refrescar: {response.status_code} {response.text}")
             raise HTTPException(status_code=502, detail="Error al refrescar el token de Spotify")
@@ -64,6 +65,8 @@ def refresh_spotify_token(user: User, db: Session) -> str:
         logger.info(f"[TOKEN] Token actualizado correctamente para {user.email}")
         return user.spotify_access_token
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"[TOKEN] Excepción durante refresh: {e}")
         raise HTTPException(status_code=500, detail="Error interno al refrescar token de Spotify")
@@ -151,9 +154,12 @@ def get_all_user_playlists(user: User, db: Session):
         logger.info(f"[PLAYLISTS] Se obtuvieron {len(playlists)} playlists de {user.email}")
         return {"playlists": playlists}
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"[PLAYLISTS] Error inesperado para {user.email}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno al obtener playlists")
+
 
 # === Playlist Update ===
 
