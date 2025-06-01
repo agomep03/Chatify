@@ -44,9 +44,9 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
   }, []);
 
   const periodLabels: Record<string, string> = {
-    semanal: "Esta semana",
-    seis_meses: "Últimos 6 meses",
-    todo_el_tiempo: "Todo el tiempo",
+    semanal: "Tus vibes semanales",
+    seis_meses: "Lo que te marcó en los últimos seis meses",
+    todo_el_tiempo: "Tus clásicos de siempre",
   };
 
   return (
@@ -56,11 +56,11 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
         top: 0,
         left: 0,
         width: "100vw",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        minHeight: "100vh",
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.custom.tabBg,
       }}
     >
       <TopBarHome toggleTheme={toggleTheme} onToggleNav={() => {}} />
@@ -88,7 +88,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
             <ArrowBackIcon sx={{ color: theme.palette.text.primary }} />
           </IconButton>
           <Typography variant="h4" sx={{ color: "text.primary" }}>
-            Mis Estadísticas de Spotify
+            Tu música, tu resumen
           </Typography>
         </Box>
         {loading ? (
@@ -116,7 +116,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
                 key={period}
                 elevation={2}
                 sx={{
-                  maxWidth: 480,
+                  width: "calc(30vw - 16px)",
                   minHeight: 320,
                   position: "relative",
                   margin: 1,
@@ -127,13 +127,16 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
                   boxSizing: "border-box",
                   p: 2,
                   background: theme.palette.background.default,
+                  "@media (max-width:1000px)": {
+                    width: "calc(40% - 16px)",
+                  },
                   "@media (max-width:750px)": {
                     minHeight: "unset",
                     width: "90%",
                   },
                 }}
               >
-                <Typography variant="h6" color="primary" gutterBottom>
+                <Typography variant="h6" color="primary" gutterBottom align="center">
                   {periodLabels[period]}
                 </Typography>
                 <Divider sx={{ width: "100%", mb: 1 }} />
