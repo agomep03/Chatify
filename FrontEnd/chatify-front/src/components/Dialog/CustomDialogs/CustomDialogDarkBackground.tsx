@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
  * @component
  * @param {boolean} open - Si el diálogo está abierto.
  * @param {() => void} onClose - Función para cerrar el diálogo.
+ * @param {() => void} onConfirm - Función que se ejecuta al confirmar la acción principal.
  * @param {ReactNode} children - Contenido del diálogo.
  * @param {Array} buttons - Configuración de los botones a mostrar (label, color, action).
  * @param {string} [title] - Título del diálogo.
@@ -28,6 +29,7 @@ type ButtonConfig = {
 type CustomDialogDarkBackgroundProps = {
   open: boolean;
   onClose: () => void;
+  onConfirm: () => void;
   children: ReactNode;
   buttons: ButtonConfig[];
   title?: string;

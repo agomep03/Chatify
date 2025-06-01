@@ -108,6 +108,20 @@ const SongsDialog = ({
     setLyricsLoading(false);
   };
 
+  const buttonStyle = {
+    minWidth: 0,
+    p: 1,
+    color: (theme: any) => theme.palette.text.primary,
+    "&:hover": {
+      backgroundColor: (theme: any) => theme.palette.action.hover,
+    },
+    "&:focus, &:focus-visible, &:active": {
+      outline: "none",
+      border: "none",
+      boxShadow: "none",
+    },
+  };
+
   return (
     <>
       <CustomDialog
@@ -162,29 +176,7 @@ const SongsDialog = ({
                   type="button"
                   variant="text"
                   size="small"
-                  sx={{
-                    minWidth: 0,
-                    p: 1,
-                    color: (theme) => theme.palette.text.primary,
-                    "&:hover": {
-                      backgroundColor: (theme) => theme.palette.action.hover,
-                    },
-                    "&:focus": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:focus-visible": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:active": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                  }}
+                  sx={buttonStyle}
                   onClick={() => handleShowLyrics(track)}
                   disabled={lyricsLoading}
                 >
@@ -195,29 +187,7 @@ const SongsDialog = ({
                   type="button"
                   variant="text"
                   size="small"
-                  sx={{
-                    minWidth: 0,
-                    p: 1,
-                    color: (theme) => theme.palette.text.primary,
-                    "&:hover": {
-                      backgroundColor: (theme) => theme.palette.action.hover,
-                    },
-                    "&:focus": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:focus-visible": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                    "&:active": {
-                      outline: "none",
-                      border: "none",
-                      boxShadow: "none",
-                    },
-                  }}
+                  sx={buttonStyle}
                   onClick={() => setOpenConfirm({ idx, track })}
                 >
                   <DeleteIcon />
