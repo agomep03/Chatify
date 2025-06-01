@@ -20,8 +20,8 @@ from src.utils.auth import hash_password, verify_password, create_access_token
 
 # --- Configuración global ---
 load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ALGORITHM = os.getenv("ALGORITHM") or "HS256"
+SECRET_KEY = os.getenv("SECRET_KEY") or "supersecretkey"
 
 # Logging
 logging.basicConfig(level=logging.INFO)
