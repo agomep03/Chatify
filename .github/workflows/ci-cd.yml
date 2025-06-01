@@ -5,22 +5,8 @@ on:
   pull_request:
 
 jobs:
-  backend:
+  backend-and-sonarqube:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      ALGORITHM: ${{ secrets.ALGORITHM }}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-      SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-      SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-      SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
-      TOKEN_GENIUS: ${{ secrets.TOKEN_GENIUS }}
-      GENIOUS_CLIENT_ID: ${{ secrets.GENIOUS_CLIENT_ID }}
-      GENIOUS_CLIENT_SECRET: ${{ secrets.GENIOUS_CLIENT_SECRET }}
-      GENIUS_CLIENT_ACCESS_TOKEN: ${{ secrets.GENIUS_CLIENT_ACCESS_TOKEN }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,33 +29,10 @@ jobs:
           ls -lh .
 
       - name: Verify coverage report
-        run: test -f BackEnd/coverage.xml || (echo "Coverage report not found" && exit 1)
+        working-directory: BackEnd
+        run: test -f coverage.xml || (echo "Coverage report not found" && exit 1)
 
       - name: Debug Coverage Directory
-        run: ls -lh BackEnd/
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v3.1.0
-        with:
-          name: coverage-report
-          path: BackEnd/coverage.xml
-
-  sonarqube:
-    runs-on: ubuntu-latest
-    needs: backend
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-report
-          path: BackEnd
-
-      - name: List downloaded coverage report
         run: ls -lh BackEnd/
 
       - name: SonarQube Scan
