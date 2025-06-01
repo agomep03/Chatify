@@ -1,8 +1,8 @@
-import { Dialog, DialogContent, Box, Button } from '@mui/material';
+import { Dialog, DialogContent, Box } from '@mui/material';
 import { ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { getDialogButtonStyles } from '../styles/buttonStyles';
+import DialogActionButtons from './DialogActionButtons';
 
 /**
  * Diálogo personalizado por defecto para confirmaciones o acciones generales.
@@ -74,17 +74,7 @@ const CustomDialogDefault = ({
         </Box>
         {/* Botones de acción */}
         <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{flexWrap: 'wrap', overflowX: 'hidden'}}>
-          {buttons.map((btn, idx) => (
-            <Button
-              key={idx}
-              onClick={btn.action}
-              color={btn.color}
-              variant={idx === buttons.length - 1 ? 'contained' : 'outlined'}
-              sx={getDialogButtonStyles(theme)}
-            >
-              {btn.label}
-            </Button>
-          ))}
+          <DialogActionButtons buttons={buttons} />
         </Box>
       </DialogContent>
     </Dialog>
