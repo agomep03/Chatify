@@ -114,7 +114,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
             }
             >
             <ListItemButton
-              selected={selectedTab === tab.id}
+              selected={String(selectedTab) === String(tab.id)}
               onClick={() => onTabChange(tab.id)}
               sx={(theme)=>({
                 borderRadius: 2, // Bordes redondeados
@@ -126,7 +126,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
               })}
             >
               <ListItemText
-                primary={<ScrollableText text={tab.title} selected={selectedTab === tab.id} />}
+                primary={<ScrollableText text={tab.title} selected={String(selectedTab) === String(tab.id)} />}
               />
             </ListItemButton>
           </ListItem>
