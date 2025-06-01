@@ -18,17 +18,17 @@ import { getScrollbarStyles } from "../../styles/scrollbarStyles";
  */
 
 interface Message {
-  id: string | number;
-  sender: 'user' | 'bot';
-  text: string;
+  readonly id: string | number;
+  readonly sender: 'user' | 'bot';
+  readonly text: string;
 }
 
 interface ChatMessagesListProps {
-  messages: Message[];
-  isLoadingDot: boolean;
-  dots: string;
-  listRef: React.RefObject<HTMLDivElement | null>;
-  theme: any;
+  readonly messages: Message[];
+  readonly isLoadingDot: boolean;
+  readonly dots: string;
+  readonly listRef: React.RefObject<HTMLDivElement | null>;
+  readonly theme: any;
 }
 
 export default function ChatMessagesList({

@@ -31,7 +31,6 @@ const LyricsDialog = ({
   <CustomDialogDarkBackground
     open={open}
     onClose={onClose}
-    onConfirm={onClose}
     buttons={[
       {
         label: "Cerrar",

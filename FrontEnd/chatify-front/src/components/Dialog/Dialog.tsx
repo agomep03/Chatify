@@ -75,7 +75,6 @@ const CustomDialog = (props: ConfirmDialogProps) => {
       <CustomDialogDarkBackground
         open={open}
         onClose={onClose}
-        onConfirm={onConfirm}
         children={children}
         buttons={buttonsWithActions}
         title={title}
@@ -89,7 +88,6 @@ const CustomDialog = (props: ConfirmDialogProps) => {
     <CustomDialogDefault
       open={open}
       onClose={onClose}
-      onConfirm={onConfirm}
       children={children}
       buttons={buttonsWithActions}
     />

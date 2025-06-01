@@ -2,6 +2,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import { Box, IconButton, useTheme } from '@mui/material';
 import ThemeButton from '../Buttons/ThemeButton/ThemeButton';
 import { useNavigate } from 'react-router';
+import { noFocusButtonSx } from '../styles/buttonFocusStyles';
 
 /**
  * Barra superior para las páginas de login y registro.
@@ -48,6 +49,7 @@ const TopBarLoginRegister: React.FC<TopBarLoginRegisterProps> = ({ toggleTheme }
         <IconButton
             size="small"
             onClick={handleNavegateStart}
+            sx={noFocusButtonSx}
         >
             <HomeIcon fontSize="medium" sx={{color:theme.palette.custom.topBarText}} />
         </IconButton>

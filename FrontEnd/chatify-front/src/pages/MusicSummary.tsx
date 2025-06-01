@@ -6,6 +6,7 @@ import { useAlert } from "../components/Alert/Alert";
 import TopBarHome from "../components/TopBar/TopBarHome";
 import { getScrollbarStyles } from "../styles/scrollbarStyles";
 import { useNavigate } from "react-router-dom";
+import { noFocusButtonSx } from "../components/styles/buttonFocusStyles";
 
 /**
  * Página de resumen musical del usuario.
@@ -82,6 +83,7 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
               mr: 1,
               backgroundColor: "transparent",
               "&:hover": { backgroundColor: "action.hover" },
+              ...noFocusButtonSx,
             }}
             size="large"
           >
@@ -112,97 +114,111 @@ const MusicSummary: React.FC<MusicSummaryProps> = ({ toggleTheme }) => {
               gap: 2,
             }}
           >
-            {Object.keys(periodLabels).map((period) => (
-              <Paper
-                key={period}
-                elevation={2}
-                sx={{
-                  flex: 1,
-                  minWidth: 260,
-                  maxWidth: 400,
-                  minHeight: 320,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  boxSizing: "border-box",
-                  p: 2,
-                  background: theme.palette.background.default,
-                  "@media (max-width:1000px)": {
-                    width: "calc(40% - 16px)",
-                  },
-                  "@media (max-width:750px)": {
-                    minHeight: "unset",
-                    width: "90%",
-                  },
-                }}
-              >
-                <Typography variant="h6" color="primary" gutterBottom align="center">
-                  {periodLabels[period]}
-                </Typography>
-                <Divider sx={{ width: "100%", mb: 1 }} />
-                <Box mb={0} sx={{ width: "100%" }}>
-                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0 }}>
-                    Artistas más escuchados:
+            {Object.keys(periodLabels).map((period) => {
+              // Artistas
+              const artists = MusicSummary.top_artists?.[period] ?? [];
+              const hasArtists = artists.length > 0;
+
+              // Canciones
+              const tracks = MusicSummary.top_tracks?.[period] ?? [];
+              const hasTracks = tracks.length > 0;
+
+              // Géneros
+              const genres = MusicSummary.top_genres?.[period] ?? [];
+              const hasGenres = genres.length > 0;
+
+              return (
+                <Paper
+                  key={period}
+                  elevation={2}
+                  sx={{
+                    flex: 1,
+                    minWidth: 260,
+                    maxWidth: 400,
+                    minHeight: 320,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    boxSizing: "border-box",
+                    p: 2,
+                    background: theme.palette.background.default,
+                    "@media (max-width:1000px)": {
+                      width: "calc(40% - 16px)",
+                    },
+                    "@media (max-width:750px)": {
+                      minHeight: "unset",
+                      width: "90%",
+                    },
+                  }}
+                >
+                  <Typography variant="h6" color="primary" gutterBottom align="center">
+                    {periodLabels[period]}
                   </Typography>
-                  {(MusicSummary.top_artists?.[period] || []).length > 0 ? (
-                    <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
-                      {MusicSummary.top_artists[period].map((artist: string, i: number) => (
-                        <li key={i}>
-                          <Typography variant="body2" color="text.secondary">
-                            {artist}
-                          </Typography>
-                        </li>
-                      ))}
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      Sin datos
+                  <Divider sx={{ width: "100%", mb: 1 }} />
+                  <Box mb={0} sx={{ width: "100%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0 }}>
+                      Artistas más escuchados:
                     </Typography>
-                  )}
-                </Box>
-                <Box mb={0} sx={{ width: "100%" }}>
-                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0, mt: 2 }}>
-                    Canciones más escuchadas:
-                  </Typography>
-                  {(MusicSummary.top_tracks?.[period] || []).length > 0 ? (
-                    <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
-                      {MusicSummary.top_tracks[period].map((track: string, i: number) => (
-                        <li key={i}>
-                          <Typography variant="body2" color="text.secondary">
-                            {track}
-                          </Typography>
-                        </li>
-                      ))}
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      Sin datos
+                    {hasArtists ? (
+                      <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
+                        {artists.map((artist: string, i: number) => (
+                          <li key={i}>
+                            <Typography variant="body2" color="text.secondary">
+                              {artist}
+                            </Typography>
+                          </li>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Sin datos
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box mb={0} sx={{ width: "100%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0, mt: 2 }}>
+                      Canciones más escuchadas:
                     </Typography>
-                  )}
-                </Box>
-                <Box mb={0} sx={{ width: "100%" }}>
-                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0, mt: 2 }}>
-                    Géneros favoritos:
-                  </Typography>
-                  {(MusicSummary.top_genres?.[period] || []).length > 0 ? (
-                    <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
-                      {MusicSummary.top_genres[period].map((genre: string, i: number) => (
-                        <li key={i}>
-                          <Typography variant="body2" color="text.secondary">
-                            {genre}
-                          </Typography>
-                        </li>
-                      ))}
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      Sin datos
+                    {hasTracks ? (
+                      <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
+                        {tracks.map((track: string, i: number) => (
+                          <li key={i}>
+                            <Typography variant="body2" color="text.secondary">
+                              {track}
+                            </Typography>
+                          </li>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Sin datos
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box mb={0} sx={{ width: "100%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0, mt: 2 }}>
+                      Géneros favoritos:
                     </Typography>
-                  )}
-                </Box>
-              </Paper>
-            ))}
+                    {hasGenres ? (
+                      <Box component="ul" sx={{ pl: 5, mb: 0, mt: 0 }}>
+                        {genres.map((genre: string, i: number) => (
+                          <li key={i}>
+                            <Typography variant="body2" color="text.secondary">
+                              {genre}
+                            </Typography>
+                          </li>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Sin datos
+                      </Typography>
+                    )}
+                  </Box>
+                </Paper>
+              );
+            })}
           </Box>
         ) : (
           <Typography color="text.secondary" align="center">

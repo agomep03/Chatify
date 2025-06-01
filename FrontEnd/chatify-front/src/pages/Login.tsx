@@ -78,7 +78,7 @@ const Login: React.FC<LoginProps> = ({ toggleTheme }) => {
         window.location.href = redirect_url;
       }
     } catch (error: any) {
-      customAlert("error", `Error: ${error.message || "Inicio de sesión fallido"}`);
+      customAlert("error", `Error: ${error.message ?? "Inicio de sesión fallido"}`);
     } finally {
       setLoading(false);
     }

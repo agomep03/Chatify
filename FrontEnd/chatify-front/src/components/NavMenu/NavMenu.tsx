@@ -55,7 +55,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
   onTabClose,
   onTabRename,
 }) => {
-  const [, setHoveredTabId] = useState<string | null>(null);
+  const [_, setHoveredTabId] = useState<string | null>(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuTabId, setMenuTabId] = useState<string | null>(null);
   const [openRenameForm, setOpenRenameForm] = useState(false);
@@ -144,7 +144,7 @@ const NavMenu: React.FC<NavMenuProps> = ({
               setMenuAnchorEl(null);
               // Buscar la tab a eliminar y mostrar el confirm dialog
               const tab = tabs.find(t => t.id === menuTabId);
-              setTabToDelete(tab || null);
+              setTabToDelete(tab ?? null);
               setOpenConfirmDelete(true);
             }}
           >

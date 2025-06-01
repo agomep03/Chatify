@@ -32,11 +32,11 @@ const ImageField = ({
   disabled = false,
   required = false,
 }: ImageFieldProps) => {
-  const [imagePreview, setImagePreview] = useState<string | null>(value || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(value ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setImagePreview(value || null);
+    setImagePreview(value ?? null);
   }, [value]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
