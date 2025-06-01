@@ -28,6 +28,7 @@ class Message(Base):
     """
 
     __tablename__ = 'messages'
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     conversation_id = Column(Integer, ForeignKey('conversations.id', ondelete="CASCADE"))

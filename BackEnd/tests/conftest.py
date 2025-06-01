@@ -7,17 +7,21 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
 import pytest
 
-# Cargar variables de entorno desde .env (ruta relativa)
+# Cargar variables de entorno desde .env
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.env"))
 load_dotenv(dotenv_path=dotenv_path)
 
-# Añadir carpeta padre al path para importar módulos
+# Añadir carpeta padre al path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Importar app FastAPI y dependencias
-from BackEnd.main import app as original_app
-from BackEnd.src.routes.auth_routes import get_current_user, get_db
-from BackEnd.src.config.db import Base, engine
+# Importar app y dependencias
+from main import app as original_app
+from src.routes.auth_routes import get_current_user, get_db
+from src.config.db import Base, engine
+
+from src.models.auth_model import User
+from src.models.conversation_model import Conversation
+from src.models.message_model import Message
 
 
 class FakeUser:
@@ -39,11 +43,12 @@ class FakeUser:
         self.spotify_user_id = spotify_user_id
         self.spotify_token_expires_at = datetime.utcnow() + timedelta(minutes=token_expiry_minutes)
 
+
 @pytest.fixture(scope="function")
 def db_session():
     connection = engine.connect()
 
-    # Limpieza segura de tablas e índices
+    # 🔄 Asegura que todas las tablas existen antes de ejecutar tests
     Base.metadata.drop_all(bind=connection)
     connection.commit()
 
@@ -63,14 +68,12 @@ def db_session():
 
 @pytest.fixture
 def app(db_session):
-    # Sobrescribir dependencias para que usen la sesión de prueba
     original_app.dependency_overrides[get_db] = lambda: db_session
     return original_app
 
 
 @pytest.fixture
 def client(app):
-    # Client con usuario falso 1
     app.dependency_overrides[get_current_user] = lambda: FakeUser(1, "user1", "user1@test.com")
     with TestClient(app) as c:
         yield c
@@ -78,7 +81,6 @@ def client(app):
 
 @pytest.fixture
 def client2(app):
-    # Client con usuario falso 2
     app.dependency_overrides[get_current_user] = lambda: FakeUser(2, "user2", "user2@test.com")
     with TestClient(app) as c:
         yield c
@@ -86,10 +88,10 @@ def client2(app):
 
 @pytest.fixture
 def client_no_auth(app):
-    # Client sin usuario autenticado (None)
     app.dependency_overrides[get_current_user] = lambda: None
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture
 def authenticated_user():
@@ -103,11 +105,13 @@ def authenticated_user():
         token_expiry_minutes=60
     )
 
+
 @pytest.fixture
 def client_with_user(app, authenticated_user):
     app.dependency_overrides[get_current_user] = lambda: authenticated_user
     with TestClient(app) as c:
         yield c, authenticated_user
+
 
 @pytest.fixture
 def user_without_spotify():
@@ -120,6 +124,7 @@ def user_without_spotify():
         spotify_user_id=None,
         token_expiry_minutes=60
     )
+
 
 @pytest.fixture
 def client_with_user_without_spotify(app, user_without_spotify):

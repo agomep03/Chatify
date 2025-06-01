@@ -2,8 +2,8 @@ import pytest
 from fastapi import Request, HTTPException
 from unittest.mock import MagicMock, patch
 from sqlalchemy.exc import IntegrityError
-from BackEnd.src.services.spotify_service import login_spotify
-from BackEnd.src.models.auth_model import User
+from src.services.spotify_service import login_spotify
+from src.models.auth_model import User
 
 
 def mock_request(code="valid_code", state="user@test.com"):
@@ -33,8 +33,8 @@ def test_login_success(mock_user):
         "id": "spotify_user_123"
     }
 
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post, \
-         patch("BackEnd.src.services.spotify_service.requests.get") as mock_get:
+    with patch("src.services.spotify_service.requests.post") as mock_post, \
+         patch("src.services.spotify_service.requests.get") as mock_get:
         
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = token_response
@@ -54,7 +54,7 @@ def test_login_missing_params():
 
 
 def test_token_request_failure():
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post:
+    with patch("src.services.spotify_service.requests.post") as mock_post:
         mock_post.return_value.status_code = 400
         mock_post.return_value.text = "invalid_request"
 
@@ -64,7 +64,7 @@ def test_token_request_failure():
 
 
 def test_no_access_token():
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post:
+    with patch("src.services.spotify_service.requests.post") as mock_post:
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {}  # no access_token
 
@@ -80,8 +80,8 @@ def test_user_info_failure():
         "expires_in": 3600
     }
 
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post, \
-         patch("BackEnd.src.services.spotify_service.requests.get") as mock_get:
+    with patch("src.services.spotify_service.requests.post") as mock_post, \
+         patch("src.services.spotify_service.requests.get") as mock_get:
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = token_response
@@ -105,8 +105,8 @@ def test_user_not_found():
 
     user_info_response = {"id": "spotify_user_123"}
 
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post, \
-         patch("BackEnd.src.services.spotify_service.requests.get") as mock_get:
+    with patch("src.services.spotify_service.requests.post") as mock_post, \
+         patch("src.services.spotify_service.requests.get") as mock_get:
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = token_response
@@ -134,8 +134,8 @@ def test_integrity_error_duplicate_key(mock_user):
     integrity_error.orig = MagicMock()
     integrity_error.orig.args = ("duplicate key value violates unique constraint",)
 
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post, \
-         patch("BackEnd.src.services.spotify_service.requests.get") as mock_get:
+    with patch("src.services.spotify_service.requests.post") as mock_post, \
+         patch("src.services.spotify_service.requests.get") as mock_get:
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = token_response
@@ -154,7 +154,7 @@ def test_unexpected_exception(mock_user):
     mock_db = MagicMock()
     mock_db.query.side_effect = Exception("Something broke")
 
-    with patch("BackEnd.src.services.spotify_service.requests.post") as mock_post:
+    with patch("src.services.spotify_service.requests.post") as mock_post:
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {
             "access_token": "token123",
@@ -162,7 +162,7 @@ def test_unexpected_exception(mock_user):
             "expires_in": 3600
         }
 
-        with patch("BackEnd.src.services.spotify_service.requests.get") as mock_get:
+        with patch("src.services.spotify_service.requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = {"id": "spotify_user_123"}
 

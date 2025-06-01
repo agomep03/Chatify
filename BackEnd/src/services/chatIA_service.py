@@ -93,6 +93,15 @@ class Agent:
 
         logger.debug(f"[Agent CHAT] Payload enviado a OpenRouter: {str(payload)[:100]}...")
 
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                json=payload
+            )
+
+        data = response.json()
+
         try:
             async with httpx.AsyncClient(timeout=60) as client:
                 response = await client.post(

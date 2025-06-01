@@ -22,8 +22,6 @@ async def start_conversation(user_id: str, db: Session):
     """Crea una nueva conversación para el usuario especificado."""
     logger.info(f"Start conversation for user with id {user_id}")
     try:
-        Conversation.__table__.create(bind=db.get_bind(), checkfirst=True)
-
         new_conversation = Conversation(user_id=user_id)
         db.add(new_conversation)
         db.commit()
