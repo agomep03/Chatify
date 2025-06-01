@@ -111,7 +111,7 @@ class Agent:
                     json=payload
                 )
 
-            data = await response.json()
+            data = response.json()
             logger.info("[Agent CHAT] Respuesta recibida de OpenRouter")
 
             content = data["choices"][0]["message"]["content"]
