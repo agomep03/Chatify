@@ -1,9 +1,9 @@
-import { Dialog, DialogContent, Box, Button, DialogTitle, IconButton } from '@mui/material';
+import { Dialog, DialogContent, Box, DialogTitle, IconButton } from '@mui/material';
 import { ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CloseIcon from '@mui/icons-material/Close';
-import { getDialogButtonStyles } from '../styles/buttonStyles';
+import DialogActionButtons from './DialogActionButtons';
 
 /**
  * Diálogo personalizado con fondo oscuro para confirmaciones o acciones importantes.
@@ -84,17 +84,7 @@ const CustomDialogDarkBackground = ({
       <DialogContent dividers>
         {children}
         <Box mt={3} display="flex" justifyContent="center" gap={1} sx={{ flexWrap: 'nowrap', overflowX: 'hidden' }}>
-          {buttons.map((btn, idx) => (
-            <Button
-              key={idx}
-              onClick={btn.action}
-              color={btn.color}
-              variant={idx === buttons.length - 1 ? 'contained' : 'outlined'}
-              sx={getDialogButtonStyles(theme)}
-            >
-              {btn.label}
-            </Button>
-          ))}
+          <DialogActionButtons buttons={buttons} />
         </Box>
       </DialogContent>
     </Dialog>
