@@ -1,24 +1,35 @@
-from fastapi import APIRouter, Query, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
-from src.controllers import chat_controller
+from typing import Optional
+
 from src.controllers.auth_controller import get_db, get_current_user
 from src.models.auth_model import User
-from pydantic import BaseModel
-from typing import Literal, Optional
+from src.schemas.chat_schemas import ChatRequest
+from src.controllers.chat_controller import (
+    start_conversation,
+    get_conversation_by_id,
+    handle_message,
+    delete_chat,
+    get_history,
+    get_conversations,
+    rename_conversation
+)
 
 router = APIRouter()
 
-class ChatRequest(BaseModel):
-    question: str
-    mode: Optional[Literal["normal", "creatividad", "razonamiento"]] = "normal"
-
 @router.post("/start")
-async def start_chat(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def start_chat(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Inicia una nueva conversación para un usuario específico.
+    Inicia una nueva conversación para el usuario autenticado.
+
+    Returns:
+        dict: Detalles de la conversación creada.
     """
     user_id = str(current_user.id)
-    return await chat_controller.start_conversation(user_id, db)
+    return await start_conversation(user_id, db)
 
 @router.post("/{chat_id}/message")
 async def send_message(
@@ -28,52 +39,102 @@ async def send_message(
     db: Session = Depends(get_db)
 ):
     """
-    Envía un mensaje a una conversación existente, con opción de modo.
-    """
-    conversation = chat_controller.get_conversation_by_id(str(chat_id), db)
+    Envía un mensaje a una conversación existente.
 
-    if not conversation or str(conversation.user_id) != str(current_user.id):
+    Args:
+        chat_id (int): ID de la conversación.
+        body (ChatRequest): Mensaje y modo de la consulta.
+        current_user (User): Usuario autenticado.
+        db (Session): Sesión de base de datos.
+
+    Returns:
+        dict: Respuesta del chatbot.
+    """
+    conversation = get_conversation_by_id(chat_id, db)
+
+    if not conversation or conversation.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Unauthorized")
 
-    return await chat_controller.handle_message(chat_id, body.question, current_user, db, mode=body.mode)
+    return await handle_message(chat_id, body.question, current_user, db, mode=body.mode)
 
 @router.delete("/{chat_id}")
-def delete_chat(chat_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_chat_route(
+    chat_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Elimina una conversación y sus mensajes asociados.
-    """
-    conversation = chat_controller.get_conversation_by_id(chat_id, db)
+    Elimina una conversación específica y todos sus mensajes.
 
-    if not conversation or str(conversation.user_id) != str(current_user.id):
+    Args:
+        chat_id (int): ID de la conversación.
+
+    Returns:
+        dict: Resultado de la operación.
+    """
+    conversation = get_conversation_by_id(chat_id, db)
+
+    if not conversation or conversation.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    return chat_controller.delete_chat(chat_id, db)
+
+    return delete_chat(chat_id, db)
 
 @router.get("/{chat_id}/history")
-def get_history(chat_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_history_route(
+    chat_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Obtiene el historial de mensajes de una conversación.
-    """
-    conversation = chat_controller.get_conversation_by_id(chat_id, db)
+    Obtiene el historial de mensajes de una conversación específica.
 
-    if not conversation or str(conversation.user_id) != str(current_user.id):
+    Args:
+        chat_id (int): ID de la conversación.
+
+    Returns:
+        list: Lista de mensajes.
+    """
+    conversation = get_conversation_by_id(chat_id, db)
+
+    if not conversation or conversation.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    return chat_controller.get_history(chat_id, db)
+
+    return get_history(chat_id, db)
 
 @router.get("/user")
-def get_conversations(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_conversations_route(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Obtiene todas las conversaciones de un usuario.
+    Obtiene todas las conversaciones del usuario autenticado.
+
+    Returns:
+        list: Lista de conversaciones.
     """
     user_id = str(current_user.id)
-    return chat_controller.get_conversations(user_id, db)
+    return get_conversations(user_id, db)
 
 @router.put("/{chat_id}/rename")
-def rename_conversation(chat_id: int, new_title: str = Body(...), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def rename_conversation_route(
+    chat_id: int,
+    new_title: str = Body(..., embed=True),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Cambia el título de una conversación existente.
-    """
-    conversation = chat_controller.get_conversation_by_id(chat_id, db)
+    Cambia el nombre (título) de una conversación existente.
 
-    if not conversation or str(conversation.user_id) != str(current_user.id):
+    Args:
+        chat_id (int): ID de la conversación.
+        new_title (str): Nuevo título deseado.
+
+    Returns:
+        dict: Detalles de la conversación actualizada.
+    """
+    conversation = get_conversation_by_id(chat_id, db)
+
+    if not conversation or conversation.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    return chat_controller.rename_conversation(chat_id, new_title, db)
+
+    return rename_conversation(chat_id, new_title, db)
