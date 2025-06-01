@@ -1,12 +1,8 @@
 import pytest
 from src.controllers import auth_controller
 from fastapi import HTTPException
-from src.controllers.auth_controller import register_user
 import pytest
 from unittest.mock import patch
-
-from BackEnd.src.controllers.auth_controller import register_user
-from BackEnd.src.models.auth_model import User
 
 def test_get_db_session_lifecycle(monkeypatch):
     # Simulamos una sesión mock para controlar close()

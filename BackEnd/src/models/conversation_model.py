@@ -13,7 +13,7 @@ class Conversation(Base):
     title = Column(String, default=lambda: "Conversación " + datetime.utcnow().strftime("%d/%m/%Y %H:%M"))
 
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
-    user = relationship("User", back_populates="conversations")
+    user = relationship("src.models.auth_model.User", back_populates="conversations")
 
     def __repr__(self):
         return f"<Conversation id={self.id} user_id={self.user_id}>"

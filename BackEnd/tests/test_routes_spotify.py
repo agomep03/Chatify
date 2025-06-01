@@ -1,13 +1,6 @@
 import pytest
 from fastapi import status
-import json
 from src.controllers.auth_controller import get_current_user
-
-import pytest
-from fastapi import status
-
-import pytest
-from fastapi import status
 from unittest.mock import patch
 
 @pytest.mark.asyncio
