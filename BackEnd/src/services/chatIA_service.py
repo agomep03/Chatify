@@ -1,4 +1,5 @@
 import os
+import logging
 import httpx  # Cliente HTTP asincrónico
 from dotenv import load_dotenv
 

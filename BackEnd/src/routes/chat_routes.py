@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -14,6 +15,9 @@ from src.controllers.chat_controller import (
     get_conversations,
     rename_conversation
 )
+
+# Configuración de logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
