@@ -77,15 +77,20 @@ const SongsDialog = ({
       const artist = Array.isArray(track.artists) ? track.artists[0] : track.artists;
       const result = await fetchLyrics(artist, track.name);
 
-      if (typeof result === "object" && result.Type) {
-        if (result.Type === "Redirect" && result.url) {
-          window.open(result.url, "_blank");
+      if (
+        typeof result === "object" &&
+        result !== null &&
+        "Type" in result
+      ) {
+        const typedResult = result as { Type: string; url?: string };
+        if (typedResult.Type === "Redirect" && typedResult.url) {
+          window.open(typedResult.url, "_blank");
           setLyricsOpen(false);
-        } else if (result.Type === "Captcha") {
-          setCaptchaUrl(result.url || null);
+        } else if (typedResult.Type === "Captcha") {
+          setCaptchaUrl(typedResult.url || null);
           setCaptchaDialog(true);
           setLyricsOpen(false);
-        } else if (result.Type === "Error") {
+        } else if (typedResult.Type === "Error") {
           setNotFoundDialog(true);
           setLyricsOpen(false);
         }
@@ -245,8 +250,9 @@ const SongsDialog = ({
       <CustomDialogDarkBackground
         open={notFoundDialog}
         onClose={() => setNotFoundDialog(false)}
-        onConfirm={() => setNotFoundDialog(false)}
-        buttons={[{ label: "Cerrar", color: "primary" }]}
+        buttons={[
+          { label: "Cerrar", color: "primary", action: () => setNotFoundDialog(false) }
+        ]}
         title="Letra no encontrada"
       >
         <Typography variant="body1" sx={{ p: 2 }}>
