@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from BackEnd.src.services.chatIA_service import Agent
+from src.services.chatIA_service import Agent
 
 
 @pytest.mark.asyncio
@@ -22,7 +22,7 @@ async def test_chat_success():
     mock_async_client = AsyncMock()
     mock_async_client.__aenter__.return_value = mock_client
 
-    with patch("BackEnd.src.services.chatIA_service.httpx.AsyncClient", return_value=mock_async_client):
+    with patch("src.services.chatIA_service.httpx.AsyncClient", return_value=mock_async_client):
         result = await agent.chat("Hola", mode="normal")
         assert "asistente musical" in result
 
@@ -47,7 +47,7 @@ async def test_chat_with_extra_context():
     mock_async_client = AsyncMock()
     mock_async_client.__aenter__.return_value = mock_client
 
-    with patch("BackEnd.src.services.chatIA_service.httpx.AsyncClient", return_value=mock_async_client):
+    with patch("src.services.chatIA_service.httpx.AsyncClient", return_value=mock_async_client):
         result = await agent.chat("Recomiéndame algo", mode="creatividad", extra_context=extra_info)
         assert "jazz" in result
 
@@ -69,6 +69,6 @@ async def test_chat_invalid_response_raises():
     mock_async_client = AsyncMock()
     mock_async_client.__aenter__.return_value = mock_client
 
-    with patch("BackEnd.src.services.chatIA_service.httpx.AsyncClient", return_value=mock_async_client):
+    with patch("src.services.chatIA_service.httpx.AsyncClient", return_value=mock_async_client):
         with pytest.raises(Exception, match="Openrouter no devuelve la respuesta en formato correcto."):
             await agent.chat("Hola", mode="razonamiento")
