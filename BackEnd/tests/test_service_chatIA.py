@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from src.services.chatIA_service import Agent
 
 
+# --- Test: Respuesta exitosa del agente ---
 @pytest.mark.asyncio
 async def test_chat_success():
     agent = Agent()
@@ -27,6 +28,7 @@ async def test_chat_success():
         assert "asistente musical" in result
 
 
+# --- Test: Respuesta con contexto adicional ---
 @pytest.mark.asyncio
 async def test_chat_with_extra_context():
     agent = Agent()
@@ -52,6 +54,7 @@ async def test_chat_with_extra_context():
         assert "jazz" in result
 
 
+# --- Test: Formato inválido en respuesta lanza excepción ---
 @pytest.mark.asyncio
 async def test_chat_invalid_response_raises():
     agent = Agent()
